@@ -1,12 +1,45 @@
-//! # Pricer Core (L1: Foundation)
+//! # pricer_core: Mathematical Foundation for XVA Pricing Library
 //!
-//! Core mathematical types, traits, and utilities for the Neutryx pricing library.
+//! ## Layer 1 (Foundation) Role
 //!
-//! This crate provides:
-//! - Dual-mode numeric types (Enzyme vs num-dual)
-//! - Smooth approximations for discontinuous functions
-//! - Date/time handling with day count conventions
-//! - Core traits for priceable instruments
+//! pricer_core serves as the bottom layer of the 4-layer architecture, providing:
+//! - Differentiable smoothing functions (`math::smoothing`)
+//! - Dual number type integration (`types::dual`)
+//! - Traits for pricing and differentiability (`traits`)
+//! - Time types and Day Count Conventions (`types::time`)
+//!
+//! ## Zero Dependency Principle
+//!
+//! Layer 1 has no dependencies on other pricer_* crates, with minimal external dependencies:
+//! - num-traits: Traits for generic numerical computation
+//! - num-dual: Dual number types and automatic differentiation
+//! - chrono: Date arithmetic
+//!
+//! ## Stable Rust Toolchain
+//!
+//! Layer 1 can be built with stable Rust only (nightly not required).
+//! The Enzyme AD engine is isolated in Layer 3.
+//!
+//! ## Usage Examples
+//!
+//! ```rust
+//! use pricer_core::math::smoothing::smooth_max;
+//! # #[cfg(feature = "num-dual-mode")]
+//! use pricer_core::types::dual::DualNumber;
+//!
+//! // Computation with f64
+//! let result = smooth_max(3.0, 5.0, 1e-6);
+//! # assert!((result - 5.0).abs() < 1e-3);
+//!
+//! # #[cfg(feature = "num-dual-mode")]
+//! # {
+//! // Automatic differentiation with Dual numbers
+//! let a = DualNumber::from(3.0).derivative();
+//! let b = DualNumber::from(5.0);
+//! let result = smooth_max(a, b, 1e-6);
+//! let gradient = result.eps; // ∂smooth_max/∂a
+//! # }
+//! ```
 //!
 //! ## Feature Flags
 //!

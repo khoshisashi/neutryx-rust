@@ -1,20 +1,20 @@
 {
   "commands": {
     "kiro:steering": {
-      "description": "Analyse project structure and generate core context files.",
-      "prompt": "Analyse the current project state. Generate 'product.md', 'tech.md', and 'structure.md'.\n[Directives]\n- Tone: Academic and Formal.\n- Accuracy: Prioritise factual verification over assumption."
+      "description": "Analyze Neutryx project structure.",
+      "prompt": "Analyze the Neutryx Rust project. Focus on the 4-layer architecture. \n[Context]\n- Current Focus: L1 (pricer_core).\n- Language: British English (Strict).\n- Math Focus: Pre-emptively designing for Automatic Differentiation (smoothing)."
     },
     "kiro:spec-requirements": {
-      "description": "Define requirements and acceptance criteria.",
-      "prompt": "Draft the requirements document based on the feature scope.\n[Directives]\n- Explicitly define mathematical constraints (e.g., non-negativity, boundary conditions).\n- Clarify numerical stability requirements."
+      "description": "Define Phase 1 requirements.",
+      "prompt": "Define requirements for 'pricer_core'.\n[Constraints]\n- **Dual-Mode**: Types must support both `f64` (Production) and `num_dual::Dual64` (Verification).\n- **Smoothing**: Discontinuous functions (max, min) must accept `smoothing_epsilon`.\n- **Stability**: No `nightly` features allowed in L1."
     },
     "kiro:spec-design": {
-      "description": "Generate technical design documents.",
-      "prompt": "Create a technical design based on requirements.md.\n[Directives]\n- Language: Use **British English** for all interface definitions and technical terms.\n- Consistency: Ensure mathematical consistency with the Requirements.\n- Structure: Adhere to the existing project architecture."
+      "description": "Design L1 Foundation.",
+      "prompt": "Design the module structure for 'pricer_core'.\n[Standards]\n- Use generic `T: Float + FromPrimitive` (num-traits) to abstract scalar types.\n- Interface definitions must use British English.\n- Avoid `Box<dyn Trait>`; prefer Enum dispatch for Enzyme optimization."
     },
     "kiro:spec-impl": {
-      "description": "Implement the specified task.",
-      "prompt": "Implement the selected task based on design.md.\n[Coding Standards]\n- Language: **British English** for all comments and string literals.\n- Comments: Minimal and strictly professional.\n- Verification: Generate minimal reproduction scripts or test cases to verify numerical results."
+      "description": "Implement L1 components.",
+      "prompt": "Implement the assigned task.\n[Rules]\n- Comments: British English (Minimal & Formal).\n- Tests: Unit tests must verify behavior for both `f64` and `Dual64` via feature flags.\n- Performance: Prioritise inlining for math kernels."
     }
   }
 }
