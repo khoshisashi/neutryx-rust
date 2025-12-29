@@ -9,7 +9,9 @@
       "Skill(kiro:spec-design)",
       "Skill(kiro:spec-design:*)",
       "Skill(kiro:spec-tasks)",
-      "Skill(kiro:spec-tasks:*)"
+      "Skill(kiro:spec-tasks:*)",
+      "Skill(kiro:spec-impl)",
+      "Skill(kiro:spec-impl:*)"
     ]
   }
 }

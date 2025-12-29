@@ -79,6 +79,9 @@
 // Phase 3.0: Only verify module is active
 pub mod verify;
 
+// Phase 3.1a: Random number generation infrastructure
+pub mod rng;
+
 // Phase 4: These modules will be activated for Monte Carlo and Enzyme integration
 // pub mod checkpoint;
 // pub mod enzyme;

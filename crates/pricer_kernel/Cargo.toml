@@ -14,8 +14,13 @@ llvm-sys = "180"
 # Basic numeric traits
 num-traits.workspace = true
 
+# Random number generation (Phase 3.1a: RNG infrastructure)
+rand.workspace = true
+rand_distr.workspace = true
+
 [dev-dependencies]
 approx.workspace = true
+proptest.workspace = true
 
 [build-dependencies]
 # Future: For linking Enzyme LLVM plugin
