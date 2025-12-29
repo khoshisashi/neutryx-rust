@@ -27,7 +27,7 @@ rand_distr = "0.4"
 rayon = "1.10"
 
 # Date/time
-chrono = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
 
 # Error handling
 thiserror = "2.0"
