@@ -7,16 +7,21 @@ repository.workspace = true
 authors.workspace = true
 
 [dependencies]
-pricer_core = { path = "../pricer_core", features = ["enzyme-mode"] }
-pricer_models = { path = "../pricer_models" }
-rand.workspace = true
-rand_distr.workspace = true
+# Phase 3.0: NO dependencies on other pricer_* crates (complete isolation)
+# LLVM 18 bindings for Enzyme support
+llvm-sys = "180"
+
+# Basic numeric traits
 num-traits.workspace = true
 
 [dev-dependencies]
 approx.workspace = true
-pricer_core = { path = "../pricer_core", features = ["num-dual-mode"] }
 
 [build-dependencies]
 # Future: For linking Enzyme LLVM plugin
 # cc = "1.0"
+
+[features]
+default = []
+# Future: enzyme-ad feature for actual Enzyme integration
+enzyme-ad = []
