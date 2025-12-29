@@ -280,4 +280,168 @@ mod tests {
     fn test_smooth_abs_panics_on_zero_epsilon() {
         smooth_abs(3.0_f64, 0.0);
     }
+
+    // Task 6.1: Property-based tests for smoothing functions
+    #[cfg(test)]
+    mod property_tests {
+        use super::*;
+        use proptest::prelude::*;
+
+        // Generate epsilon in practical range [1e-8, 1e-3]
+        fn epsilon_strategy() -> impl Strategy<Value = f64> {
+            prop::num::f64::POSITIVE.prop_filter("epsilon in range", |&e| e >= 1e-8 && e <= 1e-3)
+        }
+
+        // Generate finite f64 values for testing
+        fn finite_f64_strategy() -> impl Strategy<Value = f64> {
+            prop::num::f64::NORMAL
+        }
+
+        proptest! {
+            #![proptest_config(ProptestConfig::with_cases(1000))]
+
+            #[test]
+            fn test_smooth_max_inequality(
+                a in finite_f64_strategy(),
+                b in finite_f64_strategy(),
+                epsilon in epsilon_strategy()
+            ) {
+                let result = smooth_max(a, b, epsilon);
+                let true_max = a.max(b);
+                let tolerance = epsilon.abs() * 10.0; // O(ε) tolerance
+
+                // smooth_max(a, b, ε) >= max(a, b) - tolerance
+                assert!(
+                    result >= true_max - tolerance,
+                    "smooth_max({}, {}, {}) = {} should be >= {} - {}",
+                    a, b, epsilon, result, true_max, tolerance
+                );
+            }
+
+            #[test]
+            fn test_smooth_max_commutativity_property(
+                a in finite_f64_strategy(),
+                b in finite_f64_strategy(),
+                epsilon in epsilon_strategy()
+            ) {
+                let result1 = smooth_max(a, b, epsilon);
+                let result2 = smooth_max(b, a, epsilon);
+
+                // smooth_max(a, b, ε) == smooth_max(b, a, ε)
+                assert_relative_eq!(result1, result2, epsilon = 1e-10);
+            }
+
+            #[test]
+            fn test_smooth_min_inequality(
+                a in finite_f64_strategy(),
+                b in finite_f64_strategy(),
+                epsilon in epsilon_strategy()
+            ) {
+                let result = smooth_min(a, b, epsilon);
+                let true_min = a.min(b);
+                let tolerance = epsilon.abs() * 10.0; // O(ε) tolerance
+
+                // smooth_min(a, b, ε) <= min(a, b) + tolerance
+                assert!(
+                    result <= true_min + tolerance,
+                    "smooth_min({}, {}, {}) = {} should be <= {} + {}",
+                    a, b, epsilon, result, true_min, tolerance
+                );
+            }
+
+            #[test]
+            fn test_smooth_min_commutativity_property(
+                a in finite_f64_strategy(),
+                b in finite_f64_strategy(),
+                epsilon in epsilon_strategy()
+            ) {
+                let result1 = smooth_min(a, b, epsilon);
+                let result2 = smooth_min(b, a, epsilon);
+
+                // smooth_min(a, b, ε) == smooth_min(b, a, ε)
+                assert_relative_eq!(result1, result2, epsilon = 1e-10);
+            }
+
+            #[test]
+            fn test_smooth_indicator_monotonicity(
+                x1 in finite_f64_strategy(),
+                x2 in finite_f64_strategy(),
+                epsilon in epsilon_strategy()
+            ) {
+                // Only test when x1 < x2
+                if x1 < x2 {
+                    let result1 = smooth_indicator(x1, epsilon);
+                    let result2 = smooth_indicator(x2, epsilon);
+
+                    // x1 < x2 → smooth_indicator(x1, ε) <= smooth_indicator(x2, ε)
+                    assert!(
+                        result1 <= result2,
+                        "smooth_indicator({}, {}) = {} should be <= smooth_indicator({}, {}) = {}",
+                        x1, epsilon, result1, x2, epsilon, result2
+                    );
+                }
+            }
+
+            #[test]
+            fn test_smooth_indicator_bounds(
+                x in finite_f64_strategy(),
+                epsilon in epsilon_strategy()
+            ) {
+                let result = smooth_indicator(x, epsilon);
+
+                // smooth_indicator should always be in [0, 1]
+                assert!(
+                    result >= 0.0 && result <= 1.0,
+                    "smooth_indicator({}, {}) = {} should be in [0, 1]",
+                    x, epsilon, result
+                );
+            }
+
+            #[test]
+            fn test_smooth_abs_even_function_property(
+                x in finite_f64_strategy(),
+                epsilon in epsilon_strategy()
+            ) {
+                let result_pos = smooth_abs(x, epsilon);
+                let result_neg = smooth_abs(-x, epsilon);
+
+                // smooth_abs(-x, ε) == smooth_abs(x, ε)
+                assert_relative_eq!(result_pos, result_neg, epsilon = 1e-10);
+            }
+
+            #[test]
+            fn test_smooth_abs_non_negative(
+                x in finite_f64_strategy(),
+                epsilon in epsilon_strategy()
+            ) {
+                let result = smooth_abs(x, epsilon);
+
+                // smooth_abs should always be non-negative
+                assert!(
+                    result >= 0.0,
+                    "smooth_abs({}, {}) = {} should be non-negative",
+                    x, epsilon, result
+                );
+            }
+
+            #[test]
+            fn test_all_smoothing_functions_return_finite(
+                a in finite_f64_strategy(),
+                b in finite_f64_strategy(),
+                x in finite_f64_strategy(),
+                epsilon in epsilon_strategy()
+            ) {
+                // All smoothing functions should return finite values for finite inputs
+                let max_result = smooth_max(a, b, epsilon);
+                let min_result = smooth_min(a, b, epsilon);
+                let ind_result = smooth_indicator(x, epsilon);
+                let abs_result = smooth_abs(x, epsilon);
+
+                assert!(max_result.is_finite());
+                assert!(min_result.is_finite());
+                assert!(ind_result.is_finite());
+                assert!(abs_result.is_finite());
+            }
+        }
+    }
 }

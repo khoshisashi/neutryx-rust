@@ -34,6 +34,8 @@
 /// which `DualNumber` implements. This allows seamless AD:
 ///
 /// ```
+/// # #[cfg(feature = "num-dual-mode")]
+/// # {
 /// use pricer_core::types::dual::DualNumber;
 /// use pricer_core::math::smoothing::{smooth_max, smooth_min, smooth_abs, smooth_indicator};
 ///
@@ -45,10 +47,12 @@
 /// let min_result = smooth_min(x, y, 1e-6);
 /// let abs_result = smooth_abs(x, 1e-6);
 /// let ind_result = smooth_indicator(x, 1e-6);
+/// # }
 /// ```
+#[cfg(feature = "num-dual-mode")]
 pub type DualNumber = num_dual::Dual64;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "num-dual-mode"))]
 mod tests {
     use super::*;
     use crate::math::smoothing::{smooth_abs, smooth_indicator, smooth_max, smooth_min};
