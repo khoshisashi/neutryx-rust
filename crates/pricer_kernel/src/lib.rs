@@ -93,4 +93,4 @@ pub mod rng;
 // pub mod mc;
 
 // Re-export commonly used items for convenience
-pub use enzyme::{Activity, gradient, gradient_with_step};
+pub use enzyme::{gradient, gradient_with_step, Activity};

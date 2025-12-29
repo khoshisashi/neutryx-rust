@@ -779,8 +779,14 @@ mod tests {
 
     #[test]
     fn test_dcc_display() {
-        assert_eq!(format!("{}", DayCountConvention::ActualActual365), "ACT/365");
-        assert_eq!(format!("{}", DayCountConvention::ActualActual360), "ACT/360");
+        assert_eq!(
+            format!("{}", DayCountConvention::ActualActual365),
+            "ACT/365"
+        );
+        assert_eq!(
+            format!("{}", DayCountConvention::ActualActual360),
+            "ACT/360"
+        );
         assert_eq!(format!("{}", DayCountConvention::Thirty360), "30/360");
     }
 
@@ -916,10 +922,10 @@ mod tests {
 
         // Generate valid NaiveDate values (avoiding edge cases)
         fn date_strategy() -> impl Strategy<Value = NaiveDate> {
-            (2000i32..2100i32, 1u32..13u32, 1u32..29u32).prop_filter_map(
-                "valid date",
-                |(year, month, day)| NaiveDate::from_ymd_opt(year, month, day),
-            )
+            (2000i32..2100i32, 1u32..13u32, 1u32..29u32)
+                .prop_filter_map("valid date", |(year, month, day)| {
+                    NaiveDate::from_ymd_opt(year, month, day)
+                })
         }
 
         proptest! {

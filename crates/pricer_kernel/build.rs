@@ -38,9 +38,7 @@ fn main() {
 ///
 /// Emits cargo:warning with installation guidance if LLVM 18 is not found.
 fn validate_llvm_version() {
-    let llvm_config = env::var("LLVM_CONFIG")
-        .ok()
-        .or_else(|| find_llvm_config());
+    let llvm_config = env::var("LLVM_CONFIG").ok().or_else(|| find_llvm_config());
 
     match llvm_config {
         Some(config_path) => {
@@ -101,7 +99,9 @@ fn emit_llvm_version_warning(message: &str) {
     println!("cargo:warning=LLVM 18 Installation Guide:");
     println!("cargo:warning=  Ubuntu/Debian: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 18");
     println!("cargo:warning=  macOS: brew install llvm@18");
-    println!("cargo:warning=  Windows: Download from https://github.com/llvm/llvm-project/releases");
+    println!(
+        "cargo:warning=  Windows: Download from https://github.com/llvm/llvm-project/releases"
+    );
     println!("cargo:warning=");
     println!("cargo:warning=Set LLVM_CONFIG environment variable if LLVM is installed in a non-standard location.");
     println!("cargo:warning=");
@@ -116,7 +116,10 @@ fn configure_enzyme_plugin() {
             if std::path::Path::new(&enzyme_path).exists() {
                 println!("cargo:warning=Enzyme plugin found at: {}", enzyme_path);
                 // Note: RUSTFLAGS must be set externally; build.rs cannot modify them
-                println!("cargo:warning=Ensure RUSTFLAGS includes: -C llvm-args=-load={}", enzyme_path);
+                println!(
+                    "cargo:warning=Ensure RUSTFLAGS includes: -C llvm-args=-load={}",
+                    enzyme_path
+                );
             } else {
                 emit_enzyme_warning(&format!("ENZYME_LIB path does not exist: {}", enzyme_path));
             }

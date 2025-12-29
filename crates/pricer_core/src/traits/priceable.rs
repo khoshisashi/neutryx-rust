@@ -164,7 +164,7 @@ mod tests {
                     SimpleInstrument::FixedValue(val) => {
                         if *val < 0.0 {
                             return Err(PricingError::InvalidInput(
-                                "Price cannot be negative".to_string()
+                                "Price cannot be negative".to_string(),
                             ));
                         }
                         Ok(*val)
@@ -248,12 +248,12 @@ mod tests {
             fn price(&self) -> Result<f64, PricingError> {
                 if self.volatility < 0.0 {
                     return Err(PricingError::InvalidInput(
-                        "Volatility must be non-negative".to_string()
+                        "Volatility must be non-negative".to_string(),
                     ));
                 }
                 if self.volatility > 10.0 {
                     return Err(PricingError::NumericalInstability(
-                        "Volatility too high for numerical stability".to_string()
+                        "Volatility too high for numerical stability".to_string(),
                     ));
                 }
                 Ok(100.0 * self.volatility)

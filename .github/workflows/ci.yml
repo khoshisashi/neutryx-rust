@@ -58,7 +58,7 @@ jobs:
         run: cargo test -p pricer_core --features num-dual-mode
 
   # ============================================================================
-  # Nightly Rust: L3 (pricer_kernel with Enzyme)
+  # Nightly Rust: L3 (pricer_kernel with autodiff/Enzyme)
   # ============================================================================
   nightly-kernel:
     name: Nightly Rust - L3 (pricer_kernel)
@@ -72,30 +72,8 @@ jobs:
         with:
           components: rustfmt, clippy
 
-      - name: Install LLVM 18
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 18
-          sudo apt-get install -y llvm-18-dev clang-18 cmake ninja-build
-
-      - name: Cache Enzyme build
-        id: cache-enzyme
-        uses: actions/cache@v4
-        with:
-          path: /usr/local/lib/LLVMEnzyme-18.so
-          key: enzyme-v0.0.100-llvm18-${{ runner.os }}
-
-      - name: Install Enzyme
-        if: steps.cache-enzyme.outputs.cache-hit != 'true'
-        run: |
-          export LLVM_VERSION=18
-          ./scripts/install_enzyme.sh
-
-      - name: Verify Enzyme installation
-        run: |
-          export LLVM_VERSION=18
-          ./scripts/verify_enzyme.sh
+      - name: Verify autodiff support
+        run: ./scripts/verify_enzyme.sh
 
       - name: Cache cargo build (nightly)
         uses: actions/cache@v4
@@ -105,17 +83,17 @@ jobs:
 
       - name: Build pricer_kernel
         run: |
-          export RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
+          export RUSTFLAGS="-Z autodiff=Enable"
           cargo +nightly build -p pricer_kernel
 
       - name: Test pricer_kernel
         run: |
-          export RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
+          export RUSTFLAGS="-Z autodiff=Enable"
           cargo +nightly test -p pricer_kernel
 
       - name: Clippy (pricer_kernel)
         run: |
-          export RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
+          export RUSTFLAGS="-Z autodiff=Enable"
           cargo +nightly clippy -p pricer_kernel -- -D warnings
 
   # ============================================================================
@@ -132,29 +110,9 @@ jobs:
       - name: Install nightly Rust
         uses: dtolnay/rust-toolchain@nightly
 
-      - name: Install LLVM 18
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 18
-          sudo apt-get install -y llvm-18-dev clang-18 cmake ninja-build
-
-      - name: Cache Enzyme
-        id: cache-enzyme
-        uses: actions/cache@v4
-        with:
-          path: /usr/local/lib/LLVMEnzyme-18.so
-          key: enzyme-v0.0.100-llvm18-${{ runner.os }}
-
-      - name: Install Enzyme
-        if: steps.cache-enzyme.outputs.cache-hit != 'true'
-        run: |
-          export LLVM_VERSION=18
-          ./scripts/install_enzyme.sh
-
       - name: Run integration tests
         run: |
-          export RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
+          export RUSTFLAGS="-Z autodiff=Enable"
           cargo +nightly test --all-features
 
   # ============================================================================

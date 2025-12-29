@@ -1,9 +1,9 @@
-# Cargo configuration for Enzyme LLVM plugin
+# Cargo configuration for autodiff/Enzyme support
 
 [build]
-# Enzyme-specific LLVM flags (only affects pricer_kernel crate)
-# Uncomment when Enzyme is installed:
-# rustflags = ["-C", "llvm-args=-load=/usr/local/lib/LLVMEnzyme.so"]
+# Autodiff (Enzyme) support for pricer_kernel crate
+# Uncomment for nightly builds with autodiff:
+# rustflags = ["-Z", "autodiff=Enable"]
 
 [target.x86_64-unknown-linux-gnu]
 # Additional optimization flags for release builds

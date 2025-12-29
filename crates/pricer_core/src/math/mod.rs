@@ -6,5 +6,9 @@
 //!
 //! ## Submodules
 //! - `smoothing`: Smooth approximations using LogSumExp and sigmoid functions
+//! - `interpolators`: Interpolation methods for curve and surface fitting
+//! - `solvers`: Root-finding algorithms for numerical solving
 
+pub mod interpolators;
 pub mod smoothing;
+pub mod solvers;

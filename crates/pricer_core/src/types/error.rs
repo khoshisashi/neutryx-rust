@@ -4,8 +4,11 @@
 //! - `PricingError`: Errors from pricing operations
 //! - `DateError`: Errors from date construction and parsing
 //! - `CurrencyError`: Errors from currency parsing
+//! - `InterpolationError`: Errors from interpolation operations
+//! - `SolverError`: Errors from root-finding solvers
 
 use std::fmt;
+use thiserror::Error;
 
 /// Categorised pricing errors.
 ///
@@ -138,6 +141,108 @@ impl fmt::Display for CurrencyError {
 
 impl std::error::Error for CurrencyError {}
 
+/// Interpolation-related errors.
+///
+/// Provides structured error handling for interpolation operations
+/// with descriptive context for each failure mode.
+///
+/// # Variants
+/// - `OutOfBounds`: Query point outside valid interpolation domain
+/// - `InsufficientData`: Not enough data points for interpolation
+/// - `NonMonotonicData`: Data violates monotonicity requirement
+/// - `InvalidInput`: General invalid input error
+///
+/// # Examples
+/// ```
+/// use pricer_core::types::InterpolationError;
+///
+/// let err = InterpolationError::OutOfBounds { x: 5.0, min: 0.0, max: 3.0 };
+/// assert!(format!("{}", err).contains("outside valid domain"));
+/// ```
+#[derive(Error, Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum InterpolationError {
+    /// Query point outside valid interpolation domain.
+    #[error("Query point {x} outside valid domain [{min}, {max}]")]
+    OutOfBounds {
+        /// The query point that was out of bounds
+        x: f64,
+        /// Minimum valid value
+        min: f64,
+        /// Maximum valid value
+        max: f64,
+    },
+
+    /// Insufficient data points for interpolation.
+    #[error("Insufficient data points: got {got}, need at least {need}")]
+    InsufficientData {
+        /// Number of points provided
+        got: usize,
+        /// Minimum number of points required
+        need: usize,
+    },
+
+    /// Data is not monotonic when monotonicity is required.
+    #[error("Data is not monotonic at index {index}")]
+    NonMonotonicData {
+        /// Index where monotonicity violation was detected
+        index: usize,
+    },
+
+    /// Invalid input data or parameters.
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
+}
+
+/// Root-finding solver errors.
+///
+/// Provides structured error handling for root-finding solver operations
+/// with descriptive context for each failure mode.
+///
+/// # Variants
+/// - `MaxIterationsExceeded`: Solver failed to converge within iteration limit
+/// - `DerivativeNearZero`: Derivative too small for Newton-Raphson
+/// - `NoBracket`: Function values at bracket endpoints have same sign
+/// - `NumericalInstability`: General numerical instability
+///
+/// # Examples
+/// ```
+/// use pricer_core::types::SolverError;
+///
+/// let err = SolverError::MaxIterationsExceeded { iterations: 100 };
+/// assert!(format!("{}", err).contains("100 iterations"));
+/// ```
+#[derive(Error, Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum SolverError {
+    /// Solver failed to converge within maximum iterations.
+    #[error("Failed to converge after {iterations} iterations")]
+    MaxIterationsExceeded {
+        /// Number of iterations attempted
+        iterations: usize,
+    },
+
+    /// Derivative near zero (division by zero risk in Newton-Raphson).
+    #[error("Derivative near zero at x = {x}")]
+    DerivativeNearZero {
+        /// The x value where derivative was near zero
+        x: f64,
+    },
+
+    /// No valid bracket (function values at endpoints have same sign).
+    #[error("No bracket: f({a}) and f({b}) have same sign")]
+    NoBracket {
+        /// Left bracket endpoint
+        a: f64,
+        /// Right bracket endpoint
+        b: f64,
+    },
+
+    /// Numerical instability during computation.
+    #[error("Numerical instability: {0}")]
+    NumericalInstability(String),
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -151,7 +256,10 @@ mod tests {
     #[test]
     fn test_numerical_instability_display() {
         let err = PricingError::NumericalInstability("Failed to converge".to_string());
-        assert_eq!(format!("{}", err), "Numerical instability: Failed to converge");
+        assert_eq!(
+            format!("{}", err),
+            "Numerical instability: Failed to converge"
+        );
     }
 
     #[test]
@@ -243,5 +351,129 @@ mod tests {
         let err1 = CurrencyError::UnknownCurrency("XYZ".to_string());
         let err2 = err1.clone();
         assert_eq!(err1, err2);
+    }
+
+    // InterpolationError tests
+
+    #[test]
+    fn test_interpolation_error_out_of_bounds_display() {
+        let err = InterpolationError::OutOfBounds {
+            x: 5.0,
+            min: 0.0,
+            max: 3.0,
+        };
+        assert_eq!(
+            format!("{}", err),
+            "Query point 5 outside valid domain [0, 3]"
+        );
+    }
+
+    #[test]
+    fn test_interpolation_error_insufficient_data_display() {
+        let err = InterpolationError::InsufficientData { got: 1, need: 2 };
+        assert_eq!(
+            format!("{}", err),
+            "Insufficient data points: got 1, need at least 2"
+        );
+    }
+
+    #[test]
+    fn test_interpolation_error_non_monotonic_display() {
+        let err = InterpolationError::NonMonotonicData { index: 3 };
+        assert_eq!(format!("{}", err), "Data is not monotonic at index 3");
+    }
+
+    #[test]
+    fn test_interpolation_error_invalid_input_display() {
+        let err = InterpolationError::InvalidInput("empty array".to_string());
+        assert_eq!(format!("{}", err), "Invalid input: empty array");
+    }
+
+    #[test]
+    fn test_interpolation_error_trait_implementation() {
+        let err = InterpolationError::OutOfBounds {
+            x: 5.0,
+            min: 0.0,
+            max: 3.0,
+        };
+        let _: &dyn std::error::Error = &err;
+    }
+
+    #[test]
+    fn test_interpolation_error_clone_and_equality() {
+        let err1 = InterpolationError::InsufficientData { got: 1, need: 2 };
+        let err2 = err1.clone();
+        assert_eq!(err1, err2);
+    }
+
+    // SolverError tests
+
+    #[test]
+    fn test_solver_error_max_iterations_display() {
+        let err = SolverError::MaxIterationsExceeded { iterations: 100 };
+        assert_eq!(
+            format!("{}", err),
+            "Failed to converge after 100 iterations"
+        );
+    }
+
+    #[test]
+    fn test_solver_error_derivative_near_zero_display() {
+        let err = SolverError::DerivativeNearZero { x: 1.5 };
+        assert_eq!(format!("{}", err), "Derivative near zero at x = 1.5");
+    }
+
+    #[test]
+    fn test_solver_error_no_bracket_display() {
+        let err = SolverError::NoBracket { a: 0.0, b: 1.0 };
+        assert_eq!(format!("{}", err), "No bracket: f(0) and f(1) have same sign");
+    }
+
+    #[test]
+    fn test_solver_error_numerical_instability_display() {
+        let err = SolverError::NumericalInstability("overflow detected".to_string());
+        assert_eq!(
+            format!("{}", err),
+            "Numerical instability: overflow detected"
+        );
+    }
+
+    #[test]
+    fn test_solver_error_trait_implementation() {
+        let err = SolverError::MaxIterationsExceeded { iterations: 100 };
+        let _: &dyn std::error::Error = &err;
+    }
+
+    #[test]
+    fn test_solver_error_clone_and_equality() {
+        let err1 = SolverError::NoBracket { a: 0.0, b: 1.0 };
+        let err2 = err1.clone();
+        assert_eq!(err1, err2);
+    }
+
+    // Serde tests (feature-gated)
+    #[cfg(feature = "serde")]
+    mod serde_tests {
+        use super::*;
+
+        #[test]
+        fn test_interpolation_error_serde_roundtrip() {
+            let err = InterpolationError::OutOfBounds {
+                x: 5.0,
+                min: 0.0,
+                max: 3.0,
+            };
+            let json = serde_json::to_string(&err).unwrap();
+            let deserialized: InterpolationError = serde_json::from_str(&json).unwrap();
+            assert_eq!(err, deserialized);
+        }
+
+        #[test]
+        fn test_solver_error_serde_roundtrip() {
+            let err = SolverError::MaxIterationsExceeded { iterations: 100 };
+            let json = serde_json::to_string(&err).unwrap();
+            let deserialized: SolverError = serde_json::from_str(&json).unwrap();
+            assert_eq!(err, deserialized);
+        }
     }
 }
