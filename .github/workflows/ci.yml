@@ -1,0 +1,194 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # ============================================================================
+  # Stable Rust: L1, L2, L4 (pricer_core, pricer_models, pricer_xva)
+  # ============================================================================
+  stable-layers:
+    name: Stable Rust - L1/L2/L4
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-stable-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Clippy (stable crates)
+        run: cargo clippy --workspace --exclude pricer_kernel -- -D warnings
+
+      - name: Build (stable crates)
+        run: cargo build --workspace --exclude pricer_kernel
+
+      - name: Test (stable crates)
+        run: cargo test --workspace --exclude pricer_kernel
+
+      - name: Test with num-dual feature
+        run: cargo test -p pricer_core --features num-dual-mode
+
+  # ============================================================================
+  # Nightly Rust: L3 (pricer_kernel with Enzyme)
+  # ============================================================================
+  nightly-kernel:
+    name: Nightly Rust - L3 (pricer_kernel)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install nightly Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt, clippy
+
+      - name: Install LLVM 18
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 18
+          sudo apt-get install -y llvm-18-dev clang-18 cmake ninja-build
+
+      - name: Cache Enzyme build
+        id: cache-enzyme
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/lib/LLVMEnzyme-18.so
+          key: enzyme-v0.0.100-llvm18-${{ runner.os }}
+
+      - name: Install Enzyme
+        if: steps.cache-enzyme.outputs.cache-hit != 'true'
+        run: |
+          export LLVM_VERSION=18
+          ./scripts/install_enzyme.sh
+
+      - name: Verify Enzyme installation
+        run: |
+          export LLVM_VERSION=18
+          ./scripts/verify_enzyme.sh
+
+      - name: Cache cargo build (nightly)
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-nightly-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build pricer_kernel
+        run: |
+          export RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
+          cargo +nightly build -p pricer_kernel
+
+      - name: Test pricer_kernel
+        run: |
+          export RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
+          cargo +nightly test -p pricer_kernel
+
+      - name: Clippy (pricer_kernel)
+        run: |
+          export RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
+          cargo +nightly clippy -p pricer_kernel -- -D warnings
+
+  # ============================================================================
+  # Integration Tests (Full Stack)
+  # ============================================================================
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [stable-layers, nightly-kernel]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install nightly Rust
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: Install LLVM 18
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 18
+          sudo apt-get install -y llvm-18-dev clang-18 cmake ninja-build
+
+      - name: Cache Enzyme
+        id: cache-enzyme
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/lib/LLVMEnzyme-18.so
+          key: enzyme-v0.0.100-llvm18-${{ runner.os }}
+
+      - name: Install Enzyme
+        if: steps.cache-enzyme.outputs.cache-hit != 'true'
+        run: |
+          export LLVM_VERSION=18
+          ./scripts/install_enzyme.sh
+
+      - name: Run integration tests
+        run: |
+          export RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
+          cargo +nightly test --all-features
+
+  # ============================================================================
+  # Documentation
+  # ============================================================================
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build documentation
+        run: cargo doc --workspace --exclude pricer_kernel --no-deps
+
+      - name: Check for broken links
+        run: |
+          cargo install cargo-deadlinks || true
+          cargo deadlinks --dir target/doc || true
+
+  # ============================================================================
+  # Code Coverage (Future)
+  # ============================================================================
+  # coverage:
+  #   name: Code Coverage
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Install tarpaulin
+  #       run: cargo install cargo-tarpaulin
+  #     - name: Generate coverage
+  #       run: cargo tarpaulin --out Xml
+  #     - name: Upload to codecov
+  #       uses: codecov/codecov-action@v3

@@ -1,0 +1,90 @@
+# Nightly Rust Dockerfile with Enzyme for L3 (pricer_kernel)
+# This is the ONLY crate that requires Enzyme and nightly Rust
+
+FROM rustlang/rust:nightly-2025-01-15 as builder
+
+WORKDIR /build
+
+# Install Enzyme dependencies
+RUN apt-get update && apt-get install -y \
+    llvm-18 \
+    llvm-18-dev \
+    llvm-18-tools \
+    libllvm18 \
+    clang-18 \
+    cmake \
+    git \
+    build-essential \
+    ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set LLVM environment variables
+ENV LLVM_DIR=/usr/lib/llvm-18
+ENV PATH="$LLVM_DIR/bin:$PATH"
+
+# Clone and build Enzyme
+# Note: This takes ~15-30 minutes on first build
+RUN git clone --depth 1 --branch v0.0.100 https://github.com/EnzymeAD/Enzyme.git /enzyme \
+    && cd /enzyme/enzyme \
+    && mkdir build && cd build \
+    && cmake .. \
+        -G Ninja \
+        -DLLVM_DIR=$LLVM_DIR/lib/cmake/llvm \
+        -DCMAKE_BUILD_TYPE=Release \
+    && ninja \
+    && ninja install
+
+# Verify Enzyme installation
+RUN test -f /usr/local/lib/LLVMEnzyme-18.so || \
+    (echo "Enzyme installation failed" && exit 1)
+
+# Copy workspace configuration
+COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
+COPY .cargo .cargo
+COPY crates/pricer_core/Cargo.toml crates/pricer_core/
+COPY crates/pricer_models/Cargo.toml crates/pricer_models/
+COPY crates/pricer_kernel/Cargo.toml crates/pricer_kernel/
+
+# Create dummy sources for dependency caching
+RUN mkdir -p crates/pricer_core/src crates/pricer_models/src crates/pricer_kernel/src \
+    && echo "fn main() {}" > crates/pricer_core/src/lib.rs \
+    && echo "fn main() {}" > crates/pricer_models/src/lib.rs \
+    && echo "fn main() {}" > crates/pricer_kernel/src/lib.rs
+
+# Build dependencies
+RUN cargo +nightly build --release -p pricer_kernel
+
+# Remove dummy sources
+RUN rm -rf crates/*/src
+
+# Copy actual source code
+COPY crates/pricer_core crates/pricer_core
+COPY crates/pricer_models crates/pricer_models
+COPY crates/pricer_kernel crates/pricer_kernel
+
+# Build with Enzyme
+ENV RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
+RUN cargo +nightly build --release -p pricer_kernel
+
+# Test
+RUN cargo +nightly test --release -p pricer_kernel
+
+# Runtime stage
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y \
+    libllvm18 \
+    libssl3 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy Enzyme library
+COPY --from=builder /usr/local/lib/LLVMEnzyme-18.so /usr/local/lib/
+
+# Copy built libraries
+COPY --from=builder /build/target/release/libpricer_*.rlib /usr/local/lib/
+COPY --from=builder /build/target/release/libpricer_*.so /usr/local/lib/ 2>/dev/null || true
+
+WORKDIR /app
+
+CMD ["/bin/bash"]
