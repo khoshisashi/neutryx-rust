@@ -95,14 +95,16 @@ checkpoint/   → (Phase 4) Memory management for path-dependent options
 **Location**: `crates/pricer_xva/src/`
 **Purpose**: Portfolio analytics and XVA calculations (stable Rust)
 **Structure**:
-```
-portfolio/  → Trade structures, netting sets
-xva/        → CVA, DVA, FVA calculators
-soa/        → Structure of Arrays for vectorization
-parallel/   → Rayon-based parallelization
+
+```text
+portfolio/  → Trade, Counterparty, NettingSet, PortfolioBuilder
+exposure/   → EE, EPE, PFE, EEPE, ENE calculators
+xva/        → CVA, DVA, FVA calculators with XvaCalculator
+soa/        → Structure of Arrays (TradeSoA, ExposureSoA)
+parallel/   → Rayon-based parallelization config
 ```
 
-**Key Principle**: Consumer of L1+L2+L3, orchestrates portfolio-level computations.
+**Key Principle**: Consumer of L1+L2+L3, orchestrates portfolio-level computations with parallel processing.
 
 ### Infrastructure
 
