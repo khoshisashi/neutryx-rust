@@ -488,7 +488,13 @@ mod tests {
 
         for x in [-1.0, 0.0, 1.0, 4.0, 100.0] {
             let result = smooth_sqrt(x, epsilon);
-            assert!(result >= -epsilon, "smooth_sqrt({}, {}) = {} should be >= -epsilon", x, epsilon, result);
+            assert!(
+                result >= -epsilon,
+                "smooth_sqrt({}, {}) = {} should be >= -epsilon",
+                x,
+                epsilon,
+                result
+            );
         }
     }
 
@@ -550,8 +556,14 @@ mod tests {
         let result = smooth_log(1e-10_f64, epsilon);
 
         // Should return a large negative but finite value
-        assert!(result.is_finite(), "smooth_log should return finite value near zero");
-        assert!(result < 0.0, "smooth_log of small positive should be negative");
+        assert!(
+            result.is_finite(),
+            "smooth_log should return finite value near zero"
+        );
+        assert!(
+            result < 0.0,
+            "smooth_log of small positive should be negative"
+        );
     }
 
     #[test]
@@ -639,7 +651,10 @@ mod tests {
         let result = smooth_pow(1e-10_f64, p, epsilon);
 
         // Should return a small positive finite value
-        assert!(result.is_finite(), "smooth_pow should return finite value near zero");
+        assert!(
+            result.is_finite(),
+            "smooth_pow should return finite value near zero"
+        );
         assert!(result > 0.0, "smooth_pow should return positive value");
     }
 
