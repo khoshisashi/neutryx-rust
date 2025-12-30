@@ -4,7 +4,7 @@
 //!
 //! pricer_kernel serves as the AD (Automatic Differentiation) engine in the 4-layer architecture:
 //! - Enzyme LLVM-level automatic differentiation
-//! - Monte Carlo pricing kernels (Phase 4)
+//! - Monte Carlo pricing kernels with AD integration (Phase 3.2)
 //! - Gradient verification utilities
 //!
 //! ## Nightly Rust Requirement
@@ -88,9 +88,12 @@ mod verify_enzyme;
 // Phase 3.1a: Random number generation infrastructure
 pub mod rng;
 
-// Phase 4: These modules will be activated for Monte Carlo
+// Phase 3.2: Monte Carlo kernel with Enzyme AD integration
+pub mod mc;
+
+// Phase 4: Checkpointing for memory-efficient AD
 // pub mod checkpoint;
-// pub mod mc;
 
 // Re-export commonly used items for convenience
 pub use enzyme::{gradient, gradient_with_step, Activity};
+pub use mc::{GbmParams, Greek, MonteCarloConfig, MonteCarloPricer, PayoffParams, PricingResult};
