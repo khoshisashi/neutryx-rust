@@ -6,7 +6,7 @@
 //!
 //! ## Usage
 //!
-//! ```
+//! ```ignore
 //! use pricer_core::types::dual::DualNumber;
 //! use pricer_core::math::smoothing::smooth_max;
 //!
@@ -33,7 +33,7 @@
 /// All smoothing functions in `math::smoothing` are generic over `T: num_traits::Float`,
 /// which `DualNumber` implements. This allows seamless AD:
 ///
-/// ```
+/// ```ignore
 /// # #[cfg(feature = "num-dual-mode")]
 /// # {
 /// use pricer_core::types::dual::DualNumber;

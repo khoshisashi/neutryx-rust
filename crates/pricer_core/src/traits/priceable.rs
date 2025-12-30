@@ -22,7 +22,8 @@ use crate::types::error::PricingError;
 /// optimisation. Instead, use `enum`-based dispatch:
 ///
 /// ```
-/// use pricer_core::traits::{Priceable, Float};
+/// use pricer_core::traits::Float;
+/// use pricer_core::traits::priceable::Priceable;
 /// use pricer_core::types::error::PricingError;
 ///
 /// enum Instrument<T: Float> {
@@ -82,7 +83,8 @@ pub trait Priceable<T: Float> {
     ///
     /// # Examples
     /// ```
-    /// use pricer_core::traits::{Priceable, Float};
+    /// use pricer_core::traits::Float;
+    /// use pricer_core::traits::priceable::Priceable;
     /// use pricer_core::types::error::PricingError;
     ///
     /// struct SimpleOption<T: Float> {
@@ -126,7 +128,7 @@ pub trait Priceable<T: Float> {
 ///
 /// # Examples
 /// ```
-/// use pricer_core::traits::Differentiable;
+/// use pricer_core::traits::priceable::Differentiable;
 ///
 /// struct SmoothCallPayoff {
 ///     smoothing_epsilon: f64,

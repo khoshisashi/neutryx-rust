@@ -171,15 +171,15 @@ impl<T: Float> Interpolator<T> for LinearInterpolator<T> {
     /// ```
     /// use pricer_core::math::interpolators::{Interpolator, LinearInterpolator};
     ///
-    /// let interp = LinearInterpolator::new(&[0.0, 1.0, 2.0], &[0.0, 2.0, 4.0]).unwrap();
+    /// let interp = LinearInterpolator::new(&[0.0_f64, 1.0, 2.0], &[0.0_f64, 2.0, 4.0]).unwrap();
     ///
     /// // Interpolate at midpoint
-    /// let y = interp.interpolate(0.5).unwrap();
-    /// assert!((y - 1.0).abs() < 1e-10);
+    /// let y = interp.interpolate(0.5_f64).unwrap();
+    /// assert!((y - 1.0_f64).abs() < 1e-10);
     ///
     /// // Interpolate at knot point
-    /// let y = interp.interpolate(1.0).unwrap();
-    /// assert!((y - 2.0).abs() < 1e-10);
+    /// let y = interp.interpolate(1.0_f64).unwrap();
+    /// assert!((y - 2.0_f64).abs() < 1e-10);
     /// ```
     fn interpolate(&self, x: T) -> Result<T, InterpolationError> {
         let x_min = self.xs[0];

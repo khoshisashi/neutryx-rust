@@ -40,8 +40,8 @@
 //! assert_eq!(usd.decimal_places(), 2);
 //!
 //! // Computation with f64
-//! let result = smooth_max(3.0, 5.0, 1e-6);
-//! # assert!((result - 5.0).abs() < 1e-3);
+//! let result = smooth_max(3.0_f64, 5.0_f64, 1e-6_f64);
+//! # assert!((result - 5.0_f64).abs() < 1e-3);
 //! ```
 //!
 //! ## Feature Flags

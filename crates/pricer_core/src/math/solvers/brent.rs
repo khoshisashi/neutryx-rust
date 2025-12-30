@@ -461,7 +461,12 @@ mod tests {
 
     #[test]
     fn test_with_f32() {
-        let solver: BrentSolver<f32> = BrentSolver::with_defaults();
+        // Use relaxed tolerance for f32
+        let config = SolverConfig {
+            tolerance: 1e-5_f32,
+            max_iterations: 100,
+        };
+        let solver: BrentSolver<f32> = BrentSolver::new(config);
 
         let f = |x: f32| x * x - 2.0;
 

@@ -29,17 +29,17 @@
 //! ```
 //! use pricer_core::math::interpolators::{Interpolator, LinearInterpolator};
 //!
-//! let xs = [0.0, 1.0, 2.0, 3.0];
-//! let ys = [0.0, 1.0, 4.0, 9.0];
+//! let xs = [0.0_f64, 1.0, 2.0, 3.0];
+//! let ys = [0.0_f64, 1.0, 4.0, 9.0];
 //!
 //! let interp = LinearInterpolator::new(&xs, &ys).unwrap();
 //! let (x_min, x_max) = interp.domain();
-//! assert_eq!(x_min, 0.0);
-//! assert_eq!(x_max, 3.0);
+//! assert_eq!(x_min, 0.0_f64);
+//! assert_eq!(x_max, 3.0_f64);
 //!
 //! // Interpolate at x = 1.5 (between y=1.0 and y=4.0)
-//! let y = interp.interpolate(1.5).unwrap();
-//! assert!((y - 2.5).abs() < 1e-10);
+//! let y = interp.interpolate(1.5_f64).unwrap();
+//! assert!((y - 2.5_f64).abs() < 1e-10);
 //! ```
 
 mod bilinear;

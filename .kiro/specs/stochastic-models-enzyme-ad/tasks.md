@@ -3,21 +3,21 @@
 ## Tasks
 
 - [ ] 1. Smooth Approximation関数の拡張（L1: pricer_core）
-- [ ] 1.1 (P) smooth_sqrt関数の実装
+- [x] 1.1 (P) smooth_sqrt関数の実装
   - ゼロ近傍で滑らかに動作する平方根関数を実装
   - 数学的定義: smooth_sqrt(x, epsilon) = sqrt(x + epsilon^2) - epsilon
   - ジェネリックFloat型でf32、f64、DualNumber型をサポート
   - epsilonが小さい場合に真の平方根値に収束することを検証するテスト
   - _Requirements: 8.1, 8.4, 8.5_
 
-- [ ] 1.2 (P) smooth_log関数の実装
+- [x] 1.2 (P) smooth_log関数の実装
   - ゼロ近傍で滑らかに動作する対数関数を実装
   - smooth_max関数と組み合わせて特異点を回避
   - ジェネリックFloat型でf32、f64、DualNumber型をサポート
   - log-sum-exp技法による数値オーバーフロー防止
   - _Requirements: 8.2, 8.4, 8.5, 8.6_
 
-- [ ] 1.3 (P) smooth_pow関数の実装
+- [x] 1.3 (P) smooth_pow関数の実装
   - 非整数べき乗を滑らかに処理するべき乗関数を実装
   - smooth_log、smooth_absとの組み合わせでAD互換性を維持
   - ジェネリックFloat型でf32、f64、DualNumber型をサポート

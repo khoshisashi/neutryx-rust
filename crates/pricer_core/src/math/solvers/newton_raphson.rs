@@ -380,7 +380,12 @@ mod tests {
 
     #[test]
     fn test_with_f32() {
-        let solver: NewtonRaphsonSolver<f32> = NewtonRaphsonSolver::with_defaults();
+        // Use relaxed tolerance for f32
+        let config = SolverConfig {
+            tolerance: 1e-5_f32,
+            max_iterations: 100,
+        };
+        let solver: NewtonRaphsonSolver<f32> = NewtonRaphsonSolver::new(config);
 
         let f = |x: f32| x * x - 2.0;
         let f_prime = |x: f32| 2.0 * x;

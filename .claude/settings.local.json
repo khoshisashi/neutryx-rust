@@ -42,7 +42,16 @@
       "Bash(git commit:*)",
       "Bash(git push)",
       "Bash(git pull:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(where:*)",
+      "Bash(cmd //c \"where cargo\")",
+      "Bash(powershell -Command \"& {Get-Command cargo -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source}\")",
+      "Bash(powershell.exe -Command \"cd 'c:\\\\Users\\\\khosh\\\\neutryx-rust\\\\neutryx-rust'; cargo test:*)",
+      "Bash(powershell.exe -Command \"$env:PATH += '';C:\\\\Users\\\\khosh\\\\.cargo\\\\bin''; cd ''c:\\\\Users\\\\khosh\\\\neutryx-rust\\\\neutryx-rust''; cargo test -p pricer_models models::stochastic -- --nocapture 2>&1\")",
+      "Bash(C:/Users/khosh/.cargo/bin/cargo.exe test:*)",
+      "Bash(cmd.exe /c \"cd /d c:\\\\Users\\\\khosh\\\\neutryx-rust\\\\neutryx-rust && cargo test -p pricer_models models::stochastic -- --nocapture 2>&1\")",
+      "Bash(cmd.exe /c \"cd /d c:\\\\Users\\\\khosh\\\\neutryx-rust\\\\neutryx-rust && cargo test -p pricer_models models::stochastic -- --nocapture\")",
+      "Bash(cmd.exe /c \"cd /d c:\\\\Users\\\\khosh\\\\neutryx-rust\\\\neutryx-rust & cargo test -p pricer_models models::stochastic -- --nocapture\")"
     ]
   }
 }
