@@ -279,10 +279,7 @@ mod tests {
 
     #[test]
     fn test_config_invalid_zero_paths() {
-        let result = MonteCarloConfig::builder()
-            .n_paths(0)
-            .n_steps(100)
-            .build();
+        let result = MonteCarloConfig::builder().n_paths(0).n_steps(100).build();
 
         assert!(matches!(result, Err(ConfigError::InvalidPathCount(0))));
     }
@@ -299,10 +296,7 @@ mod tests {
 
     #[test]
     fn test_config_invalid_zero_steps() {
-        let result = MonteCarloConfig::builder()
-            .n_paths(1000)
-            .n_steps(0)
-            .build();
+        let result = MonteCarloConfig::builder().n_paths(1000).n_steps(0).build();
 
         assert!(matches!(result, Err(ConfigError::InvalidStepCount(0))));
     }
@@ -323,7 +317,10 @@ mod tests {
 
         assert!(matches!(
             result,
-            Err(ConfigError::InvalidParameter { name: "n_paths", .. })
+            Err(ConfigError::InvalidParameter {
+                name: "n_paths",
+                ..
+            })
         ));
     }
 
@@ -333,7 +330,10 @@ mod tests {
 
         assert!(matches!(
             result,
-            Err(ConfigError::InvalidParameter { name: "n_steps", .. })
+            Err(ConfigError::InvalidParameter {
+                name: "n_steps",
+                ..
+            })
         ));
     }
 

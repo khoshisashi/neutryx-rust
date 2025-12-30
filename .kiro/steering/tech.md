@@ -4,12 +4,14 @@
 
 **4-Layer Isolation Design**: Experimental AD technology confined to Layer 3, enabling 75% of codebase to use stable Rust while isolating Enzyme (nightly Rust + LLVM plugin) dependencies.
 
-```
+```text
 L1: pricer_core     → Foundation (Stable)
 L2: pricer_models   → Business Logic (Stable)
-L3: pricer_kernel   → AD Engine (Nightly + Enzyme)
+L3: pricer_kernel   → AD Engine (Nightly + Enzyme, currently isolated)
 L4: pricer_xva      → Application (Stable)
 ```
+
+**Phase 3.0 Note**: L3 currently has zero pricer_* dependencies (complete isolation). L1/L2 integration planned for Phase 4.
 
 ## Core Technologies
 
@@ -100,5 +102,5 @@ docker run -it neutryx-enzyme
 
 ---
 _Created: 2025-12-29_
-_Updated: 2025-12-29_ — Added llvm-sys, serde, thiserror libraries
+_Updated: 2025-12-30_ — Corrected L3 phase status (currently isolated), added Phase 3.0 note
 _Document standards and patterns, not every dependency_

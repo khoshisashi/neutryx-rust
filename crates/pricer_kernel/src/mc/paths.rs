@@ -236,7 +236,8 @@ pub fn generate_gbm_paths_tangent_spot(
             paths[path_offset + step + 1] = paths[path_offset + step] * exp_increment;
 
             // Tangent: dS[t+1] = dS[t] * exp(...) (chain rule)
-            tangent_paths[path_offset + step + 1] = tangent_paths[path_offset + step] * exp_increment;
+            tangent_paths[path_offset + step + 1] =
+                tangent_paths[path_offset + step] * exp_increment;
         }
     }
 
@@ -352,7 +353,11 @@ mod tests {
         generate_gbm_paths(&mut ws2, params, 10, 5);
 
         // Different seeds should produce different paths
-        let different = ws1.paths().iter().zip(ws2.paths().iter()).any(|(p1, p2)| p1 != p2);
+        let different = ws1
+            .paths()
+            .iter()
+            .zip(ws2.paths().iter())
+            .any(|(p1, p2)| p1 != p2);
         assert!(different);
     }
 

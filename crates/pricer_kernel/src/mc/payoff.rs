@@ -211,8 +211,12 @@ pub fn european_put_smooth(terminal_price: f64, strike: f64, epsilon: f64) -> f6
 #[inline]
 pub fn compute_payoff(terminal_price: f64, params: PayoffParams) -> f64 {
     match params.payoff_type {
-        PayoffType::Call => european_call_smooth(terminal_price, params.strike, params.smoothing_epsilon),
-        PayoffType::Put => european_put_smooth(terminal_price, params.strike, params.smoothing_epsilon),
+        PayoffType::Call => {
+            european_call_smooth(terminal_price, params.strike, params.smoothing_epsilon)
+        }
+        PayoffType::Put => {
+            european_put_smooth(terminal_price, params.strike, params.smoothing_epsilon)
+        }
     }
 }
 

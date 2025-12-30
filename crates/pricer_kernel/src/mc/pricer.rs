@@ -239,11 +239,8 @@ impl MonteCarloPricer {
         let sum: f64 = payoffs.iter().sum();
         let mean = sum / n_paths as f64;
 
-        let variance: f64 = payoffs
-            .iter()
-            .map(|&p| (p - mean).powi(2))
-            .sum::<f64>()
-            / (n_paths - 1) as f64;
+        let variance: f64 =
+            payoffs.iter().map(|&p| (p - mean).powi(2)).sum::<f64>() / (n_paths - 1) as f64;
         let std_dev = variance.sqrt();
         let std_error = std_dev / (n_paths as f64).sqrt();
 
@@ -308,12 +305,7 @@ impl MonteCarloPricer {
     /// Computes Delta using central differences (Phase 3.2 placeholder).
     ///
     /// In Phase 4, this will use Enzyme forward-mode AD.
-    fn compute_delta(
-        &mut self,
-        gbm: GbmParams,
-        payoff: PayoffParams,
-        discount_factor: f64,
-    ) -> f64 {
+    fn compute_delta(&mut self, gbm: GbmParams, payoff: PayoffParams, discount_factor: f64) -> f64 {
         // Bump size: 1% of spot or minimum 0.01
         let bump = (0.01 * gbm.spot).max(0.01);
 

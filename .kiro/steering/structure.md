@@ -3,14 +3,16 @@
 ## Organization Philosophy
 
 **Layer-Based Architecture with Dependency Flow**:
-Strict bottom-up dependencies (`L1 ← L2 ← L3 → L4`), isolating experimental technology (Enzyme) to Layer 3 while keeping foundation and application stable.
+Strict bottom-up dependencies, isolating experimental technology (Enzyme) to Layer 3 while keeping foundation and application stable.
 
 ```
 L1 (pricer_core)    → No dependencies, pure Rust traits/types
 L2 (pricer_models)  → Depends on L1 only
-L3 (pricer_kernel)  → Depends on L1+L2, Enzyme isolated here
+L3 (pricer_kernel)  → Currently isolated (Phase 3.0), will integrate L1+L2 in Phase 4
 L4 (pricer_xva)     → Depends on L1+L2+L3, stable Rust
 ```
+
+**Phase 3.0 Isolation**: L3 intentionally has zero pricer_* dependencies for complete Enzyme infrastructure isolation. L1/L2 integration planned for Phase 4.
 
 ## Directory Patterns
 
@@ -72,15 +74,21 @@ analytical/   → Closed-form solutions (Black-Scholes, barrier formulas)
 **Structure**:
 ```
 enzyme/       → Enzyme bindings, autodiff macros
-mc/           → Monte Carlo kernel, path generation
+mc/           → Monte Carlo kernel (GBM paths, workspace buffers, Greeks)
 rng/          → Random number generation (PRNG, QMC sequences)
-checkpoint/   → Memory management for path-dependent options
 verify/       → Enzyme vs num-dual verification tests
+checkpoint/   → (Phase 4) Memory management for path-dependent options
 ```
 
-**Key Principle**: **Only crate requiring nightly Rust and Enzyme**. Isolated from L1/L2/L4.
+**Key Principle**: **Only crate requiring nightly Rust and Enzyme**. Currently isolated (Phase 3.0) with zero pricer_* dependencies.
 
 **RNG Design**: Zero-allocation batch operations, static dispatch only, Enzyme-compatible. Supports reproducible seeding for deterministic simulations.
+
+**Monte Carlo Features** (Phase 3.2):
+- Pre-allocated workspace buffers (`PathWorkspace`) for allocation-free simulation
+- GBM path generation with log-space formulation
+- Smooth payoff functions for AD compatibility
+- Greeks via bump-and-revalue with forward-mode AD prototype
 
 ### Layer 4: Application (pricer_xva)
 
@@ -154,5 +162,5 @@ Current roadmap (see README.md):
 
 ---
 _Created: 2025-12-29_
-_Updated: 2025-12-30_ — Added L1 market_data/ module (yield curves, volatility surfaces), expanded interpolators (bilinear, cubic_spline, monotonic, smooth_interp), expanded solvers (Brent)
+_Updated: 2025-12-30_ — Corrected L3 dependency documentation (Phase 3.0 isolation), added Monte Carlo features, clarified checkpoint as Phase 4
 _Document patterns, not file trees. New files following patterns shouldn't require updates_
