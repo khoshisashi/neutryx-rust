@@ -84,7 +84,7 @@ impl<T: Float + Default> StochasticState<T> for SingleState<T> {
     }
 
     fn from_slice(values: &[T]) -> Option<Self> {
-        if values.len() >= 1 {
+        if !values.is_empty() {
             Some(SingleState(values[0]))
         } else {
             None
