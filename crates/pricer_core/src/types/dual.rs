@@ -51,4 +51,3 @@
 /// ```
 #[cfg(feature = "num-dual-mode")]
 pub type DualNumber = num_dual::Dual64;
-

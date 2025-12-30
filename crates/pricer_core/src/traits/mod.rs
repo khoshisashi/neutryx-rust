@@ -78,5 +78,4 @@ mod tests {
         let result2 = generic_exp(1.0_f64);
         assert!((result2 - std::f64::consts::E).abs() < 1e-10);
     }
-
 }
