@@ -494,13 +494,34 @@ mod tests {
     fn test_different_currencies() {
         let dates = vec![1.0_f64];
 
-        let usd_swap = Swap::new(1_000_000.0, 0.02, dates.clone(), PaymentFrequency::Annual, Currency::USD).unwrap();
+        let usd_swap = Swap::new(
+            1_000_000.0,
+            0.02,
+            dates.clone(),
+            PaymentFrequency::Annual,
+            Currency::USD,
+        )
+        .unwrap();
         assert_eq!(usd_swap.currency(), Currency::USD);
 
-        let eur_swap = Swap::new(1_000_000.0, 0.02, dates.clone(), PaymentFrequency::Annual, Currency::EUR).unwrap();
+        let eur_swap = Swap::new(
+            1_000_000.0,
+            0.02,
+            dates.clone(),
+            PaymentFrequency::Annual,
+            Currency::EUR,
+        )
+        .unwrap();
         assert_eq!(eur_swap.currency(), Currency::EUR);
 
-        let jpy_swap = Swap::new(100_000_000.0, 0.001, dates.clone(), PaymentFrequency::Annual, Currency::JPY).unwrap();
+        let jpy_swap = Swap::new(
+            100_000_000.0,
+            0.001,
+            dates.clone(),
+            PaymentFrequency::Annual,
+            Currency::JPY,
+        )
+        .unwrap();
         assert_eq!(jpy_swap.currency(), Currency::JPY);
     }
 
@@ -588,10 +609,7 @@ mod tests {
     fn test_dual64_notional_sensitivity() {
         use num_dual::Dual64;
 
-        let payment_dates = vec![
-            Dual64::new(0.5, 0.0),
-            Dual64::new(1.0, 0.0),
-        ];
+        let payment_dates = vec![Dual64::new(0.5, 0.0), Dual64::new(1.0, 0.0)];
 
         let swap = Swap::new(
             Dual64::new(1_000_000.0, 1.0), // Track derivative w.r.t. notional

@@ -218,7 +218,14 @@ mod tests {
 
     fn create_test_swap() -> Swap<f64> {
         let dates = vec![0.5, 1.0, 1.5, 2.0];
-        Swap::new(1_000_000.0, 0.03, dates, PaymentFrequency::SemiAnnual, Currency::USD).unwrap()
+        Swap::new(
+            1_000_000.0,
+            0.03,
+            dates,
+            PaymentFrequency::SemiAnnual,
+            Currency::USD,
+        )
+        .unwrap()
     }
 
     #[test]

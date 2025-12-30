@@ -309,17 +309,18 @@ impl MonteCarloPricer {
         // Bump size: 1% of spot or minimum 0.01
         let bump = (0.01 * gbm.spot).max(0.01);
 
-        // Save RNG state for reproducibility
-        let seed = self.rng.seed();
-
-        // Price at S + bump
-        self.reset_with_seed(seed);
-        let gbm_up = GbmParams { spot: gbm.spot + bump, ..gbm };
+        let gbm_up = GbmParams {
+            spot: gbm.spot + bump,
+            ..gbm
+        };
         let price_up = self.price_european(gbm_up, payoff, discount_factor).price;
 
         // Price at S - bump
         self.reset_with_seed(seed);
-        let gbm_down = GbmParams { spot: gbm.spot - bump, ..gbm };
+        let gbm_down = GbmParams {
+            spot: gbm.spot - bump,
+            ..gbm
+        };
         let price_down = self.price_european(gbm_down, payoff, discount_factor).price;
 
         // Central difference
@@ -327,12 +328,7 @@ impl MonteCarloPricer {
     }
 
     /// Computes Gamma using central differences.
-    fn compute_gamma(
-        &mut self,
-        gbm: GbmParams,
-        payoff: PayoffParams,
-        discount_factor: f64,
-    ) -> f64 {
+    fn compute_gamma(&mut self, gbm: GbmParams, payoff: PayoffParams, discount_factor: f64) -> f64 {
         let bump = (0.01 * gbm.spot).max(0.01);
         let seed = self.rng.seed();
 
@@ -342,12 +338,18 @@ impl MonteCarloPricer {
 
         // Price at S + bump
         self.reset_with_seed(seed);
-        let gbm_up = GbmParams { spot: gbm.spot + bump, ..gbm };
+        let gbm_up = GbmParams {
+            spot: gbm.spot + bump,
+            ..gbm
+        };
         let price_up = self.price_european(gbm_up, payoff, discount_factor).price;
 
         // Price at S - bump
         self.reset_with_seed(seed);
-        let gbm_down = GbmParams { spot: gbm.spot - bump, ..gbm };
+        let gbm_down = GbmParams {
+            spot: gbm.spot - bump,
+            ..gbm
+        };
         let price_down = self.price_european(gbm_down, payoff, discount_factor).price;
 
         // Second derivative via central differences
@@ -357,24 +359,25 @@ impl MonteCarloPricer {
     /// Computes Vega using central differences.
     ///
     /// In Phase 4, this will use Enzyme reverse-mode AD.
-    fn compute_vega(
-        &mut self,
-        gbm: GbmParams,
-        payoff: PayoffParams,
-        discount_factor: f64,
-    ) -> f64 {
+    fn compute_vega(&mut self, gbm: GbmParams, payoff: PayoffParams, discount_factor: f64) -> f64 {
         // Bump size: 1% of vol (absolute)
         let bump = 0.01;
         let seed = self.rng.seed();
 
         // Price at vol + bump
         self.reset_with_seed(seed);
-        let gbm_up = GbmParams { volatility: gbm.volatility + bump, ..gbm };
+        let gbm_up = GbmParams {
+            volatility: gbm.volatility + bump,
+            ..gbm
+        };
         let price_up = self.price_european(gbm_up, payoff, discount_factor).price;
 
         // Price at vol - bump
         self.reset_with_seed(seed);
-        let gbm_down = GbmParams { volatility: (gbm.volatility - bump).max(0.001), ..gbm };
+        let gbm_down = GbmParams {
+            volatility: (gbm.volatility - bump).max(0.001),
+            ..gbm
+        };
         let price_down = self.price_european(gbm_down, payoff, discount_factor).price;
 
         // Central difference (scaled to 1% vol move)
@@ -382,20 +385,20 @@ impl MonteCarloPricer {
     }
 
     /// Computes Theta using central differences.
-    fn compute_theta(
-        &mut self,
-        gbm: GbmParams,
-        payoff: PayoffParams,
-        discount_factor: f64,
-    ) -> f64 {
+    fn compute_theta(&mut self, gbm: GbmParams, payoff: PayoffParams, discount_factor: f64) -> f64 {
         // Bump size: 1 day = 1/252 years
         let bump = 1.0 / 252.0;
         let seed = self.rng.seed();
 
         // Price at T - bump (shorter maturity)
         self.reset_with_seed(seed);
-        let gbm_short = GbmParams { maturity: (gbm.maturity - bump).max(0.001), ..gbm };
-        let price_short = self.price_european(gbm_short, payoff, discount_factor).price;
+        let gbm_short = GbmParams {
+            maturity: (gbm.maturity - bump).max(0.001),
+            ..gbm
+        };
+        let price_short = self
+            .price_european(gbm_short, payoff, discount_factor)
+            .price;
 
         // Price at T (original)
         self.reset_with_seed(seed);
@@ -407,25 +410,26 @@ impl MonteCarloPricer {
     }
 
     /// Computes Rho using central differences.
-    fn compute_rho(
-        &mut self,
-        gbm: GbmParams,
-        payoff: PayoffParams,
-        discount_factor: f64,
-    ) -> f64 {
+    fn compute_rho(&mut self, gbm: GbmParams, payoff: PayoffParams, discount_factor: f64) -> f64 {
         // Bump size: 1% rate change (absolute)
         let bump = 0.01;
         let seed = self.rng.seed();
 
         // Price at r + bump
         self.reset_with_seed(seed);
-        let gbm_up = GbmParams { rate: gbm.rate + bump, ..gbm };
+        let gbm_up = GbmParams {
+            rate: gbm.rate + bump,
+            ..gbm
+        };
         let df_up = (-(gbm.rate + bump) * gbm.maturity).exp();
         let price_up = self.price_european(gbm_up, payoff, df_up).price;
 
         // Price at r - bump
         self.reset_with_seed(seed);
-        let gbm_down = GbmParams { rate: gbm.rate - bump, ..gbm };
+        let gbm_down = GbmParams {
+            rate: gbm.rate - bump,
+            ..gbm
+        };
         let df_down = (-(gbm.rate - bump) * gbm.maturity).exp();
         let price_down = self.price_european(gbm_down, payoff, df_down).price;
 
@@ -659,12 +663,8 @@ mod tests {
         let payoff = PayoffParams::call(100.0);
         let df = (-0.05_f64).exp();
 
-        let result = pricer.price_with_greeks(
-            gbm,
-            payoff,
-            df,
-            &[Greek::Delta, Greek::Gamma, Greek::Vega],
-        );
+        let result =
+            pricer.price_with_greeks(gbm, payoff, df, &[Greek::Delta, Greek::Gamma, Greek::Vega]);
 
         assert!(result.delta.is_some());
         assert!(result.gamma.is_some());
@@ -745,11 +745,15 @@ mod tests {
 
         // Call price
         let mut pricer = MonteCarloPricer::new(config.clone()).unwrap();
-        let call_price = pricer.price_european(gbm, PayoffParams::call(strike), df).price;
+        let call_price = pricer
+            .price_european(gbm, PayoffParams::call(strike), df)
+            .price;
 
         // Put price
         let mut pricer = MonteCarloPricer::new(config).unwrap();
-        let put_price = pricer.price_european(gbm, PayoffParams::put(strike), df).price;
+        let put_price = pricer
+            .price_european(gbm, PayoffParams::put(strike), df)
+            .price;
 
         // Expected: S - K * exp(-rT) = 100 - 100 * exp(-0.05) ≈ 4.88
         let expected_diff = gbm.spot - strike * df;

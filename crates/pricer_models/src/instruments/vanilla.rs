@@ -232,8 +232,12 @@ mod tests {
     #[test]
     fn test_digital_call_payoff() {
         let params = create_test_params();
-        let digital =
-            VanillaOption::new(params, PayoffType::DigitalCall, ExerciseStyle::European, 1e-6);
+        let digital = VanillaOption::new(
+            params,
+            PayoffType::DigitalCall,
+            ExerciseStyle::European,
+            1e-6,
+        );
 
         // ITM digital call
         let payoff_itm = digital.payoff(110.0);
@@ -247,8 +251,7 @@ mod tests {
     #[test]
     fn test_american_option() {
         let params = create_test_params();
-        let american =
-            VanillaOption::new(params, PayoffType::Call, ExerciseStyle::American, 1e-6);
+        let american = VanillaOption::new(params, PayoffType::Call, ExerciseStyle::American, 1e-6);
 
         assert!(american.exercise_style().is_american());
         assert!(american.exercise_style().allows_early_exercise());
