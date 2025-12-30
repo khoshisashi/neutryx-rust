@@ -486,9 +486,8 @@ mod tests {
     fn test_aggregate_by_netting_set() {
         let portfolio = create_test_portfolio();
 
-        let agg = portfolio.aggregate_by_netting_set(|trades| {
-            trades.iter().map(|t| t.notional()).sum()
-        });
+        let agg =
+            portfolio.aggregate_by_netting_set(|trades| trades.iter().map(|t| t.notional()).sum());
 
         assert_eq!(agg.get(&NettingSetId::new("NS001")), Some(&3_000_000.0));
         assert_eq!(agg.get(&NettingSetId::new("NS002")), Some(&500_000.0));
@@ -524,10 +523,7 @@ mod tests {
         let portfolio = create_test_portfolio();
 
         // Ensure parallel iteration works
-        let total: f64 = portfolio
-            .trades_par_iter()
-            .map(|(_, t)| t.notional())
-            .sum();
+        let total: f64 = portfolio.trades_par_iter().map(|(_, t)| t.notional()).sum();
 
         assert_eq!(total, 3_500_000.0);
     }

@@ -5,10 +5,11 @@ A production-grade **XVA (Credit Valuation Adjustment) pricing library** for der
 ## Core Capabilities
 
 - **Credit Valuation Adjustments**: CVA, DVA, FVA calculations for derivatives portfolios
+- **Exposure Metrics**: EE, EPE, PFE, EEPE, ENE calculations with parallel computation
 - **High-Performance Greeks**: Enzyme LLVM-level AD for C++-competitive differentiation
 - **Dual-Mode Verification**: Parallel Enzyme and num-dual backends for correctness validation
-- **Monte Carlo Pricing**: Path-dependent options with checkpointing and memory management
-- **Portfolio Analytics**: Parallelized portfolio-level XVA computations
+- **Monte Carlo Pricing**: Path-dependent options with workspace buffers and memory management
+- **Portfolio Analytics**: Parallelized portfolio-level XVA computations with SoA optimization
 - **Market Data Infrastructure**: AD-compatible yield curves and volatility surfaces with interpolation
 
 ## Target Use Cases
