@@ -369,7 +369,10 @@ mod tests {
         let solver: NewtonRaphsonSolver<f64> = NewtonRaphsonSolver::with_defaults();
         let cloned = solver.clone();
 
-        assert_eq!(solver.config().max_iterations, cloned.config().max_iterations);
+        assert_eq!(
+            solver.config().max_iterations,
+            cloned.config().max_iterations
+        );
     }
 
     #[test]

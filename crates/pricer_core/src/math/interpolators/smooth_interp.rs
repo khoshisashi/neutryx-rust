@@ -207,7 +207,11 @@ mod tests {
         // All epsilon values should produce finite results
         for eps in [1e-3, 1e-4, 1e-5, 1e-6] {
             let result = smooth_interp(&xs, &ys, 0.5, eps).unwrap();
-            assert!(result.is_finite(), "Result should be finite for eps={}", eps);
+            assert!(
+                result.is_finite(),
+                "Result should be finite for eps={}",
+                eps
+            );
         }
     }
 

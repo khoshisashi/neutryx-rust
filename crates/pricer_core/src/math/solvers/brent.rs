@@ -154,9 +154,7 @@ impl<T: Float> BrentSolver<T> {
                 let q = (t - T::one()) * (r - T::one()) * (s - T::one());
 
                 // Check if step is acceptable
-                if p.abs() < (three * m * q).abs() / two
-                    && p.abs() < (e * q).abs() / two
-                {
+                if p.abs() < (three * m * q).abs() / two && p.abs() < (e * q).abs() / two {
                     e = d;
                     d = p / q;
                     use_bisection = false;
@@ -170,9 +168,7 @@ impl<T: Float> BrentSolver<T> {
                 let q = T::one() - s;
 
                 // Check if step is acceptable
-                if p.abs() < (three * m * q).abs() / two
-                    && p.abs() < (e * q).abs() / two
-                {
+                if p.abs() < (three * m * q).abs() / two && p.abs() < (e * q).abs() / two {
                     e = d;
                     d = p / q;
                     use_bisection = false;
@@ -457,7 +453,10 @@ mod tests {
         let solver: BrentSolver<f64> = BrentSolver::with_defaults();
         let cloned = solver.clone();
 
-        assert_eq!(solver.config().max_iterations, cloned.config().max_iterations);
+        assert_eq!(
+            solver.config().max_iterations,
+            cloned.config().max_iterations
+        );
     }
 
     #[test]

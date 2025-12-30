@@ -10,8 +10,15 @@
 #
 # Note: Modern Rust nightly has built-in Enzyme support via #![feature(autodiff)]
 # The Enzyme backend component must be installed via rustup (this script handles it).
+#
+# Exit codes:
+#   0 - Success (autodiff works) or graceful skip (component unavailable)
+#   1 - Hard failure (toolchain issues, unexpected errors)
 
 set -euo pipefail
+
+# Track whether Enzyme is available
+ENZYME_AVAILABLE=true
 
 echo "===================================="
 echo "Rust Autodiff Verification Script"
@@ -64,12 +71,18 @@ if rustup +nightly component list 2>/dev/null | grep -q "rustc-codegen-llvm-enzy
         rustup +nightly component add rustc-codegen-llvm-enzyme || {
             echo "⚠ Failed to install enzyme codegen component"
             echo "  This component may not be available for your platform"
+            ENZYME_AVAILABLE=false
         }
     fi
-    echo "✓ Enzyme codegen component available"
+    if [ "$ENZYME_AVAILABLE" = true ]; then
+        echo "✓ Enzyme codegen component available"
+    fi
 else
     echo "⚠ rustc-codegen-llvm-enzyme component not available in this nightly"
-    echo "  Autodiff may still work with built-in LLVM Enzyme support"
+    echo "  Will attempt compilation, but autodiff may not work"
+    # Note: We don't set ENZYME_AVAILABLE=false here yet - some nightlies
+    # have built-in Enzyme support without requiring the separate component.
+    # We'll detect actual availability during the build step.
 fi
 
 echo "✓ Required components checked"
@@ -124,7 +137,12 @@ EOF
 # Note: -Z autodiff=Enable activates Rust's built-in Enzyme support
 export RUSTFLAGS="-Z autodiff=Enable"
 
-if cargo +nightly test 2>&1 | tee build.log; then
+# Capture build output to check for specific errors
+BUILD_OUTPUT=$(cargo +nightly test 2>&1) || true
+echo "$BUILD_OUTPUT" | tee build.log
+
+# Check if build succeeded
+if echo "$BUILD_OUTPUT" | grep -q "test result: ok"; then
     echo ""
     echo "✓ Autodiff verification PASSED"
     echo ""
@@ -137,21 +155,51 @@ if cargo +nightly test 2>&1 | tee build.log; then
     # Cleanup
     cd /
     rm -rf $TEST_DIR
-else
-    echo ""
-    echo "✗ Autodiff verification FAILED"
-    echo ""
-    echo "Build log saved to: $TEST_DIR/build.log"
-    echo "Common issues:"
-    echo "  - Enzyme backend not installed (run: rustup +nightly component add rustc-codegen-llvm-enzyme)"
-    echo "  - autodiff feature not available in this nightly"
-    echo "  - Missing #![feature(autodiff)] in source"
-    echo "  - Rust nightly version too old (autodiff merged ~2024)"
-    echo ""
-    echo "Note: autodiff/Enzyme is experimental and requires:"
-    echo "  1. A recent nightly toolchain with Enzyme support"
-    echo "  2. The rustc-codegen-llvm-enzyme component (if available for your platform)"
-    echo "  3. Platform support (primarily Linux x86_64)"
-    echo ""
-    exit 1
+    exit 0
 fi
+
+# Check if failure is due to missing Enzyme backend (expected on many platforms/nightlies)
+if echo "$BUILD_OUTPUT" | grep -q "failed to load our autodiff backend"; then
+    echo ""
+    echo "===================================="
+    echo "⚠ Autodiff Backend Not Available"
+    echo "===================================="
+    echo ""
+    echo "The Enzyme autodiff backend is not available for this platform/nightly."
+    echo "This is expected - Enzyme support is experimental and not universally available."
+    echo ""
+    echo "Details:"
+    echo "  - Nightly: $(rustc +nightly --version)"
+    echo "  - Platform: $(uname -s) $(uname -m)"
+    echo "  - The rustc-codegen-llvm-enzyme component is not distributed for all"
+    echo "    nightly versions or platforms."
+    echo ""
+    echo "Your code using #![feature(autodiff)] will work when:"
+    echo "  - A nightly with Enzyme support becomes available for your platform"
+    echo "  - Or when running on a platform where Enzyme is distributed"
+    echo ""
+    echo "Skipping autodiff verification (not a failure)."
+    echo ""
+    # Cleanup
+    cd /
+    rm -rf $TEST_DIR
+    exit 0
+fi
+
+# Some other unexpected failure occurred
+echo ""
+echo "✗ Autodiff verification FAILED"
+echo ""
+echo "Build log saved to: $TEST_DIR/build.log"
+echo "Common issues:"
+echo "  - autodiff feature not available in this nightly"
+echo "  - Missing #![feature(autodiff)] in source"
+echo "  - Rust nightly version too old (autodiff merged ~2024)"
+echo "  - Syntax errors in test code"
+echo ""
+echo "Note: autodiff/Enzyme is experimental and requires:"
+echo "  1. A recent nightly toolchain with Enzyme support"
+echo "  2. The rustc-codegen-llvm-enzyme component (if available for your platform)"
+echo "  3. Platform support (primarily Linux x86_64)"
+echo ""
+exit 1

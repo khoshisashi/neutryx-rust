@@ -466,8 +466,7 @@ mod tests {
 
     #[test]
     fn test_interpolate_out_of_bounds_low() {
-        let interp =
-            MonotonicInterpolator::new(&[0.0, 1.0, 2.0], &[0.0, 1.0, 2.0]).unwrap();
+        let interp = MonotonicInterpolator::new(&[0.0, 1.0, 2.0], &[0.0, 1.0, 2.0]).unwrap();
         let result = interp.interpolate(-0.1);
 
         assert!(result.is_err());
@@ -479,8 +478,7 @@ mod tests {
 
     #[test]
     fn test_interpolate_out_of_bounds_high() {
-        let interp =
-            MonotonicInterpolator::new(&[0.0, 1.0, 2.0], &[0.0, 1.0, 2.0]).unwrap();
+        let interp = MonotonicInterpolator::new(&[0.0, 1.0, 2.0], &[0.0, 1.0, 2.0]).unwrap();
         let result = interp.interpolate(2.1);
 
         assert!(result.is_err());
