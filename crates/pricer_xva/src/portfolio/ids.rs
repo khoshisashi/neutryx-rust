@@ -62,7 +62,7 @@ impl From<String> for TradeId {
 /// let id = CounterpartyId::new("CP001");
 /// assert_eq!(id.as_str(), "CP001");
 /// ```
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CounterpartyId(String);
 
@@ -108,7 +108,7 @@ impl From<String> for CounterpartyId {
 /// let id = NettingSetId::new("NS001");
 /// assert_eq!(id.as_str(), "NS001");
 /// ```
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NettingSetId(String);
 
