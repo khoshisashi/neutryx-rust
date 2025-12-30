@@ -42,20 +42,20 @@
 //! assert!((y - 2.5).abs() < 1e-10);
 //! ```
 
+mod bilinear;
+mod cubic_spline;
 mod linear;
+mod monotonic;
+mod smooth_interp;
 mod traits;
 
-// Re-export public types at module level
-pub use linear::LinearInterpolator;
-pub use traits::Interpolator;
+#[cfg(all(test, feature = "num-dual-mode"))]
+mod ad_tests;
 
-// Future implementations will be added here:
-// mod cubic_spline;
-// mod monotonic;
-// mod bilinear;
-// mod smooth_interp;
-//
-// pub use cubic_spline::CubicSplineInterpolator;
-// pub use monotonic::MonotonicInterpolator;
-// pub use bilinear::BilinearInterpolator;
-// pub use smooth_interp::smooth_interp;
+// Re-export public types at module level
+pub use bilinear::BilinearInterpolator;
+pub use cubic_spline::CubicSplineInterpolator;
+pub use linear::LinearInterpolator;
+pub use monotonic::MonotonicInterpolator;
+pub use smooth_interp::smooth_interp;
+pub use traits::Interpolator;

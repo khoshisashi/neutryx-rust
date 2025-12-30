@@ -23,7 +23,7 @@
 //!
 //! ## Example
 //!
-//! ```ignore
+//! ```
 //! use pricer_core::math::solvers::{NewtonRaphsonSolver, SolverConfig};
 //!
 //! // Solve x² - 2 = 0 (find √2)
@@ -37,14 +37,11 @@
 //! assert!((root - std::f64::consts::SQRT_2).abs() < 1e-10);
 //! ```
 
+mod brent;
 mod config;
+mod newton_raphson;
 
-// Re-export configuration at module level
+// Re-export public types at module level
+pub use brent::BrentSolver;
 pub use config::SolverConfig;
-
-// Future implementations will be added here:
-// mod newton_raphson;
-// mod brent;
-//
-// pub use newton_raphson::NewtonRaphsonSolver;
-// pub use brent::BrentSolver;
+pub use newton_raphson::NewtonRaphsonSolver;
