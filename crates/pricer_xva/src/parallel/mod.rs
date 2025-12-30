@@ -76,10 +76,7 @@ where
     M: Fn(&T) -> R + Sync + Send,
     Red: Fn(R, R) -> R + Sync + Send,
 {
-    items
-        .par_iter()
-        .map(mapper)
-        .reduce(|| identity, reducer)
+    items.par_iter().map(mapper).reduce(|| identity, reducer)
 }
 
 /// Parallel sum of values.
