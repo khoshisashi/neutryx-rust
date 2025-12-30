@@ -6,12 +6,16 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[features]
+default = []
+serde = ["dep:serde"]
+
 [dependencies]
 pricer_core = { path = "../pricer_core" }
 pricer_models = { path = "../pricer_models" }
 pricer_kernel = { path = "../pricer_kernel" }
 rayon.workspace = true
-serde.workspace = true
+serde = { workspace = true, optional = true }
 thiserror.workspace = true
 
 [dev-dependencies]

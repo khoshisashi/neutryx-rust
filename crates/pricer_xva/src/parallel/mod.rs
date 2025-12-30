@@ -31,7 +31,7 @@ pub fn process_in_batches<T, R, F>(items: &[T], batch_size: usize, processor: F)
 where
     T: Sync,
     R: Send,
-    F: Fn(&[T]) -> R + Sync,
+    F: Fn(&[T]) -> R + Sync + Send,
 {
     items.par_chunks(batch_size.max(1)).map(processor).collect()
 }
@@ -52,7 +52,7 @@ pub fn parallel_map<T, R, F>(items: &[T], mapper: F) -> Vec<R>
 where
     T: Sync,
     R: Send,
-    F: Fn(&T) -> R + Sync,
+    F: Fn(&T) -> R + Sync + Send,
 {
     items.par_iter().map(mapper).collect()
 }
@@ -73,8 +73,8 @@ pub fn parallel_reduce<T, R, M, Red>(items: &[T], identity: R, mapper: M, reduce
 where
     T: Sync,
     R: Send + Copy,
-    M: Fn(&T) -> R + Sync,
-    Red: Fn(R, R) -> R + Sync,
+    M: Fn(&T) -> R + Sync + Send,
+    Red: Fn(R, R) -> R + Sync + Send,
 {
     items
         .par_iter()
@@ -86,7 +86,7 @@ where
 pub fn parallel_sum<T, F>(items: &[T], extractor: F) -> f64
 where
     T: Sync,
-    F: Fn(&T) -> f64 + Sync,
+    F: Fn(&T) -> f64 + Sync + Send,
 {
     items.par_iter().map(extractor).sum()
 }

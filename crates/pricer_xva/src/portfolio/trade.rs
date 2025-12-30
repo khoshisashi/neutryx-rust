@@ -4,7 +4,7 @@
 //! with metadata for portfolio management.
 
 use pricer_core::types::Currency;
-use pricer_models::instruments::{Instrument, PayoffType, VanillaOption};
+use pricer_models::instruments::{Instrument, PayoffType};
 
 use super::ids::{CounterpartyId, NettingSetId, TradeId};
 
