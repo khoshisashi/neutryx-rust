@@ -38,7 +38,7 @@ fn main() {
 ///
 /// Emits cargo:warning with installation guidance if LLVM 18 is not found.
 fn validate_llvm_version() {
-    let llvm_config = env::var("LLVM_CONFIG").ok().or_else(|| find_llvm_config());
+    let llvm_config = env::var("LLVM_CONFIG").ok().or_else(find_llvm_config);
 
     match llvm_config {
         Some(config_path) => {

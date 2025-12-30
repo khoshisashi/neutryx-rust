@@ -26,13 +26,13 @@ L4 (pricer_xva)     → Depends on L1+L2+L3, stable Rust
 ### Layer 1: Foundation (pricer_core)
 
 **Location**: `crates/pricer_core/src/`
-**Purpose**: Math types, traits, smoothing functions (stable Rust)
+**Purpose**: Math types, traits, smoothing functions, market data abstractions (stable Rust)
 **Structure**:
 ```
 math/
-├── smoothing/      → Smooth approximations (smooth_max, smooth_indicator)
-├── interpolators/  → Interpolation methods (linear, traits for extensibility)
-└── solvers/        → Root-finding algorithms (Newton-Raphson, bisection)
+├── smoothing.rs    → Smooth approximations (smooth_max, smooth_indicator)
+├── interpolators/  → Interpolation methods (linear, bilinear, cubic_spline, monotonic, smooth_interp)
+└── solvers/        → Root-finding algorithms (Newton-Raphson, Brent)
 
 traits/     → Priceable, Differentiable, core abstractions
 types/
@@ -40,9 +40,17 @@ types/
 ├── time.rs      → Date, DayCountConvention for financial calculations
 ├── currency.rs  → ISO 4217 currency codes with metadata
 └── error.rs     → Structured error types (PricingError, DateError, etc.)
+
+market_data/
+├── curves/     → Yield curve abstractions (YieldCurve trait, FlatCurve, InterpolatedCurve)
+├── surfaces/   → Volatility surface abstractions (VolatilitySurface trait, FlatVol, InterpolatedVolSurface)
+└── error.rs    → MarketDataError for curve/surface validation
 ```
 
-**Key Principle**: Zero dependencies on other pricer_* crates, pure foundation.
+**Key Principles**:
+
+- Zero dependencies on other pricer_* crates, pure foundation
+- All market data structures generic over `T: Float` for AD compatibility
 
 ### Layer 2: Business Logic (pricer_models)
 
@@ -146,5 +154,5 @@ Current roadmap (see README.md):
 
 ---
 _Created: 2025-12-29_
-_Updated: 2025-12-29_ — Added L1 interpolators/solvers/expanded types, L3 rng/ module
+_Updated: 2025-12-30_ — Added L1 market_data/ module (yield curves, volatility surfaces), expanded interpolators (bilinear, cubic_spline, monotonic, smooth_interp), expanded solvers (Brent)
 _Document patterns, not file trees. New files following patterns shouldn't require updates_

@@ -52,6 +52,7 @@
 
 #![warn(missing_docs)]
 
+pub mod market_data;
 pub mod math;
 pub mod traits;
 pub mod types;

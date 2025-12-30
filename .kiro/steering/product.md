@@ -9,6 +9,7 @@ A production-grade **XVA (Credit Valuation Adjustment) pricing library** for der
 - **Dual-Mode Verification**: Parallel Enzyme and num-dual backends for correctness validation
 - **Monte Carlo Pricing**: Path-dependent options with checkpointing and memory management
 - **Portfolio Analytics**: Parallelized portfolio-level XVA computations
+- **Market Data Infrastructure**: AD-compatible yield curves and volatility surfaces with interpolation
 
 ## Target Use Cases
 
@@ -26,4 +27,5 @@ A production-grade **XVA (Credit Valuation Adjustment) pricing library** for der
 
 ---
 _Created: 2025-12-29_
+_Updated: 2025-12-30_ — Added market data infrastructure capability
 _Focus on patterns and purpose, not exhaustive feature lists_

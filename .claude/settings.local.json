@@ -30,7 +30,8 @@
       "Bash(powershell.exe -Command \"Set-Location ''f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust''; & $env:USERPROFILE\\\\.cargo\\\\bin\\\\cargo.exe fmt --all\")",
       "Bash(powershell.exe -Command \"Set-Location ''f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust''; & ''C:\\\\Users\\\\kenst\\\\.cargo\\\\bin\\\\cargo.exe'' fmt --all\")",
       "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\Users\\\\kenst\\\\.cargo\\\\bin\\\\'' | Select-Object Name\")",
-      "Bash(powershell.exe -Command \"Set-Location ''f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust''; cargo fmt --all\")"
+      "Bash(powershell.exe -Command \"Set-Location ''f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust''; cargo fmt --all\")",
+      "Bash(cargo clippy:*)"
     ]
   }
 }
