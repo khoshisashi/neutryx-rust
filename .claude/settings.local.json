@@ -26,7 +26,11 @@
       "Bash(cmd.exe /c \"cd /d f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust && cargo fmt --all\")",
       "Bash(cmd.exe /c \"where cargo 2>nul || echo %USERPROFILE%\\\\.cargo\\\\bin\\\\cargo.exe\")",
       "Bash(cmd.exe /c \"cd /d f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust && C:\\\\Users\\\\kenst\\\\.cargo\\\\bin\\\\cargo.exe fmt --all\")",
-      "Bash(cmd.exe /c \"dir f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust\")"
+      "Bash(cmd.exe /c \"dir f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust\")",
+      "Bash(powershell.exe -Command \"Set-Location ''f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust''; & $env:USERPROFILE\\\\.cargo\\\\bin\\\\cargo.exe fmt --all\")",
+      "Bash(powershell.exe -Command \"Set-Location ''f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust''; & ''C:\\\\Users\\\\kenst\\\\.cargo\\\\bin\\\\cargo.exe'' fmt --all\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\Users\\\\kenst\\\\.cargo\\\\bin\\\\'' | Select-Object Name\")",
+      "Bash(powershell.exe -Command \"Set-Location ''f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust''; cargo fmt --all\")"
     ]
   }
 }
