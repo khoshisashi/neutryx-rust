@@ -14,7 +14,8 @@
 //!
 //! ```
 //! use pricer_models::models::stochastic::{StochasticModel, StochasticState};
-//! use pricer_core::traits::{Float, Differentiable};
+//! use pricer_core::traits::Float;
+//! use pricer_core::traits::priceable::Differentiable;
 //!
 //! // Implement for a simple GBM model
 //! struct SimpleGBM<T: Float> {
@@ -28,7 +29,8 @@
 //! // Model implementation would follow...
 //! ```
 
-use pricer_core::traits::{Differentiable, Float};
+use pricer_core::traits::Float;
+use pricer_core::traits::priceable::Differentiable;
 
 /// State representation for stochastic models.
 ///
@@ -59,7 +61,7 @@ pub trait StochasticState<T: Float>: Clone + Copy + Default {
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct SingleState<T: Float>(pub T);
 
-impl<T: Float> StochasticState<T> for SingleState<T> {
+impl<T: Float + Default> StochasticState<T> for SingleState<T> {
     fn dimension() -> usize {
         1
     }
@@ -103,7 +105,7 @@ pub struct TwoFactorState<T: Float> {
     pub second: T,
 }
 
-impl<T: Float> StochasticState<T> for TwoFactorState<T> {
+impl<T: Float + Default> StochasticState<T> for TwoFactorState<T> {
     fn dimension() -> usize {
         2
     }
