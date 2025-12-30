@@ -89,6 +89,7 @@ docker run -it neutryx-enzyme
 |----------|-----------|
 | **4-Layer Architecture** | Isolate experimental Enzyme code (L3) from stable production code (L1/L2/L4) |
 | **Static Dispatch (enum)** | Enzyme performs better with concrete types than trait objects |
+| **StochasticModel Trait** | Unified interface for stochastic processes with enum-based dispatch |
 | **Dual-Mode Verification** | Enzyme (performance) + num-dual (correctness) for validation |
 | **Smooth Approximations** | Replace all discontinuities (if/max) with differentiable functions |
 | **Feature Flags** | `num-dual-mode` (default), `enzyme-mode`, `serde` for serialization |
@@ -102,5 +103,5 @@ docker run -it neutryx-enzyme
 
 ---
 _Created: 2025-12-29_
-_Updated: 2025-12-30_ — Corrected L3 phase status (currently isolated), added Phase 3.0 note
+_Updated: 2025-12-30_ — Added StochasticModel trait to key technical decisions
 _Document standards and patterns, not every dependency_

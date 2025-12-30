@@ -61,11 +61,17 @@ market_data/
 **Structure**:
 ```
 instruments/  → Enum-based instrument definitions (VanillaOption, Forward, Swap)
-models/       → Stochastic models (GBM, Heston, local vol)
+models/       → Stochastic models with unified trait interface
 analytical/   → Closed-form solutions (Black-Scholes, barrier formulas)
 ```
 
-**Key Principle**: Static dispatch via `enum Instrument<T: Float>` for Enzyme compatibility and AD support.
+**Key Principles**:
+
+- Static dispatch via `enum Instrument<T: Float>` for Enzyme compatibility
+- **StochasticModel Trait**: Unified interface for stochastic processes (`evolve_step`, `initial_state`, `brownian_dim`)
+- **StochasticModelEnum**: Static dispatch enum wrapping concrete models (GBM, future: Heston, SABR)
+- **State Types**: `SingleState<T>` (1-factor), `TwoFactorState<T>` (2-factor) via `StochasticState` trait
+- **ModelParams/ModelState**: Unified enums for type-safe parameter and state handling
 
 ### Layer 3: AD Engine (pricer_kernel)
 
@@ -165,5 +171,5 @@ Current roadmap (see README.md):
 
 ---
 _Created: 2025-12-29_
-_Updated: 2025-12-30_ — Updated L4 structure (exposure module), L2 instruments (Forward, Swap), phase status alignment
+_Updated: 2025-12-30_ — Added StochasticModel trait pattern and unified enum dispatch for L2 models
 _Document patterns, not file trees. New files following patterns should not require updates_
