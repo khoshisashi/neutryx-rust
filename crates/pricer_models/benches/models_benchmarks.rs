@@ -81,7 +81,9 @@ fn bench_payoff_evaluation(c: &mut Criterion) {
     for size in [100, 1000, 10000] {
         group.bench_with_input(BenchmarkId::new("call_batch", size), &size, |b, &n| {
             let payoff = PayoffType::Call;
-            let spots: Vec<f64> = (0..n).map(|i| 80.0 + (i as f64 / n as f64) * 40.0).collect();
+            let spots: Vec<f64> = (0..n)
+                .map(|i| 80.0 + (i as f64 / n as f64) * 40.0)
+                .collect();
             let strike = 100.0;
             let epsilon = 1e-6;
             b.iter(|| {

@@ -103,7 +103,10 @@ fn bench_potential_future_exposure(c: &mut Criterion) {
             &values,
             |b, values| {
                 b.iter(|| {
-                    ExposureCalculator::potential_future_exposure(black_box(values), black_box(0.95))
+                    ExposureCalculator::potential_future_exposure(
+                        black_box(values),
+                        black_box(0.95),
+                    )
                 });
             },
         );
@@ -150,7 +153,13 @@ fn bench_dva_calculation(c: &mut Criterion) {
     let ene = ExposureCalculator::expected_exposure(&neg_values);
 
     group.bench_function("dva_50_times", |b| {
-        b.iter(|| compute_dva(black_box(&ene), black_box(&time_grid), black_box(&own_credit)));
+        b.iter(|| {
+            compute_dva(
+                black_box(&ene),
+                black_box(&time_grid),
+                black_box(&own_credit),
+            )
+        });
     });
 
     group.finish();
@@ -161,55 +170,51 @@ fn bench_portfolio_construction(c: &mut Criterion) {
     let mut group = c.benchmark_group("portfolio_construction");
 
     for n_trades in [10, 100, 1000] {
-        group.bench_with_input(
-            BenchmarkId::new("build", n_trades),
-            &n_trades,
-            |b, &n| {
-                // Pre-create trades outside the benchmark loop
-                let credit = CreditParams::new(0.02, 0.4).unwrap();
-                let counterparty = Counterparty::new(CounterpartyId::new("CP001"), credit);
-                let netting_set =
-                    NettingSet::new(NettingSetId::new("NS001"), CounterpartyId::new("CP001"));
+        group.bench_with_input(BenchmarkId::new("build", n_trades), &n_trades, |b, &n| {
+            // Pre-create trades outside the benchmark loop
+            let credit = CreditParams::new(0.02, 0.4).unwrap();
+            let counterparty = Counterparty::new(CounterpartyId::new("CP001"), credit);
+            let netting_set =
+                NettingSet::new(NettingSetId::new("NS001"), CounterpartyId::new("CP001"));
 
-                let trades: Vec<Trade> = (0..n)
-                    .map(|i| {
-                        let strike = 90.0 + (i as f64 / n as f64) * 20.0;
-                        let params = InstrumentParams::new(strike, 1.0, 1.0).unwrap();
-                        let option = VanillaOption::new(
-                            params,
-                            if i % 2 == 0 {
-                                PayoffType::Call
-                            } else {
-                                PayoffType::Put
-                            },
-                            ExerciseStyle::European,
-                            1e-6,
-                        );
+            let trades: Vec<Trade> = (0..n)
+                .map(|i| {
+                    let strike = 90.0 + (i as f64 / n as f64) * 20.0;
+                    let params = InstrumentParams::new(strike, 1.0, 1.0).unwrap();
+                    let option = VanillaOption::new(
+                        params,
+                        if i % 2 == 0 {
+                            PayoffType::Call
+                        } else {
+                            PayoffType::Put
+                        },
+                        ExerciseStyle::European,
+                        1e-6,
+                    );
 
-                        Trade::new(
-                            TradeId::new(format!("T{:05}", i)),
-                            Instrument::Vanilla(option),
-                            Currency::USD,
-                            CounterpartyId::new("CP001"),
-                            NettingSetId::new("NS001"),
-                            1_000_000.0,
-                        )
-                    })
-                    .collect();
+                    Trade::new(
+                        TradeId::new(format!("T{:05}", i)),
+                        Instrument::Vanilla(option),
+                        Currency::USD,
+                        CounterpartyId::new("CP001"),
+                        NettingSetId::new("NS001"),
+                        1_000_000.0,
+                    )
+                })
+                .collect();
 
-                b.iter(|| {
-                    let mut builder = PortfolioBuilder::new()
-                        .add_counterparty(counterparty.clone())
-                        .add_netting_set(netting_set.clone());
+            b.iter(|| {
+                let mut builder = PortfolioBuilder::new()
+                    .add_counterparty(counterparty.clone())
+                    .add_netting_set(netting_set.clone());
 
-                    for trade in &trades {
-                        builder = builder.add_trade(trade.clone());
-                    }
+                for trade in &trades {
+                    builder = builder.add_trade(trade.clone());
+                }
 
-                    black_box(builder.build().unwrap())
-                });
-            },
-        );
+                black_box(builder.build().unwrap())
+            });
+        });
     }
 
     group.finish();

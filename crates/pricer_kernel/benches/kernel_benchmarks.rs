@@ -74,7 +74,11 @@ fn bench_mc_pricing(c: &mut Criterion) {
                     .unwrap();
                 let mut pricer = MonteCarloPricer::new(config).unwrap();
                 b.iter(|| {
-                    pricer.price_european(black_box(gbm), black_box(payoff), black_box(discount_factor))
+                    pricer.price_european(
+                        black_box(gbm),
+                        black_box(payoff),
+                        black_box(discount_factor),
+                    )
                 });
             },
         );
@@ -94,7 +98,11 @@ fn bench_mc_pricing(c: &mut Criterion) {
                 .unwrap();
             let mut pricer = MonteCarloPricer::new(config).unwrap();
             b.iter(|| {
-                pricer.price_european(black_box(gbm), black_box(put_payoff), black_box(discount_factor))
+                pricer.price_european(
+                    black_box(gbm),
+                    black_box(put_payoff),
+                    black_box(discount_factor),
+                )
             });
         },
     );
@@ -126,7 +134,11 @@ fn bench_mc_steps_scaling(c: &mut Criterion) {
                     .unwrap();
                 let mut pricer = MonteCarloPricer::new(config).unwrap();
                 b.iter(|| {
-                    pricer.price_european(black_box(gbm), black_box(payoff), black_box(discount_factor))
+                    pricer.price_european(
+                        black_box(gbm),
+                        black_box(payoff),
+                        black_box(discount_factor),
+                    )
                 });
             },
         );
@@ -147,22 +159,22 @@ fn bench_greeks(c: &mut Criterion) {
 
     // Benchmark Delta computation (bump-and-revalue or forward AD)
     for n_paths in [1_000, 10_000] {
-        group.bench_with_input(
-            BenchmarkId::new("delta", n_paths),
-            &n_paths,
-            |b, &n| {
-                let config = MonteCarloConfig::builder()
-                    .n_paths(n)
-                    .n_steps(n_steps)
-                    .seed(42)
-                    .build()
-                    .unwrap();
-                let mut pricer = MonteCarloPricer::new(config).unwrap();
-                b.iter(|| {
-                    pricer.price_with_delta_ad(black_box(gbm), black_box(payoff), black_box(discount_factor))
-                });
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("delta", n_paths), &n_paths, |b, &n| {
+            let config = MonteCarloConfig::builder()
+                .n_paths(n)
+                .n_steps(n_steps)
+                .seed(42)
+                .build()
+                .unwrap();
+            let mut pricer = MonteCarloPricer::new(config).unwrap();
+            b.iter(|| {
+                pricer.price_with_delta_ad(
+                    black_box(gbm),
+                    black_box(payoff),
+                    black_box(discount_factor),
+                )
+            });
+        });
     }
 
     group.finish();
@@ -184,9 +196,7 @@ fn bench_workspace_allocation(c: &mut Criterion) {
                     .seed(42)
                     .build()
                     .unwrap();
-                b.iter(|| {
-                    black_box(MonteCarloPricer::new(config.clone()).unwrap())
-                });
+                b.iter(|| black_box(MonteCarloPricer::new(config.clone()).unwrap()));
             },
         );
     }

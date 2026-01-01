@@ -123,7 +123,9 @@ fn bench_bilinear_interpolation(c: &mut Criterion) {
             BenchmarkId::new("construction", &size_label),
             &(&xs, &ys, &zs_refs),
             |b, (xs, ys, zs)| {
-                b.iter(|| BilinearInterpolator::new(black_box(xs), black_box(ys), black_box(zs)).unwrap());
+                b.iter(|| {
+                    BilinearInterpolator::new(black_box(xs), black_box(ys), black_box(zs)).unwrap()
+                });
             },
         );
 
@@ -134,7 +136,11 @@ fn bench_bilinear_interpolation(c: &mut Criterion) {
             &interp,
             |b, interp| {
                 let (test_x, test_y) = (0.5, 0.5);
-                b.iter(|| interp.interpolate(black_box(test_x), black_box(test_y)).unwrap());
+                b.iter(|| {
+                    interp
+                        .interpolate(black_box(test_x), black_box(test_y))
+                        .unwrap()
+                });
             },
         );
 
