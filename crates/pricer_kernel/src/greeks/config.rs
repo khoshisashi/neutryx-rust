@@ -11,7 +11,7 @@
 ///
 /// * `BumpRevalue` - Finite differences (bump-and-revalue)
 /// * `NumDual` - Forward-mode AD using num-dual library
-/// * `EnzymeAAD` - Enzyme LLVM-level AAD (requires `enzyme-mode` feature)
+/// * `EnzymeAAD` - Enzyme LLVM-level AAD (requires `enzyme-ad` feature)
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum GreeksMode {
     /// Bump-and-revalue using finite differences.
