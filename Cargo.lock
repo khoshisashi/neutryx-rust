@@ -593,6 +593,7 @@ name = "pricer_kernel"
 version = "0.1.0"
 dependencies = [
  "approx",
+ "criterion",
  "llvm-sys",
  "num-traits",
  "pricer_core",
@@ -607,6 +608,7 @@ name = "pricer_models"
 version = "0.1.0"
 dependencies = [
  "approx",
+ "criterion",
  "num-traits",
  "pricer_core",
  "proptest",
@@ -619,6 +621,7 @@ name = "pricer_xva"
 version = "0.1.0"
 dependencies = [
  "approx",
+ "criterion",
  "pricer_core",
  "pricer_kernel",
  "pricer_models",

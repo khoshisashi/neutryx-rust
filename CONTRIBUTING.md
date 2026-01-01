@@ -1,6 +1,119 @@
-### 1. Development Protocol
+# Contributing to Neutryx
 
-**File:** `CONTRIBUTING.md`
+Thank you for your interest in contributing to Neutryx! This guide will help you get started.
+
+## Quick Start (< 30 minutes)
+
+### Prerequisites
+
+- [Rust](https://rustup.rs/) (stable toolchain)
+- Git
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/torohash/neutryx-rust.git
+cd neutryx-rust
+
+# Install stable toolchain (for L1/L2/L4 layers)
+rustup default stable
+
+# Optional: Install nightly toolchain (for L3/pricer_kernel with Enzyme AD)
+rustup toolchain install nightly
+
+# Build the project
+cargo build
+
+# Run tests
+cargo test
+
+# Run Clippy
+cargo clippy -- -D warnings
+```
+
+### Toolchain Guide
+
+| Layer | Crate | Toolchain | Purpose |
+|-------|-------|-----------|---------|
+| L1 | pricer_core | stable | Core utilities, interpolation, types |
+| L2 | pricer_models | stable | Financial models, Black-Scholes |
+| L3 | pricer_kernel | nightly | Enzyme AD, Monte Carlo |
+| L4 | pricer_xva | stable | XVA calculations, portfolio |
+
+**Note:** L3 (pricer_kernel) requires nightly for Enzyme AD features. For most contributions, stable toolchain is sufficient.
+
+## Running Tests
+
+```bash
+# Run all tests (stable layers)
+cargo test -p pricer_core -p pricer_models -p pricer_xva
+
+# Run specific crate tests
+cargo test -p pricer_core
+
+# Run tests with output
+cargo test -- --nocapture
+
+# Run benchmarks (requires criterion)
+cargo bench -p pricer_core
+cargo bench -p pricer_models
+cargo bench -p pricer_xva
+```
+
+## Code Quality Checks
+
+Before submitting a PR, ensure your code passes these checks:
+
+```bash
+# Format code
+cargo fmt
+
+# Check formatting (CI runs this)
+cargo fmt --check
+
+# Run Clippy lints
+cargo clippy -- -D warnings
+
+# Build documentation
+cargo doc --no-deps
+```
+
+## Pull Request Process
+
+1. **Fork & Clone**: Fork the repository and clone your fork.
+
+2. **Create a Branch**: Create a feature branch from `main`.
+   ```bash
+   git checkout -b feat/your-feature-name
+   ```
+
+3. **Make Changes**: Implement your changes following the coding standards.
+
+4. **Test**: Ensure all tests pass and add new tests for your changes.
+
+5. **Commit**: Use [Conventional Commits](https://www.conventionalcommits.org/) format.
+   ```
+   feat(pricer_core): add new interpolation method
+   fix(pricer_xva): correct CVA calculation edge case
+   docs(readme): update installation instructions
+   ```
+
+6. **Push & PR**: Push your branch and create a Pull Request.
+   - Fill out the [PR template](.github/PULL_REQUEST_TEMPLATE.md)
+   - Link related issues
+   - Wait for CI checks to pass
+
+7. **Review**: Address review feedback and update your PR.
+
+8. **Merge**: Once approved and CI passes, your PR will be merged.
+
+## Reporting Issues
+
+- **Bug Reports**: Use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.yml)
+- **Feature Requests**: Use the [feature request template](.github/ISSUE_TEMPLATE/feature_request.yml)
+
+---
 
 # Neutryx Development Protocol: Spec-Driven Development
 

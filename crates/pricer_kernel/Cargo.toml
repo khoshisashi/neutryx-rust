@@ -26,6 +26,11 @@ rand_distr.workspace = true
 [dev-dependencies]
 approx.workspace = true
 proptest.workspace = true
+criterion = { workspace = true, features = ["html_reports"] }
+
+[[bench]]
+name = "kernel_benchmarks"
+harness = false
 
 [build-dependencies]
 # Future: For linking Enzyme LLVM plugin

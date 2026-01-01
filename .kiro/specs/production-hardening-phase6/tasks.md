@@ -31,22 +31,22 @@
   - XVA計算関連の関数に`# Examples`セクションを追加
   - _Requirements: 1.4, 1.5, 1.6_
 
-- [ ] 2. Criterionベンチマーク基盤の構築
-- [ ] 2.1 pricer_coreのベンチマークを作成する
+- [x] 2. Criterionベンチマーク基盤の構築
+- [x] 2.1 pricer_coreのベンチマークを作成する
   - Cargo.tomlにcriterion v0.7.0を追加し、`[[bench]]`セクションを設定
   - 補間処理（linear, cubic_spline, bilinear）のベンチマークを実装
   - 異なるデータサイズ（100, 1000, 10000点）でのスケーリングを測定
   - `black_box`を使用してコンパイラ最適化を防止
   - _Requirements: 3.1, 3.6, 3.7_
 
-- [ ] 2.2 pricer_modelsのベンチマークを作成する
+- [x] 2.2 pricer_modelsのベンチマークを作成する
   - Cargo.tomlにcriterion v0.7.0を追加し、`[[bench]]`セクションを設定
   - Black-Scholes価格計算（call/put）のベンチマークを実装
   - スポット価格、ストライク、ボラティリティの変動でのスケーリングを測定
   - 2.1の完了後に実施（Criterion設定パターンを参照）
   - _Requirements: 3.2, 3.6, 3.7_
 
-- [ ] 2.3 pricer_kernelのベンチマークを作成する
+- [x] 2.3 pricer_kernelのベンチマークを作成する
   - Cargo.tomlにcriterion v0.7.0を追加し、`[[bench]]`セクションを設定
   - モンテカルロパス生成（1K, 10K, 100Kパス）のベンチマークを実装
   - Enzyme AD vs num-dual比較ベンチマークを実装
@@ -54,48 +54,48 @@
   - 2.2の完了後に実施（依存パターンを参照）
   - _Requirements: 3.3, 3.4, 3.6, 3.7_
 
-- [ ] 2.4 pricer_xvaのベンチマークを作成する
+- [x] 2.4 pricer_xvaのベンチマークを作成する
   - Cargo.tomlにcriterion v0.7.0を追加し、`[[bench]]`セクションを設定
   - ポートフォリオレベルXVA計算（CVA, exposure）のベンチマークを実装
   - 異なるポートフォリオサイズ（10, 100, 1000トレード）でのスケーリングを測定
   - 2.3の完了後に実施（全クレートのベンチマーク構成を統一）
   - _Requirements: 3.5, 3.6, 3.7_
 
-- [ ] 3. CI/CDパイプラインの拡張
-- [ ] 3.1 stable-layersジョブをクロスプラットフォーム対応にする
+- [x] 3. CI/CDパイプラインの拡張
+- [x] 3.1 stable-layersジョブをクロスプラットフォーム対応にする
   - matrix戦略を追加してLinux, Windows, macOSで実行
   - OS固有の問題（パス区切り、改行コード）に対応
   - 各OSでのビルド・テスト・Clippyの成功を確認
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.6_
 
-- [ ] 3.2 カバレッジ測定ジョブを追加する
+- [x] 3.2 カバレッジ測定ジョブを追加する
   - cargo-tarpaulinをインストールするステップを追加
   - L1/L2/L4クレートのカバレッジを測定（L3は除外）
   - Codecovへのレポートアップロードを設定
   - stable-layersジョブ完了後に実行するよう依存関係を設定
   - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 3.3 ベンチマーク実行ジョブを追加する
+- [x] 3.3 ベンチマーク実行ジョブを追加する
   - cargo benchを実行するステップを追加
   - L1/L2/L4クレートのベンチマークを実行（L3は条件付き）
   - ベンチマーク結果をアーティファクトとして保存
   - stable-layersジョブ完了後に実行するよう依存関係を設定
   - _Requirements: 3.6_
 
-- [ ] 3.4 ドキュメント生成ジョブを強化する
+- [x] 3.4 ドキュメント生成ジョブを強化する
   - `RUSTDOCFLAGS="-D warnings"`を設定してドキュメント警告をエラー化
   - mainブランチマージ時のドキュメントデプロイを維持
   - ドキュメント品質チェックをPRブロック条件に追加
   - _Requirements: 4.5, 6.5_
 
-- [ ] 4. リリースワークフローの構築
-- [ ] 4.1 git-cliff設定ファイルを作成する
+- [x] 4. リリースワークフローの構築
+- [x] 4.1 git-cliff設定ファイルを作成する
   - cliff.tomlをリポジトリルートに作成
   - Conventional Commits形式でのグループ化を設定
   - 変更履歴のフォーマットテンプレートを定義
   - _Requirements: 7.3_
 
-- [ ] 4.2 リリースワークフローを作成する
+- [x] 4.2 リリースワークフローを作成する
   - release.ymlを新規作成し、`v*`タグでトリガー
   - git-cliff-actionでCHANGELOG自動生成を実装
   - リリースビルド（L1/L2/L4）の生成ステップを追加

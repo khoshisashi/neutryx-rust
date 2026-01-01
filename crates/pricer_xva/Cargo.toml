@@ -20,3 +20,8 @@ thiserror.workspace = true
 
 [dev-dependencies]
 approx.workspace = true
+criterion = { workspace = true, features = ["html_reports"] }
+
+[[bench]]
+name = "xva_benchmarks"
+harness = false
