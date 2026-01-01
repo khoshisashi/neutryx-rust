@@ -79,11 +79,12 @@ analytical/   → Closed-form solutions (Black-Scholes, barrier formulas)
 **Purpose**: Monte Carlo + Enzyme AD (nightly Rust, LLVM plugin)
 **Structure**:
 ```
-enzyme/       → Enzyme bindings, autodiff macros
-mc/           → Monte Carlo kernel (GBM paths, workspace buffers, Greeks)
-rng/          → Random number generation (PRNG, QMC sequences)
-verify/       → Enzyme vs num-dual verification tests
-checkpoint/   → (Phase 4) Memory management for path-dependent options
+enzyme/          → Enzyme bindings, autodiff macros
+mc/              → Monte Carlo kernel (GBM paths, workspace buffers, Greeks, MonteCarloPricer)
+path_dependent/  → Path-dependent options (Asian, Barrier, Lookback) with streaming statistics
+rng/             → Random number generation (PRNG, QMC sequences)
+verify/          → Enzyme vs num-dual verification tests
+checkpoint/      → (Planned) Memory management for checkpointing
 ```
 
 **Key Principle**: **Only crate requiring nightly Rust and Enzyme**. Currently isolated (Phase 3.0) with zero pricer_* dependencies.
@@ -95,6 +96,13 @@ checkpoint/   → (Phase 4) Memory management for path-dependent options
 - GBM path generation with log-space formulation
 - Smooth payoff functions for AD compatibility
 - Greeks via bump-and-revalue with forward-mode AD prototype
+
+**Path-Dependent Options** (Phase 4):
+
+- `PathObserver`: Streaming statistics accumulation (average, min, max) without storing full paths
+- `PathDependentPayoff` trait: Unified interface for Asian, Barrier, Lookback payoffs
+- `PathPayoffType` enum: Static dispatch for payoff types (Enzyme optimization)
+- Design: Memory-efficient, AD-compatible, uses smooth approximations for barriers
 
 ### Layer 4: Application (pricer_xva)
 
@@ -173,5 +181,5 @@ Current roadmap (see README.md):
 
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-01_ — Added release.yml workflow (Phase 6 CI/CD automation)
+_Updated: 2026-01-01_ — Added path_dependent module (Asian, Barrier, Lookback with streaming statistics)
 _Document patterns, not file trees. New files following patterns should not require updates_

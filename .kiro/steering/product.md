@@ -9,6 +9,7 @@ A production-grade **XVA (Credit Valuation Adjustment) pricing library** for der
 - **High-Performance Greeks**: Enzyme LLVM-level AD for C++-competitive differentiation
 - **Dual-Mode Verification**: Parallel Enzyme and num-dual backends for correctness validation
 - **Monte Carlo Pricing**: Path-dependent options with workspace buffers and memory management
+- **Path-Dependent Options**: Asian, Barrier, Lookback options with streaming statistics (memory-efficient)
 - **Portfolio Analytics**: Parallelized portfolio-level XVA computations with SoA optimization
 - **Market Data Infrastructure**: AD-compatible yield curves and volatility surfaces with interpolation
 
@@ -28,5 +29,5 @@ A production-grade **XVA (Credit Valuation Adjustment) pricing library** for der
 
 ---
 _Created: 2025-12-29_
-_Updated: 2025-12-30_ — Added exposure metrics capability, SoA optimization mention
+_Updated: 2026-01-01_ — Added Path-Dependent Options capability (Asian, Barrier, Lookback)
 _Focus on patterns and purpose, not exhaustive feature lists_
