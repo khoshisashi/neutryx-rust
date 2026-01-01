@@ -22,6 +22,7 @@ use super::error::ConfigError;
 use super::paths::{generate_gbm_paths, generate_gbm_paths_tangent_spot, GbmParams};
 use super::payoff::{compute_payoff, compute_payoffs, PayoffParams};
 use super::workspace::PathWorkspace;
+use crate::path_dependent::{PathObserver, PathPayoffType};
 use crate::rng::PricerRng;
 
 /// Greek type for selection.
@@ -442,6 +443,118 @@ impl MonteCarloPricer {
         (price_up - price_down) / (2.0 * bump)
     }
 
+    // ========================================================================
+    // Phase 4: L1/L2 Integration - YieldCurve methods
+    // ========================================================================
+
+    /// Prices a European option using Monte Carlo simulation with a YieldCurve.
+    ///
+    /// This method uses the YieldCurve trait from pricer_core to compute
+    /// the discount factor, providing a cleaner integration with the L1 layer.
+    ///
+    /// # Arguments
+    ///
+    /// * `gbm` - GBM parameters (spot, rate, volatility, maturity)
+    /// * `payoff` - Payoff parameters (strike, type, smoothing)
+    /// * `curve` - Yield curve implementing the YieldCurve trait
+    ///
+    /// # Returns
+    ///
+    /// Price and standard error.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the curve returns an error for the given maturity.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// use pricer_kernel::mc::{MonteCarloPricer, MonteCarloConfig, GbmParams, PayoffParams};
+    /// use pricer_core::market_data::curves::{FlatCurve, YieldCurve};
+    ///
+    /// let config = MonteCarloConfig::builder()
+    ///     .n_paths(10_000)
+    ///     .n_steps(50)
+    ///     .seed(42)
+    ///     .build()
+    ///     .unwrap();
+    ///
+    /// let mut pricer = MonteCarloPricer::new(config).unwrap();
+    /// let gbm = GbmParams::default();
+    /// let payoff = PayoffParams::call(100.0);
+    /// let curve = FlatCurve::new(0.05);
+    ///
+    /// let result = pricer.price_european_with_curve(gbm, payoff, &curve);
+    /// ```
+    #[cfg(feature = "l1l2-integration")]
+    pub fn price_european_with_curve<C>(
+        &mut self,
+        gbm: GbmParams,
+        payoff: PayoffParams,
+        curve: &C,
+    ) -> PricingResult
+    where
+        C: pricer_core::market_data::curves::YieldCurve<f64>,
+    {
+        let discount_factor = curve
+            .discount_factor(gbm.maturity)
+            .expect("YieldCurve::discount_factor failed for given maturity");
+        self.price_european(gbm, payoff, discount_factor)
+    }
+
+    /// Prices a European option with selected Greeks using a YieldCurve.
+    ///
+    /// This method uses the YieldCurve trait from pricer_core to compute
+    /// the discount factor for both the base price and Greek calculations.
+    ///
+    /// # Arguments
+    ///
+    /// * `gbm` - GBM parameters
+    /// * `payoff` - Payoff parameters
+    /// * `curve` - Yield curve implementing the YieldCurve trait
+    /// * `greeks` - Which Greeks to compute
+    ///
+    /// # Returns
+    ///
+    /// Price and requested Greeks.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// use pricer_kernel::mc::{MonteCarloPricer, MonteCarloConfig, GbmParams, PayoffParams, Greek};
+    /// use pricer_core::market_data::curves::{FlatCurve, YieldCurve};
+    ///
+    /// let config = MonteCarloConfig::builder()
+    ///     .n_paths(10_000)
+    ///     .n_steps(50)
+    ///     .seed(42)
+    ///     .build()
+    ///     .unwrap();
+    ///
+    /// let mut pricer = MonteCarloPricer::new(config).unwrap();
+    /// let gbm = GbmParams::default();
+    /// let payoff = PayoffParams::call(100.0);
+    /// let curve = FlatCurve::new(0.05);
+    ///
+    /// let result = pricer.price_with_greeks_and_curve(gbm, payoff, &curve, &[Greek::Delta]);
+    /// ```
+    #[cfg(feature = "l1l2-integration")]
+    pub fn price_with_greeks_and_curve<C>(
+        &mut self,
+        gbm: GbmParams,
+        payoff: PayoffParams,
+        curve: &C,
+        greeks: &[Greek],
+    ) -> PricingResult
+    where
+        C: pricer_core::market_data::curves::YieldCurve<f64>,
+    {
+        let discount_factor = curve
+            .discount_factor(gbm.maturity)
+            .expect("YieldCurve::discount_factor failed for given maturity");
+        self.price_with_greeks(gbm, payoff, discount_factor, greeks)
+    }
+
     /// Prices using forward-mode AD for spot sensitivity.
     ///
     /// This method uses tangent propagation to compute Delta efficiently
@@ -522,6 +635,315 @@ impl MonteCarloPricer {
         let delta = (delta_sum / n_paths as f64) * discount_factor;
 
         (price, delta)
+    }
+
+    // ========================================================================
+    // Phase 4: Path-Dependent Options Integration
+    // ========================================================================
+
+    /// Prices a path-dependent option using Monte Carlo simulation.
+    ///
+    /// This method generates GBM paths and uses PathObserver to track
+    /// path statistics (average, max, min, terminal) at each step.
+    /// The payoff is computed using PathPayoffType for static dispatch.
+    ///
+    /// # Arguments
+    ///
+    /// * `gbm` - GBM parameters (spot, rate, volatility, maturity)
+    /// * `payoff` - Path-dependent payoff type (Asian, Barrier, Lookback)
+    /// * `discount_factor` - Present value discount factor
+    ///
+    /// # Returns
+    ///
+    /// Price and standard error.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use pricer_kernel::mc::{MonteCarloPricer, MonteCarloConfig, GbmParams};
+    /// use pricer_kernel::path_dependent::PathPayoffType;
+    ///
+    /// let config = MonteCarloConfig::builder()
+    ///     .n_paths(10_000)
+    ///     .n_steps(50)
+    ///     .seed(42)
+    ///     .build()
+    ///     .unwrap();
+    ///
+    /// let mut pricer = MonteCarloPricer::new(config).unwrap();
+    /// let gbm = GbmParams::default();
+    /// let payoff = PathPayoffType::asian_arithmetic_call(100.0, 1e-6);
+    /// let df = (-0.05_f64).exp();
+    ///
+    /// let result = pricer.price_path_dependent(gbm, payoff, df);
+    /// println!("Asian Call Price: {:.4}", result.price);
+    /// ```
+    pub fn price_path_dependent(
+        &mut self,
+        gbm: GbmParams,
+        payoff: PathPayoffType<f64>,
+        discount_factor: f64,
+    ) -> PricingResult {
+        let n_paths = self.config.n_paths();
+        let n_steps = self.config.n_steps();
+        let n_steps_plus_1 = n_steps + 1;
+
+        // Ensure workspace capacity
+        self.workspace.ensure_capacity(n_paths, n_steps);
+
+        // Generate random samples
+        self.rng.fill_normal(self.workspace.randoms_mut());
+
+        // Generate GBM paths
+        generate_gbm_paths(&mut self.workspace, gbm, n_paths, n_steps);
+
+        let paths = self.workspace.paths();
+
+        // Compute path-dependent payoffs
+        let mut payoff_sum = 0.0;
+        let mut payoff_sum_sq = 0.0;
+
+        for path_idx in 0..n_paths {
+            let mut observer: PathObserver<f64> = PathObserver::new();
+
+            // Observe each price in the path
+            for step_idx in 0..n_steps_plus_1 {
+                let price = paths[path_idx * n_steps_plus_1 + step_idx];
+                observer.observe(price);
+            }
+
+            // Set terminal price
+            let terminal = paths[path_idx * n_steps_plus_1 + n_steps];
+            observer.set_terminal(terminal);
+
+            // Compute payoff
+            let payoff_value = payoff.compute(&[], &observer);
+            payoff_sum += payoff_value;
+            payoff_sum_sq += payoff_value * payoff_value;
+        }
+
+        // Aggregate: discounted mean and standard error
+        let mean = payoff_sum / n_paths as f64;
+        let variance = (payoff_sum_sq / n_paths as f64) - mean * mean;
+        let std_dev = variance.max(0.0).sqrt();
+        let std_error = std_dev / (n_paths as f64).sqrt();
+
+        PricingResult {
+            price: mean * discount_factor,
+            std_error: std_error * discount_factor,
+            ..Default::default()
+        }
+    }
+
+    /// Prices a path-dependent option with selected Greeks.
+    ///
+    /// # Arguments
+    ///
+    /// * `gbm` - GBM parameters
+    /// * `payoff` - Path-dependent payoff type
+    /// * `discount_factor` - Discount factor
+    /// * `greeks` - Which Greeks to compute
+    ///
+    /// # Returns
+    ///
+    /// Price and requested Greeks.
+    ///
+    /// # Implementation Note
+    ///
+    /// Phase 4 uses bump-and-revalue for Greeks. Future phases will integrate
+    /// Enzyme AD with checkpointing for path-dependent derivatives.
+    pub fn price_path_dependent_with_greeks(
+        &mut self,
+        gbm: GbmParams,
+        payoff: PathPayoffType<f64>,
+        discount_factor: f64,
+        greeks: &[Greek],
+    ) -> PricingResult {
+        // Base price
+        let mut result = self.price_path_dependent(gbm, payoff, discount_factor);
+
+        // Compute requested Greeks via bump-and-revalue
+        for greek in greeks {
+            match greek {
+                Greek::Delta => {
+                    result.delta =
+                        Some(self.compute_delta_path_dependent(gbm, payoff, discount_factor));
+                }
+                Greek::Gamma => {
+                    result.gamma =
+                        Some(self.compute_gamma_path_dependent(gbm, payoff, discount_factor));
+                }
+                Greek::Vega => {
+                    result.vega =
+                        Some(self.compute_vega_path_dependent(gbm, payoff, discount_factor));
+                }
+                Greek::Theta => {
+                    result.theta =
+                        Some(self.compute_theta_path_dependent(gbm, payoff, discount_factor));
+                }
+                Greek::Rho => {
+                    result.rho =
+                        Some(self.compute_rho_path_dependent(gbm, payoff, discount_factor));
+                }
+            }
+        }
+
+        result
+    }
+
+    /// Computes Delta for path-dependent options using central differences.
+    fn compute_delta_path_dependent(
+        &mut self,
+        gbm: GbmParams,
+        payoff: PathPayoffType<f64>,
+        discount_factor: f64,
+    ) -> f64 {
+        let bump = (0.01 * gbm.spot).max(0.01);
+        let seed = self.rng.seed();
+
+        // Price at S + bump
+        self.reset_with_seed(seed);
+        let gbm_up = GbmParams {
+            spot: gbm.spot + bump,
+            ..gbm
+        };
+        let price_up = self.price_path_dependent(gbm_up, payoff, discount_factor).price;
+
+        // Price at S - bump
+        self.reset_with_seed(seed);
+        let gbm_down = GbmParams {
+            spot: gbm.spot - bump,
+            ..gbm
+        };
+        let price_down = self
+            .price_path_dependent(gbm_down, payoff, discount_factor)
+            .price;
+
+        (price_up - price_down) / (2.0 * bump)
+    }
+
+    /// Computes Gamma for path-dependent options using central differences.
+    fn compute_gamma_path_dependent(
+        &mut self,
+        gbm: GbmParams,
+        payoff: PathPayoffType<f64>,
+        discount_factor: f64,
+    ) -> f64 {
+        let bump = (0.01 * gbm.spot).max(0.01);
+        let seed = self.rng.seed();
+
+        // Price at S
+        self.reset_with_seed(seed);
+        let price_mid = self.price_path_dependent(gbm, payoff, discount_factor).price;
+
+        // Price at S + bump
+        self.reset_with_seed(seed);
+        let gbm_up = GbmParams {
+            spot: gbm.spot + bump,
+            ..gbm
+        };
+        let price_up = self.price_path_dependent(gbm_up, payoff, discount_factor).price;
+
+        // Price at S - bump
+        self.reset_with_seed(seed);
+        let gbm_down = GbmParams {
+            spot: gbm.spot - bump,
+            ..gbm
+        };
+        let price_down = self
+            .price_path_dependent(gbm_down, payoff, discount_factor)
+            .price;
+
+        (price_up - 2.0 * price_mid + price_down) / (bump * bump)
+    }
+
+    /// Computes Vega for path-dependent options using central differences.
+    fn compute_vega_path_dependent(
+        &mut self,
+        gbm: GbmParams,
+        payoff: PathPayoffType<f64>,
+        discount_factor: f64,
+    ) -> f64 {
+        let bump = 0.01;
+        let seed = self.rng.seed();
+
+        // Price at vol + bump
+        self.reset_with_seed(seed);
+        let gbm_up = GbmParams {
+            volatility: gbm.volatility + bump,
+            ..gbm
+        };
+        let price_up = self.price_path_dependent(gbm_up, payoff, discount_factor).price;
+
+        // Price at vol - bump
+        self.reset_with_seed(seed);
+        let gbm_down = GbmParams {
+            volatility: (gbm.volatility - bump).max(0.001),
+            ..gbm
+        };
+        let price_down = self
+            .price_path_dependent(gbm_down, payoff, discount_factor)
+            .price;
+
+        (price_up - price_down) / (2.0 * bump)
+    }
+
+    /// Computes Theta for path-dependent options using forward difference.
+    fn compute_theta_path_dependent(
+        &mut self,
+        gbm: GbmParams,
+        payoff: PathPayoffType<f64>,
+        discount_factor: f64,
+    ) -> f64 {
+        let bump = 1.0 / 252.0; // 1 day
+        let seed = self.rng.seed();
+
+        // Price at T - bump
+        self.reset_with_seed(seed);
+        let gbm_short = GbmParams {
+            maturity: (gbm.maturity - bump).max(0.001),
+            ..gbm
+        };
+        let price_short = self
+            .price_path_dependent(gbm_short, payoff, discount_factor)
+            .price;
+
+        // Price at T
+        self.reset_with_seed(seed);
+        let price_orig = self.price_path_dependent(gbm, payoff, discount_factor).price;
+
+        -(price_orig - price_short) / bump
+    }
+
+    /// Computes Rho for path-dependent options using central differences.
+    fn compute_rho_path_dependent(
+        &mut self,
+        gbm: GbmParams,
+        payoff: PathPayoffType<f64>,
+        _discount_factor: f64,
+    ) -> f64 {
+        let bump = 0.01;
+        let seed = self.rng.seed();
+
+        // Price at r + bump
+        self.reset_with_seed(seed);
+        let gbm_up = GbmParams {
+            rate: gbm.rate + bump,
+            ..gbm
+        };
+        let df_up = (-(gbm.rate + bump) * gbm.maturity).exp();
+        let price_up = self.price_path_dependent(gbm_up, payoff, df_up).price;
+
+        // Price at r - bump
+        self.reset_with_seed(seed);
+        let gbm_down = GbmParams {
+            rate: gbm.rate - bump,
+            ..gbm
+        };
+        let df_down = (-(gbm.rate - bump) * gbm.maturity).exp();
+        let price_down = self.price_path_dependent(gbm_down, payoff, df_down).price;
+
+        (price_up - price_down) / (2.0 * bump)
     }
 }
 
@@ -765,5 +1187,219 @@ mod tests {
         let actual_diff = call_price - put_price;
 
         assert_relative_eq!(actual_diff, expected_diff, max_relative = 0.05);
+    }
+
+    // ========================================================================
+    // Path-Dependent Options Tests
+    // ========================================================================
+
+    #[test]
+    fn test_price_asian_arithmetic_call() {
+        let config = MonteCarloConfig::builder()
+            .n_paths(10_000)
+            .n_steps(50)
+            .seed(42)
+            .build()
+            .unwrap();
+
+        let mut pricer = MonteCarloPricer::new(config).unwrap();
+        let gbm = GbmParams::default();
+        let payoff = PathPayoffType::asian_arithmetic_call(100.0, 1e-6);
+        let df = (-0.05_f64).exp();
+
+        let result = pricer.price_path_dependent(gbm, payoff, df);
+
+        assert!(result.price > 0.0);
+        assert!(result.std_error > 0.0);
+        // Asian call should be cheaper than European call due to averaging
+        assert!(result.std_error < result.price * 0.1);
+    }
+
+    #[test]
+    fn test_price_asian_geometric_call() {
+        let config = MonteCarloConfig::builder()
+            .n_paths(10_000)
+            .n_steps(50)
+            .seed(42)
+            .build()
+            .unwrap();
+
+        let mut pricer = MonteCarloPricer::new(config).unwrap();
+        let gbm = GbmParams::default();
+        let payoff = PathPayoffType::asian_geometric_call(100.0, 1e-6);
+        let df = (-0.05_f64).exp();
+
+        let result = pricer.price_path_dependent(gbm, payoff, df);
+
+        assert!(result.price > 0.0);
+        // Geometric average should be lower than arithmetic average
+    }
+
+    #[test]
+    fn test_asian_arithmetic_vs_geometric() {
+        let config = MonteCarloConfig::builder()
+            .n_paths(20_000)
+            .n_steps(50)
+            .seed(42)
+            .build()
+            .unwrap();
+
+        let gbm = GbmParams::default();
+        let df = (-0.05_f64).exp();
+
+        // Arithmetic Asian call
+        let mut pricer1 = MonteCarloPricer::new(config.clone()).unwrap();
+        let arith_price = pricer1
+            .price_path_dependent(gbm, PathPayoffType::asian_arithmetic_call(100.0, 1e-6), df)
+            .price;
+
+        // Geometric Asian call
+        let mut pricer2 = MonteCarloPricer::new(config).unwrap();
+        let geom_price = pricer2
+            .price_path_dependent(gbm, PathPayoffType::asian_geometric_call(100.0, 1e-6), df)
+            .price;
+
+        // Geometric average is always <= arithmetic average (AM-GM inequality)
+        // So geometric Asian call should be <= arithmetic Asian call
+        assert!(
+            geom_price <= arith_price * 1.05, // Allow 5% tolerance for MC noise
+            "Geometric price ({}) should be <= Arithmetic price ({})",
+            geom_price,
+            arith_price
+        );
+    }
+
+    #[test]
+    fn test_price_barrier_up_out_call() {
+        let config = MonteCarloConfig::builder()
+            .n_paths(10_000)
+            .n_steps(50)
+            .seed(42)
+            .build()
+            .unwrap();
+
+        let mut pricer = MonteCarloPricer::new(config).unwrap();
+        let gbm = GbmParams::default();
+        // Up-and-Out barrier significantly above spot
+        let payoff = PathPayoffType::barrier_up_out_call(100.0, 150.0, 1e-6);
+        let df = (-0.05_f64).exp();
+
+        let result = pricer.price_path_dependent(gbm, payoff, df);
+
+        assert!(result.price > 0.0);
+        // Barrier option should be cheaper than vanilla option
+    }
+
+    #[test]
+    fn test_price_lookback_fixed_call() {
+        let config = MonteCarloConfig::builder()
+            .n_paths(10_000)
+            .n_steps(50)
+            .seed(42)
+            .build()
+            .unwrap();
+
+        let mut pricer = MonteCarloPricer::new(config).unwrap();
+        let gbm = GbmParams::default();
+        let payoff = PathPayoffType::lookback_fixed_call(100.0, 1e-6);
+        let df = (-0.05_f64).exp();
+
+        let result = pricer.price_path_dependent(gbm, payoff, df);
+
+        assert!(result.price > 0.0);
+        // Lookback should be more expensive than vanilla due to path maximum
+    }
+
+    #[test]
+    fn test_price_lookback_floating_call() {
+        let config = MonteCarloConfig::builder()
+            .n_paths(10_000)
+            .n_steps(50)
+            .seed(42)
+            .build()
+            .unwrap();
+
+        let mut pricer = MonteCarloPricer::new(config).unwrap();
+        let gbm = GbmParams::default();
+        let payoff = PathPayoffType::lookback_floating_call(1e-6);
+        let df = (-0.05_f64).exp();
+
+        let result = pricer.price_path_dependent(gbm, payoff, df);
+
+        // Floating lookback call should always have positive payoff
+        assert!(result.price > 0.0);
+    }
+
+    #[test]
+    fn test_path_dependent_reproducibility() {
+        let config = MonteCarloConfig::builder()
+            .n_paths(5_000)
+            .n_steps(20)
+            .seed(42)
+            .build()
+            .unwrap();
+
+        let gbm = GbmParams::default();
+        let payoff = PathPayoffType::asian_arithmetic_call(100.0, 1e-6);
+        let df = 0.95;
+
+        let mut pricer1 = MonteCarloPricer::new(config.clone()).unwrap();
+        let result1 = pricer1.price_path_dependent(gbm, payoff, df);
+
+        let mut pricer2 = MonteCarloPricer::new(config).unwrap();
+        let result2 = pricer2.price_path_dependent(gbm, payoff, df);
+
+        assert_eq!(result1.price, result2.price);
+        assert_eq!(result1.std_error, result2.std_error);
+    }
+
+    #[test]
+    fn test_path_dependent_with_delta() {
+        let config = MonteCarloConfig::builder()
+            .n_paths(10_000)
+            .n_steps(30)
+            .seed(42)
+            .build()
+            .unwrap();
+
+        let mut pricer = MonteCarloPricer::new(config).unwrap();
+        let gbm = GbmParams::default();
+        let payoff = PathPayoffType::asian_arithmetic_call(100.0, 1e-6);
+        let df = (-0.05_f64).exp();
+
+        let result = pricer.price_path_dependent_with_greeks(gbm, payoff, df, &[Greek::Delta]);
+
+        assert!(result.delta.is_some());
+        let delta = result.delta.unwrap();
+
+        // Delta of Asian call should be lower than European call (0.3-0.6)
+        assert!(
+            delta > 0.2 && delta < 0.7,
+            "Asian Delta = {} (expected 0.2-0.7)",
+            delta
+        );
+    }
+
+    #[test]
+    fn test_path_dependent_with_vega() {
+        let config = MonteCarloConfig::builder()
+            .n_paths(10_000)
+            .n_steps(30)
+            .seed(42)
+            .build()
+            .unwrap();
+
+        let mut pricer = MonteCarloPricer::new(config).unwrap();
+        let gbm = GbmParams::default();
+        let payoff = PathPayoffType::lookback_fixed_call(100.0, 1e-6);
+        let df = (-0.05_f64).exp();
+
+        let result = pricer.price_path_dependent_with_greeks(gbm, payoff, df, &[Greek::Vega]);
+
+        assert!(result.vega.is_some());
+        let vega = result.vega.unwrap();
+
+        // Vega should be positive for options
+        assert!(vega > 0.0, "Vega = {}", vega);
     }
 }

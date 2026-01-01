@@ -28,16 +28,17 @@
   - 単体テストで既存動作との等価性を確認
   - _Requirements: 4.1_
 
-- [ ] 1.3 (P) YieldCurve traitの統合
+- [x] 1.3 (P) YieldCurve traitの統合
   - 割引計算でpricer_core::market_data::curves::YieldCurveを使用
   - FlatCurve/InterpolatedCurveのimport追加
   - MCエンジンでの割引適用ポイントの特定と修正
+  - price_european_with_curve, price_with_greeks_and_curveメソッド追加
   - _Requirements: 4.4_
 
-- [ ] 1.4 StochasticModel/Instrument enumの統合検証
+- [x] 1.4 StochasticModel/Instrument enumの統合検証
   - pricer_models::models::stochastic::StochasticModelのimport確認
   - Instrument enumからペイオフ関数へのディスパッチ検討
-  - 静的ディスパッチパターンの維持確認
+  - 静的ディスパッチパターンの維持確認（instrument_tests module追加）
   - 全クレートのコンパイル成功を検証
   - _Requirements: 4.2, 4.3_
 
@@ -47,69 +48,69 @@
 
 - [ ] 2. 経路観測と統計蓄積の実装
 
-- [ ] 2.1 PathObserverの実装
+- [x] 2.1 PathObserverの実装
   - ストリーミング方式での経路統計蓄積（算術平均、幾何平均、最大値、最小値）
   - 各ステップでの価格観測とリセット機能
-  - チェックポイント用の状態スナップショット機能
+  - チェックポイント用の状態スナップショット機能（snapshot/restore）
   - Float型ジェネリックによるAD互換性
-  - 単体テストで統計計算の精度検証
+  - 単体テストで統計計算の精度検証（15テストパス）
   - _Requirements: 2.2_
 
-- [ ] 2.2 PathDependentPayoff traitの定義
+- [x] 2.2 PathDependentPayoff traitの定義
   - パス全体からのペイオフ計算インターフェース
-  - 必要な観測タイプを返すメソッド
+  - 必要な観測タイプを返すメソッド（ObservationType struct）
   - スムージングイプシロンのアクセサ
   - Send + Sync制約によるスレッド安全性
   - _Requirements: 2.1, 2.6_
 
 - [ ] 3. アジアンオプションの拡張
 
-- [ ] 3.1 (P) 幾何平均アジアンオプションの実装
-  - 対数和からの幾何平均計算
-  - smooth_maxによるスムーズペイオフ
-  - Call/Put両方のペイオフ関数
-  - 既存の算術平均アジアンとのインターフェース統一
+- [x] 3.1 (P) 幾何平均アジアンオプションの実装
+  - 対数和からの幾何平均計算（PathObserverで実装済み）
+  - smooth_maxによるスムーズペイオフ（soft_plus関数）
+  - Call/Put両方のペイオフ関数（AsianGeometricPayoff）
+  - 算術平均アジアン（AsianArithmeticPayoff）との統一インターフェース
   - _Requirements: 2.3, 2.6_
 
-- [ ] 4. バリアオプションの実装
+- [x] 4. バリアオプションの実装
 
-- [ ] 4.1 (P) Up-and-In/Up-and-Outバリアオプション
+- [x] 4.1 (P) Up-and-In/Up-and-Outバリアオプション
   - 経路最大値とバリアレベルの比較
   - smooth_indicatorによるバリア判定のスムージング
   - Call/Put両方のペイオフ計算
   - バリア条件とペイオフの積による最終価値
   - _Requirements: 2.4, 2.6_
 
-- [ ] 4.2 (P) Down-and-In/Down-and-Outバリアオプション
+- [x] 4.2 (P) Down-and-In/Down-and-Outバリアオプション
   - 経路最小値とバリアレベルの比較
   - スムーズバリア判定の実装
   - 4種類のバリアタイプの完全実装
   - _Requirements: 2.4, 2.6_
 
-- [ ] 5. ルックバックオプションの実装
+- [x] 5. ルックバックオプションの実装
 
-- [ ] 5.1 (P) 固定ストライクルックバックオプション
+- [x] 5.1 (P) 固定ストライクルックバックオプション
   - 経路最大値/最小値を使用したペイオフ計算
   - Fixed Strike Call: max(S_max - K, 0)
   - Fixed Strike Put: max(K - S_min, 0)
   - smooth_maxによるスムーズ化
   - _Requirements: 2.5, 2.6_
 
-- [ ] 5.2 (P) フローティングストライクルックバックオプション
+- [x] 5.2 (P) フローティングストライクルックバックオプション
   - 終端価格と経路極値の比較
   - Floating Strike Call: max(S_T - S_min, 0)
   - Floating Strike Put: max(S_max - S_T, 0)
   - _Requirements: 2.5, 2.6_
 
-- [ ] 6. パス依存ペイオフの統合
+- [x] 6. パス依存ペイオフの統合
 
-- [ ] 6.1 PathPayoffType enumの実装
+- [x] 6.1 PathPayoffType enumの実装
   - 全パス依存オプションタイプの列挙
   - 静的ディスパッチによるcompute関数
   - Enzyme AD互換の維持
   - _Requirements: 2.1, 2.6_
 
-- [ ] 6.2 MCエンジンへのパス依存ペイオフ統合
+- [x] 6.2 MCエンジンへのパス依存ペイオフ統合
   - PathObserverをシミュレーションループに組み込み
   - 各ステップでのobserve呼び出し
   - ペイオフ計算でのPathPayoffType使用

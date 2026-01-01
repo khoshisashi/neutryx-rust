@@ -95,6 +95,9 @@ pub mod rng;
 // Phase 3.2: Monte Carlo kernel with Enzyme AD integration
 pub mod mc;
 
+// Phase 4: Path-dependent options and checkpointing
+pub mod path_dependent;
+
 // Phase 4: Checkpointing for memory-efficient AD
 // pub mod checkpoint;
 
