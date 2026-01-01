@@ -64,7 +64,8 @@
       "Bash(git push:*)",
       "Bash(gh run list:*)",
       "Bash(cat:*)",
-      "Bash(cargo clean:*)"
+      "Bash(cargo clean:*)",
+      "Bash(cargo +nightly check:*)"
     ]
   }
 }
