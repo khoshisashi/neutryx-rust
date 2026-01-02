@@ -16,8 +16,8 @@ L4: pricer_xva      → Application (Stable)
 ## Core Technologies
 
 - **Language**: Rust Edition 2021
-- **Stable Toolchain**: Default for L1/L2/L4 (pricer_core, pricer_models, pricer_xva)
-- **Nightly Toolchain**: `nightly-2025-01-15` for L3 (pricer_kernel only)
+- **Nightly Toolchain**: `nightly-2025-01-15` (workspace default, L3-first development)
+- **Stable Compatibility**: L1/L2/L4 (pricer_core, pricer_models, pricer_xva) can build on stable when excluding L3
 - **AD Backend**: Enzyme LLVM plugin (LLVM 18 required)
 - **Build System**: Cargo workspace with resolver = "2"
 
@@ -31,6 +31,7 @@ L4: pricer_xva      → Application (Stable)
 - **Serialization**: `serde` (optional, ISO 4217 currency support)
 - **Error Handling**: `thiserror` (structured error types)
 - **Testing**: `approx`, `proptest`, `criterion`
+- **Benchmarking**: `criterion` (time-based), `iai-callgrind` (instruction-count for CI reproducibility)
 
 ## Development Standards
 
@@ -62,8 +63,8 @@ L4: pricer_xva      → Application (Stable)
 
 ### Required Tools
 
-- Rust stable + nightly-2025-01-15
-- LLVM 18 (for Enzyme)
+- Rust nightly-2025-01-15 (workspace default)
+- LLVM 18 (for Enzyme in L3)
 - Docker (recommended for reproducible Enzyme builds)
 
 ### Common Commands
@@ -103,5 +104,5 @@ docker run -it neutryx-enzyme
 
 ---
 _Created: 2025-12-29_
-_Updated: 2025-12-31_ — llvm-sys now optional with enzyme-ad feature
+_Updated: 2026-01-02_ — Corrected workspace toolchain to nightly (L3-first), added iai-callgrind benchmark
 _Document standards and patterns, not every dependency_

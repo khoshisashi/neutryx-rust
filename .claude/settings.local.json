@@ -67,7 +67,13 @@
       "Bash(cargo clean:*)",
       "Bash(cargo +nightly check:*)",
       "Bash(cargo +nightly test:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(gh run view:*)",
+      "Bash(cargo +nightly clippy:*)",
+      "Bash(\"/c/Users/khosh/.cargo/bin/cargo\" +nightly clippy -p pricer_kernel -- -D warnings)",
+      "Bash(powershell.exe -Command \"& { if \\(Test-Path ''$env:USERPROFILE\\\\.cargo\\\\bin\\\\cargo.exe''\\) { & ''$env:USERPROFILE\\\\.cargo\\\\bin\\\\cargo.exe'' +nightly clippy -p pricer_kernel -- -D warnings } else { Write-Output ''Cargo not found'' } }\")",
+      "Bash(test:*)",
+      "Bash(dir nul)"
     ]
   }
 }

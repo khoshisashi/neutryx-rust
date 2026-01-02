@@ -78,13 +78,16 @@ analytical/   → Closed-form solutions (Black-Scholes, barrier formulas)
 **Location**: `crates/pricer_kernel/src/`
 **Purpose**: Monte Carlo + Enzyme AD (nightly Rust, LLVM plugin)
 **Structure**:
-```
+
+```text
 enzyme/          → Enzyme bindings, autodiff macros
 mc/              → Monte Carlo kernel (GBM paths, workspace buffers, Greeks, MonteCarloPricer)
 path_dependent/  → Path-dependent options (Asian, Barrier, Lookback) with streaming statistics
 rng/             → Random number generation (PRNG, QMC sequences)
 verify/          → Enzyme vs num-dual verification tests
-checkpoint/      → (Planned) Memory management for checkpointing
+checkpoint/      → Memory management for checkpointing
+analytical/      → Closed-form solutions (geometric Asian, barrier options)
+greeks/          → Greeks calculation configuration and results
 ```
 
 **Key Principle**: **Only crate requiring nightly Rust and Enzyme**. Currently isolated (Phase 3.0) with zero pricer_* dependencies.
@@ -92,17 +95,33 @@ checkpoint/      → (Planned) Memory management for checkpointing
 **RNG Design**: Zero-allocation batch operations, static dispatch only, Enzyme-compatible. Supports reproducible seeding for deterministic simulations.
 
 **Monte Carlo Features** (Phase 3.2):
+
 - Pre-allocated workspace buffers (`PathWorkspace`) for allocation-free simulation
 - GBM path generation with log-space formulation
 - Smooth payoff functions for AD compatibility
 - Greeks via bump-and-revalue with forward-mode AD prototype
 
-**Path-Dependent Options** (Phase 4):
+**Path-Dependent Options** (Phase 4, Implemented):
 
 - `PathObserver`: Streaming statistics accumulation (average, min, max) without storing full paths
 - `PathDependentPayoff` trait: Unified interface for Asian, Barrier, Lookback payoffs
 - `PathPayoffType` enum: Static dispatch for payoff types (Enzyme optimization)
-- Design: Memory-efficient, AD-compatible, uses smooth approximations for barriers
+- Asian: Arithmetic/geometric averaging with smooth approximations
+- Barrier: All 8 variants (up/down, in/out, call/put) with smooth barrier detection
+- Lookback: Fixed/floating strike with streaming min/max tracking
+
+**Analytical Solutions** (Phase 4, Implemented):
+
+- `analytical/asian.rs`: Geometric Asian options (Kemna-Vorst closed-form)
+- `analytical/barrier.rs`: Barrier options (Merton/Rubinstein-Reiner formulas)
+- Purpose: Verification benchmarks for Monte Carlo pricing accuracy
+
+**Checkpointing** (Phase 4, Implemented):
+
+- `checkpoint/`: Memory management for AD with long simulation paths
+- `CheckpointStrategy`: Binomial checkpointing (Griewank/Walther algorithm)
+- `MemoryBudget`: Configurable memory limits for checkpointing
+- Integration: `MonteCarloPricer` with checkpointing support
 
 ### Layer 4: Application (pricer_xva)
 
@@ -123,12 +142,15 @@ parallel/   → Rayon-based parallelization config
 ### Infrastructure
 
 **Docker**: `docker/`
+
 - `Dockerfile.stable` - L1/L2/L4 builds (no Enzyme)
 - `Dockerfile.nightly` - L3 with Enzyme LLVM plugin
 
 **Scripts**: `scripts/`
+
 - `install_enzyme.sh` - Enzyme installation helper
 - `verify_enzyme.sh` - Enzyme verification
+- `check_iai_regression.sh` - Instruction-count regression checking
 
 **CI/CD**: `.github/workflows/`
 
@@ -146,12 +168,14 @@ parallel/   → Rayon-based parallelization config
 ## Import Organization
 
 **Absolute imports** for cross-crate dependencies:
+
 ```rust
 use pricer_core::traits::Priceable;
 use pricer_models::instruments::Instrument;
 ```
 
 **Relative imports** within same crate:
+
 ```rust
 use crate::math::smoothing::smooth_max;
 use super::types::DualNumber;
@@ -174,12 +198,12 @@ Current roadmap (see README.md):
 - Phase 0: Workspace scaffolding (complete)
 - Phase 1: L1 foundation - types, traits, smoothing, market data (complete)
 - Phase 2: L2 business logic - instruments, models (complete)
-- Phase 3: L3 Enzyme integration - AD infrastructure, MC kernel (largely complete; Phase 3.2 bump-and-revalue Greeks, Phase 4 will add `#[autodiff]` macros)
-- Phase 4: Advanced MC - checkpointing, path-dependent options (planned)
+- Phase 3: L3 Enzyme integration - AD infrastructure, MC kernel (largely complete; Phase 3.2 bump-and-revalue Greeks)
+- Phase 4: Advanced MC - checkpointing, path-dependent options, analytical solutions (complete)
 - Phase 5: L4 XVA - CVA/DVA/FVA, exposure metrics, parallelization (complete)
 - Phase 6: Production hardening - docs, benchmarks, CI/CD (in progress)
 
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-01_ — Added path_dependent module (Asian, Barrier, Lookback with streaming statistics)
+_Updated: 2026-01-02_ — Phase 4 complete (checkpointing, path-dependent, analytical); added iai-callgrind benchmark
 _Document patterns, not file trees. New files following patterns should not require updates_
