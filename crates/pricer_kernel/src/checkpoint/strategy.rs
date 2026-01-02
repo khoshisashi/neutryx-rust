@@ -91,6 +91,7 @@ impl CheckpointStrategy {
     /// assert!(uniform.should_checkpoint(10, 100));
     /// ```
     #[inline]
+    #[allow(unknown_lints)]
     #[allow(clippy::manual_is_multiple_of)]
     pub fn should_checkpoint(&self, step: usize, total_steps: usize) -> bool {
         match self {
