@@ -91,13 +91,14 @@ impl CheckpointStrategy {
     /// assert!(uniform.should_checkpoint(10, 100));
     /// ```
     #[inline]
+    #[allow(clippy::manual_is_multiple_of)]
     pub fn should_checkpoint(&self, step: usize, total_steps: usize) -> bool {
         match self {
             CheckpointStrategy::Uniform { interval } => {
                 if *interval == 0 {
                     return false;
                 }
-                step.is_multiple_of(*interval)
+                step % interval == 0
             }
             CheckpointStrategy::Logarithmic { base_interval } => {
                 if *base_interval == 0 || total_steps == 0 {
@@ -113,7 +114,7 @@ impl CheckpointStrategy {
                 }
                 // Check if step is exactly a power of 2 multiple of base_interval
                 // Step must be divisible by base_interval AND quotient must be power of 2
-                if !step.is_multiple_of(*base_interval) {
+                if step % base_interval != 0 {
                     return false;
                 }
                 let ratio = step / base_interval;
@@ -129,7 +130,7 @@ impl CheckpointStrategy {
                 }
                 // Default: ~10 checkpoints
                 let interval = (total_steps / 10).max(1);
-                step.is_multiple_of(interval)
+                step % interval == 0
             }
             CheckpointStrategy::None => false,
         }
