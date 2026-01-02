@@ -73,8 +73,6 @@
 #![deny(missing_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(rustdoc::private_intra_doc_links)]
-// Nightly features
-#![feature(unsigned_is_multiple_of)]
 // Enzyme-specific nightly features (commented until Enzyme is integrated in Phase 4)
 // #![feature(autodiff)]
 
