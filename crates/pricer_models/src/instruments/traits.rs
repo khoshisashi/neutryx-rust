@@ -18,7 +18,7 @@
 //! Full pricing with market data and Greeks is handled in L3 (pricer_pricing).
 
 use num_traits::Float;
-use pricer_core::types::{Currency, Date, PricingError};
+use pricer_core::types::Currency;
 
 /// Core trait for all financial instruments.
 ///

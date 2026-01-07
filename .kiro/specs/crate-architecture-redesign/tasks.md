@@ -86,13 +86,13 @@
 
 ## Task 4: Instrumentトレイトと階層的Enum再構�E
 
-- [ ] 4.1 Instrumentトレイト�E定義
+- [x] 4.1 Instrumentトレイト�E定義
   - 価格計算�EGreeks計算�EキャチE��ュフロー取得メソチE��を定義
   - 満期�E通貨取得メソチE��を追加
   - 全啁E��が実裁E��べき�E通インターフェースを確竁E
   - _Requirements: 1.3_
 
-- [ ] 4.2 InstrumentEnumの階層皁Enum構造への再構�E
+- [x] 4.2 InstrumentEnumの階層皁Enum構造への再構�E
   - トップレベルのアセチE��クラス別enumを定義�E�Equity, Rates, Credit, Fx, Commodity, Exotic�E�E
   - 株式商品�Eサブenumを定義
   - 既存�E啁E��をEquityサブenumに統吁E
@@ -100,7 +100,7 @@
   - 静的チE��スパッチを維持E
   - _Requirements: 1.2, 1.5_
 
-- [ ] 4.3 後方互換性の維持E
+- [x] 4.3 後方互換性の維持E
   - 既存�EInstrument enum APIを維持E
   - 新旧両方のアクセスパターンをサポ�EチE
   - deprecation警告で移行を俁E��

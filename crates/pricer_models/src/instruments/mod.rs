@@ -86,7 +86,12 @@ pub use swap::{PaymentFrequency, Swap};
 pub use traits::{Cashflow, CashflowInstrument, InstrumentTrait};
 pub use vanilla::VanillaOption;
 
+// Re-export asset class enums (when features enabled)
+#[cfg(feature = "equity")]
+pub use equity::EquityInstrument;
+
 use num_traits::Float;
+use pricer_core::types::Currency;
 
 /// Unified instrument enum for static dispatch.
 ///
@@ -231,6 +236,238 @@ impl<T: Float> Instrument<T> {
         match self {
             Instrument::Swap(swap) => Some(swap),
             _ => None,
+        }
+    }
+}
+
+// ============================================================================
+// Hierarchical Instrument Enum (New Architecture)
+// ============================================================================
+
+/// Hierarchical instrument enum for asset-class based organization.
+///
+/// This is the new architecture that organizes instruments by asset class,
+/// with each asset class having its own sub-enum. The design enables:
+///
+/// - Feature-flag based conditional compilation per asset class
+/// - Static dispatch (Enzyme AD compatible) at both top and sub-enum levels
+/// - Clean separation between asset classes
+///
+/// # Type Parameters
+///
+/// * `T` - Floating-point type implementing `Float` (e.g., `f64`, `Dual64`)
+///
+/// # Variants
+///
+/// - `Equity`: Equity derivatives (vanilla options, forwards)
+/// - `Rates`: Interest rate derivatives (IRS, swaptions, caps/floors)
+/// - `Credit`: Credit derivatives (CDS)
+/// - `Fx`: FX derivatives (FX options, FX forwards)
+/// - `Commodity`: Commodity derivatives
+/// - `Exotic`: Exotic derivatives (variance swaps, cliquets, etc.)
+///
+/// # Feature Flags
+///
+/// Each variant is gated by its corresponding feature flag:
+/// - `equity` (default): Enables `Equity` variant
+/// - `rates`: Enables `Rates` variant
+/// - `credit`: Enables `Credit` variant
+/// - `fx`: Enables `Fx` variant
+/// - `commodity`: Enables `Commodity` variant
+/// - `exotic`: Enables `Exotic` variant
+///
+/// # Examples
+///
+/// ```
+/// use pricer_models::instruments::{
+///     InstrumentEnum, EquityInstrument, VanillaOption,
+///     InstrumentParams, PayoffType, ExerciseStyle, InstrumentTrait,
+/// };
+///
+/// // Create an equity instrument via the hierarchical enum
+/// let params = InstrumentParams::new(100.0_f64, 1.0, 1.0).unwrap();
+/// let call = VanillaOption::new(params, PayoffType::Call, ExerciseStyle::European, 1e-6);
+/// let equity = EquityInstrument::Vanilla(call);
+/// let instrument = InstrumentEnum::Equity(equity);
+///
+/// // Use InstrumentTrait methods
+/// let payoff = instrument.payoff(110.0);
+/// assert!((payoff - 10.0).abs() < 0.01);
+/// ```
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub enum InstrumentEnum<T: Float> {
+    /// Equity derivatives (vanilla options, forwards).
+    #[cfg(feature = "equity")]
+    Equity(EquityInstrument<T>),
+
+    /// Interest rate derivatives (placeholder for future implementation).
+    /// Requires `rates` feature.
+    #[cfg(feature = "rates")]
+    Rates(Swap<T>), // Placeholder - will be RatesInstrument<T> in Task 6
+
+    // Future variants (commented until implemented):
+    // #[cfg(feature = "credit")]
+    // Credit(CreditInstrument<T>),
+    // #[cfg(feature = "fx")]
+    // Fx(FxInstrument<T>),
+    // #[cfg(feature = "commodity")]
+    // Commodity(CommodityInstrument<T>),
+    // #[cfg(feature = "exotic")]
+    // Exotic(ExoticInstrument<T>),
+}
+
+impl<T: Float> InstrumentEnum<T> {
+    /// Compute the payoff at given spot price.
+    ///
+    /// Delegates to the underlying asset-class sub-enum.
+    #[inline]
+    pub fn payoff(&self, spot: T) -> T {
+        match self {
+            #[cfg(feature = "equity")]
+            InstrumentEnum::Equity(equity) => equity.payoff(spot),
+            #[cfg(feature = "rates")]
+            InstrumentEnum::Rates(_swap) => T::zero(), // Swaps use curve-based valuation
+        }
+    }
+
+    /// Return time to expiry in years.
+    #[inline]
+    pub fn expiry(&self) -> T {
+        match self {
+            #[cfg(feature = "equity")]
+            InstrumentEnum::Equity(equity) => equity.expiry(),
+            #[cfg(feature = "rates")]
+            InstrumentEnum::Rates(swap) => swap.maturity(),
+        }
+    }
+
+    /// Return the settlement currency.
+    #[inline]
+    pub fn currency(&self) -> Currency {
+        match self {
+            #[cfg(feature = "equity")]
+            InstrumentEnum::Equity(equity) => equity.currency(),
+            #[cfg(feature = "rates")]
+            InstrumentEnum::Rates(swap) => swap.currency(),
+        }
+    }
+
+    /// Return the asset class of this instrument.
+    pub fn asset_class(&self) -> AssetClass {
+        match self {
+            #[cfg(feature = "equity")]
+            InstrumentEnum::Equity(_) => AssetClass::Equity,
+            #[cfg(feature = "rates")]
+            InstrumentEnum::Rates(_) => AssetClass::Rates,
+        }
+    }
+
+    /// Return whether this is an equity instrument.
+    #[cfg(feature = "equity")]
+    #[inline]
+    pub fn is_equity(&self) -> bool {
+        matches!(self, InstrumentEnum::Equity(_))
+    }
+
+    /// Return whether this is a rates instrument.
+    #[cfg(feature = "rates")]
+    #[inline]
+    pub fn is_rates(&self) -> bool {
+        matches!(self, InstrumentEnum::Rates(_))
+    }
+
+    /// Return a reference to the equity instrument if this is an Equity variant.
+    #[cfg(feature = "equity")]
+    pub fn as_equity(&self) -> Option<&EquityInstrument<T>> {
+        match self {
+            InstrumentEnum::Equity(equity) => Some(equity),
+            #[allow(unreachable_patterns)]
+            _ => None,
+        }
+    }
+
+    /// Return a reference to the rates instrument if this is a Rates variant.
+    #[cfg(feature = "rates")]
+    pub fn as_rates(&self) -> Option<&Swap<T>> {
+        match self {
+            InstrumentEnum::Rates(swap) => Some(swap),
+            #[allow(unreachable_patterns)]
+            _ => None,
+        }
+    }
+}
+
+impl<T: Float> InstrumentTrait<T> for InstrumentEnum<T> {
+    #[inline]
+    fn payoff(&self, spot: T) -> T {
+        self.payoff(spot)
+    }
+
+    #[inline]
+    fn expiry(&self) -> T {
+        self.expiry()
+    }
+
+    #[inline]
+    fn currency(&self) -> Currency {
+        self.currency()
+    }
+
+    fn type_name(&self) -> &'static str {
+        match self {
+            #[cfg(feature = "equity")]
+            InstrumentEnum::Equity(equity) => equity.type_name(),
+            #[cfg(feature = "rates")]
+            InstrumentEnum::Rates(_) => "RatesSwap",
+        }
+    }
+}
+
+// Conversion from asset class sub-enums to InstrumentEnum
+#[cfg(feature = "equity")]
+impl<T: Float> From<EquityInstrument<T>> for InstrumentEnum<T> {
+    fn from(equity: EquityInstrument<T>) -> Self {
+        InstrumentEnum::Equity(equity)
+    }
+}
+
+#[cfg(feature = "rates")]
+impl<T: Float> From<Swap<T>> for InstrumentEnum<T> {
+    fn from(swap: Swap<T>) -> Self {
+        InstrumentEnum::Rates(swap)
+    }
+}
+
+/// Asset class classification for instruments.
+///
+/// Used to categorize instruments at the top level for risk management
+/// and reporting purposes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum AssetClass {
+    /// Equity derivatives (options, forwards on stocks/indices).
+    Equity,
+    /// Interest rate derivatives (swaps, swaptions, caps/floors).
+    Rates,
+    /// Credit derivatives (CDS, credit indices).
+    Credit,
+    /// FX derivatives (currency options, forwards).
+    Fx,
+    /// Commodity derivatives (energy, metals, agriculture).
+    Commodity,
+    /// Exotic/hybrid derivatives (variance swaps, autocallables).
+    Exotic,
+}
+
+impl std::fmt::Display for AssetClass {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AssetClass::Equity => write!(f, "Equity"),
+            AssetClass::Rates => write!(f, "Rates"),
+            AssetClass::Credit => write!(f, "Credit"),
+            AssetClass::Fx => write!(f, "FX"),
+            AssetClass::Commodity => write!(f, "Commodity"),
+            AssetClass::Exotic => write!(f, "Exotic"),
         }
     }
 }
@@ -380,5 +617,172 @@ mod tests {
         let instrument = Instrument::Vanilla(call);
         let debug_str = format!("{:?}", instrument);
         assert!(debug_str.contains("Vanilla"));
+    }
+
+    // ========================================
+    // InstrumentEnum Tests (Hierarchical)
+    // ========================================
+
+    #[cfg(feature = "equity")]
+    mod instrument_enum_tests {
+        use super::*;
+
+        fn create_equity_call() -> EquityInstrument<f64> {
+            let params = InstrumentParams::new(100.0, 1.0, 1.0).unwrap();
+            let call = VanillaOption::new(params, PayoffType::Call, ExerciseStyle::European, 1e-6);
+            EquityInstrument::Vanilla(call)
+        }
+
+        fn create_equity_forward() -> EquityInstrument<f64> {
+            let forward = Forward::new(100.0, 1.0, 1.0, Direction::Long).unwrap();
+            EquityInstrument::Forward(forward)
+        }
+
+        #[test]
+        fn test_instrument_enum_equity_payoff() {
+            let equity = create_equity_call();
+            let instrument = InstrumentEnum::Equity(equity);
+
+            let payoff = instrument.payoff(110.0);
+            assert!((payoff - 10.0).abs() < 0.01);
+        }
+
+        #[test]
+        fn test_instrument_enum_equity_forward_payoff() {
+            let equity = create_equity_forward();
+            let instrument = InstrumentEnum::Equity(equity);
+
+            let payoff = instrument.payoff(110.0);
+            assert!((payoff - 10.0).abs() < 1e-10);
+        }
+
+        #[test]
+        fn test_instrument_enum_expiry() {
+            let equity = create_equity_call();
+            let instrument = InstrumentEnum::Equity(equity);
+
+            assert!((instrument.expiry() - 1.0).abs() < 1e-10);
+        }
+
+        #[test]
+        fn test_instrument_enum_currency() {
+            let equity = create_equity_call();
+            let instrument = InstrumentEnum::Equity(equity);
+
+            assert_eq!(instrument.currency(), Currency::USD);
+        }
+
+        #[test]
+        fn test_instrument_enum_asset_class() {
+            let equity = create_equity_call();
+            let instrument = InstrumentEnum::Equity(equity);
+
+            assert_eq!(instrument.asset_class(), AssetClass::Equity);
+        }
+
+        #[test]
+        fn test_instrument_enum_is_equity() {
+            let equity = create_equity_call();
+            let instrument = InstrumentEnum::Equity(equity);
+
+            assert!(instrument.is_equity());
+        }
+
+        #[test]
+        fn test_instrument_enum_as_equity() {
+            let equity = create_equity_call();
+            let instrument = InstrumentEnum::Equity(equity);
+
+            assert!(instrument.as_equity().is_some());
+        }
+
+        #[test]
+        fn test_instrument_enum_from_equity() {
+            let equity = create_equity_call();
+            let instrument: InstrumentEnum<f64> = equity.into();
+
+            assert!(instrument.is_equity());
+        }
+
+        #[test]
+        fn test_instrument_enum_trait_payoff() {
+            let equity = create_equity_call();
+            let instrument = InstrumentEnum::Equity(equity);
+
+            // Use InstrumentTrait method
+            let payoff =
+                <InstrumentEnum<f64> as InstrumentTrait<f64>>::payoff(&instrument, 110.0);
+            assert!((payoff - 10.0).abs() < 0.01);
+        }
+
+        #[test]
+        fn test_instrument_enum_trait_type_name() {
+            let equity = create_equity_call();
+            let instrument = InstrumentEnum::Equity(equity);
+
+            assert_eq!(instrument.type_name(), "EquityVanilla");
+        }
+
+        #[test]
+        fn test_instrument_enum_clone() {
+            let equity = create_equity_call();
+            let inst1 = InstrumentEnum::Equity(equity);
+            let inst2 = inst1.clone();
+
+            assert!((inst1.expiry() - inst2.expiry()).abs() < 1e-10);
+        }
+
+        #[test]
+        fn test_instrument_enum_debug() {
+            let equity = create_equity_call();
+            let instrument = InstrumentEnum::Equity(equity);
+            let debug_str = format!("{:?}", instrument);
+
+            assert!(debug_str.contains("Equity"));
+        }
+    }
+
+    // ========================================
+    // AssetClass Tests
+    // ========================================
+
+    #[test]
+    fn test_asset_class_display() {
+        assert_eq!(format!("{}", AssetClass::Equity), "Equity");
+        assert_eq!(format!("{}", AssetClass::Rates), "Rates");
+        assert_eq!(format!("{}", AssetClass::Credit), "Credit");
+        assert_eq!(format!("{}", AssetClass::Fx), "FX");
+        assert_eq!(format!("{}", AssetClass::Commodity), "Commodity");
+        assert_eq!(format!("{}", AssetClass::Exotic), "Exotic");
+    }
+
+    #[test]
+    fn test_asset_class_equality() {
+        assert_eq!(AssetClass::Equity, AssetClass::Equity);
+        assert_ne!(AssetClass::Equity, AssetClass::Rates);
+    }
+
+    #[test]
+    fn test_asset_class_clone() {
+        let ac1 = AssetClass::Equity;
+        let ac2 = ac1;
+        assert_eq!(ac1, ac2);
+    }
+
+    #[test]
+    fn test_asset_class_debug() {
+        let debug_str = format!("{:?}", AssetClass::Equity);
+        assert!(debug_str.contains("Equity"));
+    }
+
+    #[test]
+    fn test_asset_class_hash() {
+        use std::collections::HashSet;
+        let mut set = HashSet::new();
+        set.insert(AssetClass::Equity);
+        set.insert(AssetClass::Rates);
+        set.insert(AssetClass::Equity); // Duplicate
+
+        assert_eq!(set.len(), 2);
     }
 }
