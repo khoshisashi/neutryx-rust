@@ -8,7 +8,7 @@ Strict bottom-up dependencies, isolating experimental technology (Enzyme) to Lay
 ```
 L1 (pricer_core)    → No dependencies, pure Rust traits/types
 L2 (pricer_models)  → Depends on L1 only
-L3 (pricer_kernel)  → Currently isolated (Phase 3.0), will integrate L1+L2 in Phase 4
+L3 (pricer_engine)  → Currently isolated (Phase 3.0), will integrate L1+L2 in Phase 4
 L4 (pricer_xva)     → Depends on L1+L2+L3, stable Rust
 ```
 
@@ -73,9 +73,9 @@ analytical/   → Closed-form solutions (Black-Scholes, barrier formulas)
 - **State Types**: `SingleState<T>` (1-factor), `TwoFactorState<T>` (2-factor) via `StochasticState` trait
 - **ModelParams/ModelState**: Unified enums for type-safe parameter and state handling
 
-### Layer 3: AD Engine (pricer_kernel)
+### Layer 3: AD Engine (pricer_engine)
 
-**Location**: `crates/pricer_kernel/src/`
+**Location**: `crates/pricer_engine/src/`
 **Purpose**: Monte Carlo + Enzyme AD (nightly Rust, LLVM plugin)
 **Structure**:
 
@@ -91,6 +91,8 @@ greeks/          → Greeks calculation types (GreeksConfig, GreeksMode, GreeksR
 ```
 
 **Key Principle**: **Only crate requiring nightly Rust and Enzyme**. Currently isolated (Phase 3.0) with zero pricer_* dependencies.
+
+> **Note**: This crate was renamed from `pricer_kernel` to `pricer_engine` in version 0.7.0.
 
 **RNG Design**: Zero-allocation batch operations, static dispatch only, Enzyme-compatible. Supports reproducible seeding for deterministic simulations.
 
@@ -165,7 +167,7 @@ parallel/   → Rayon-based parallelization config
 
 ## Naming Conventions
 
-- **Crates**: `pricer_*` prefix, snake_case (`pricer_core`, `pricer_kernel`)
+- **Crates**: `pricer_*` prefix, snake_case (`pricer_core`, `pricer_engine`)
 - **Modules**: snake_case (`monte_carlo`, `smoothing`)
 - **Traits**: PascalCase (`Priceable`, `Differentiable`)
 - **Types**: PascalCase (`DualNumber`, `VanillaOption`)

@@ -7,7 +7,7 @@
 ```text
 L1: pricer_core     → Foundation (Stable)
 L2: pricer_models   → Business Logic (Stable)
-L3: pricer_kernel   → AD Engine (Nightly + Enzyme, currently isolated)
+L3: pricer_engine   → AD Engine (Nightly + Enzyme, currently isolated)
 L4: pricer_xva      → Application (Stable)
 ```
 
@@ -71,13 +71,13 @@ L4: pricer_xva      → Application (Stable)
 
 ```bash
 # Dev (stable crates only)
-cargo build --workspace --exclude pricer_kernel
-cargo test --workspace --exclude pricer_kernel
+cargo build --workspace --exclude pricer_engine
+cargo test --workspace --exclude pricer_engine
 
 # Dev (with Enzyme - L3)
 export RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
-cargo +nightly build -p pricer_kernel
-cargo +nightly test -p pricer_kernel
+cargo +nightly build -p pricer_engine
+cargo +nightly test -p pricer_engine
 
 # Docker (full Enzyme environment)
 docker build -f docker/Dockerfile.nightly -t neutryx-enzyme .

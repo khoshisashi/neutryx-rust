@@ -655,7 +655,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pricer_kernel"
+name = "pricer_engine"
 version = "0.1.0"
 dependencies = [
  "approx",
@@ -687,13 +687,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "pricer_xva"
+name = "pricer_risk"
 version = "0.1.0"
 dependencies = [
  "approx",
  "criterion",
  "pricer_core",
- "pricer_kernel",
+ "pricer_engine",
  "pricer_models",
  "rayon",
  "serde",
