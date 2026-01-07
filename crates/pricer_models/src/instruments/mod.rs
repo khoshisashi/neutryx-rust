@@ -83,6 +83,7 @@ pub use forward::{Direction, Forward};
 pub use params::InstrumentParams;
 pub use payoff::PayoffType;
 pub use swap::{PaymentFrequency, Swap};
+pub use traits::{Cashflow, CashflowInstrument, InstrumentTrait};
 pub use vanilla::VanillaOption;
 
 use num_traits::Float;
