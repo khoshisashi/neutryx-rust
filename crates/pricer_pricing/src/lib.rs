@@ -142,15 +142,13 @@ pub use mc::{GbmParams, Greek, MonteCarloConfig, MonteCarloPricer, PayoffParams,
 /// // After
 /// use pricer_pricing::mc::MonteCarloPricer;
 /// ```
+///
+/// This module is deprecated and will be removed in a future version.
 #[deprecated(
     since = "0.7.0",
     note = "pricer_kernel has been renamed to pricer_pricing. Please update your imports."
 )]
 pub mod pricer_kernel {
-    //! Backward compatibility re-exports from the old pricer_kernel name.
-    //!
-    //! This module is deprecated and will be removed in a future version.
-
     pub use crate::analytical;
     pub use crate::checkpoint;
     pub use crate::enzyme;

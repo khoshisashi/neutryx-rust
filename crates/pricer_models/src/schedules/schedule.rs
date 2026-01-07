@@ -53,7 +53,10 @@ impl Schedule {
     ///
     /// Panics if periods is empty.
     pub fn new(periods: Vec<Period>) -> Self {
-        assert!(!periods.is_empty(), "Schedule must have at least one period");
+        assert!(
+            !periods.is_empty(),
+            "Schedule must have at least one period"
+        );
 
         let payment_dates: Vec<Date> = periods.iter().map(|p| p.payment()).collect();
         let accrual_start: Vec<Date> = periods.iter().map(|p| p.start()).collect();
@@ -327,26 +330,26 @@ impl ScheduleBuilder {
         let inner = date.into_inner();
 
         let new_date = match frequency {
-            Frequency::Annual => inner
-                .checked_add_months(Months::new(12))
-                .ok_or_else(|| ScheduleError::DateOverflow {
+            Frequency::Annual => inner.checked_add_months(Months::new(12)).ok_or_else(|| {
+                ScheduleError::DateOverflow {
                     reason: "Adding 12 months overflowed".to_string(),
-                })?,
-            Frequency::SemiAnnual => inner
-                .checked_add_months(Months::new(6))
-                .ok_or_else(|| ScheduleError::DateOverflow {
+                }
+            })?,
+            Frequency::SemiAnnual => inner.checked_add_months(Months::new(6)).ok_or_else(|| {
+                ScheduleError::DateOverflow {
                     reason: "Adding 6 months overflowed".to_string(),
-                })?,
-            Frequency::Quarterly => inner
-                .checked_add_months(Months::new(3))
-                .ok_or_else(|| ScheduleError::DateOverflow {
+                }
+            })?,
+            Frequency::Quarterly => inner.checked_add_months(Months::new(3)).ok_or_else(|| {
+                ScheduleError::DateOverflow {
                     reason: "Adding 3 months overflowed".to_string(),
-                })?,
-            Frequency::Monthly => inner
-                .checked_add_months(Months::new(1))
-                .ok_or_else(|| ScheduleError::DateOverflow {
+                }
+            })?,
+            Frequency::Monthly => inner.checked_add_months(Months::new(1)).ok_or_else(|| {
+                ScheduleError::DateOverflow {
                     reason: "Adding 1 month overflowed".to_string(),
-                })?,
+                }
+            })?,
             Frequency::Weekly => inner + chrono::Days::new(7),
             Frequency::Daily => inner + chrono::Days::new(1),
         };
@@ -595,7 +598,10 @@ mod tests {
             .frequency(Frequency::Quarterly)
             .build();
 
-        assert!(matches!(result, Err(ScheduleError::InvalidDateRange { .. })));
+        assert!(matches!(
+            result,
+            Err(ScheduleError::InvalidDateRange { .. })
+        ));
     }
 
     #[test]
@@ -606,7 +612,10 @@ mod tests {
             .frequency(Frequency::Quarterly)
             .build();
 
-        assert!(matches!(result, Err(ScheduleError::InvalidDateRange { .. })));
+        assert!(matches!(
+            result,
+            Err(ScheduleError::InvalidDateRange { .. })
+        ));
     }
 
     #[test]

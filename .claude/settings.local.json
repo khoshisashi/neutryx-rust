@@ -79,7 +79,9 @@
       "Bash(powershell -ExecutionPolicy Bypass -File \"f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust\\\\replace_engine.ps1\")",
       "Bash(powershell -ExecutionPolicy Bypass -File \"f:\\\\Codes\\\\neutryx-rust\\\\neutryx-rust\\\\replace_engine_md.ps1\")",
       "Bash(git checkout:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(cargo metadata:*)",
+      "Bash(ls:*)"
     ]
   }
 }

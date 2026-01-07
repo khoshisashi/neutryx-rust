@@ -187,7 +187,9 @@ pub trait CashflowInstrument<T: Float>: InstrumentTrait<T> {
     /// Return the total undiscounted cashflow amount.
     #[inline]
     fn total_cashflow(&self) -> T {
-        self.cashflows().iter().fold(T::zero(), |acc, cf| acc + cf.amount)
+        self.cashflows()
+            .iter()
+            .fold(T::zero(), |acc, cf| acc + cf.amount)
     }
 }
 

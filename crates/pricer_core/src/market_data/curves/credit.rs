@@ -34,7 +34,7 @@ use num_traits::Float;
 /// // Create a hazard rate curve with 100bp hazard rate
 /// let tenors = [1.0_f64, 2.0, 5.0];
 /// let hazard_rates = [0.01, 0.012, 0.015];
-/// let curve = HazardRateCurve::new(&tenors, &hazard_rates, false).unwrap();
+/// let curve = HazardRateCurve::new(&tenors, &hazard_rates, true).unwrap();
 ///
 /// // Get survival probability for 1 year
 /// let surv = curve.survival_probability(1.0).unwrap();
@@ -337,7 +337,7 @@ impl<T: Float> HazardRateCurve<T> {
 
         let (t_min, t_max) = self.domain();
 
-        // For t < t_min, assume constant hazard rate from 0 to t_min
+        // For t <= t_min, assume constant hazard rate from 0 to t_min
         if t <= t_min {
             let h0 = if self.allow_extrapolation {
                 self.hazard_rates[0]
@@ -352,15 +352,12 @@ impl<T: Float> HazardRateCurve<T> {
         }
 
         let mut integral = T::zero();
-        let mut prev_t = T::zero();
 
         // Integrate from 0 to t_min with constant hazard rate (extrapolation)
         if self.allow_extrapolation {
             integral = integral + self.hazard_rates[0] * t_min;
-            prev_t = t_min;
-        } else {
-            prev_t = t_min;
         }
+        let mut prev_t = t_min;
 
         // Integrate over each segment up to t
         for i in 0..self.tenors.len() {
@@ -766,8 +763,16 @@ mod tests {
 
         for t in [0.5_f64, 1.0, 2.0, 3.0, 5.0, 10.0] {
             let surv = curve.survival_probability(t).unwrap();
-            assert!(surv > 0.0, "Survival probability should be positive at t={}", t);
-            assert!(surv <= 1.0, "Survival probability should be <= 1 at t={}", t);
+            assert!(
+                surv > 0.0,
+                "Survival probability should be positive at t={}",
+                t
+            );
+            assert!(
+                surv <= 1.0,
+                "Survival probability should be <= 1 at t={}",
+                t
+            );
         }
     }
 

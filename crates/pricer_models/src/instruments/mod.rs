@@ -90,6 +90,9 @@ pub use vanilla::VanillaOption;
 #[cfg(feature = "equity")]
 pub use equity::EquityInstrument;
 
+#[cfg(feature = "rates")]
+pub use rates::RatesInstrument;
+
 use num_traits::Float;
 use pricer_core::types::Currency;
 
@@ -301,11 +304,10 @@ pub enum InstrumentEnum<T: Float> {
     #[cfg(feature = "equity")]
     Equity(EquityInstrument<T>),
 
-    /// Interest rate derivatives (placeholder for future implementation).
+    /// Interest rate derivatives (IRS, swaptions, caps/floors).
     /// Requires `rates` feature.
     #[cfg(feature = "rates")]
-    Rates(Swap<T>), // Placeholder - will be RatesInstrument<T> in Task 6
-
+    Rates(RatesInstrument<T>),
     // Future variants (commented until implemented):
     // #[cfg(feature = "credit")]
     // Credit(CreditInstrument<T>),
@@ -327,7 +329,7 @@ impl<T: Float> InstrumentEnum<T> {
             #[cfg(feature = "equity")]
             InstrumentEnum::Equity(equity) => equity.payoff(spot),
             #[cfg(feature = "rates")]
-            InstrumentEnum::Rates(_swap) => T::zero(), // Swaps use curve-based valuation
+            InstrumentEnum::Rates(rates) => rates.payoff(spot),
         }
     }
 
@@ -338,7 +340,7 @@ impl<T: Float> InstrumentEnum<T> {
             #[cfg(feature = "equity")]
             InstrumentEnum::Equity(equity) => equity.expiry(),
             #[cfg(feature = "rates")]
-            InstrumentEnum::Rates(swap) => swap.maturity(),
+            InstrumentEnum::Rates(rates) => rates.expiry(),
         }
     }
 
@@ -349,7 +351,7 @@ impl<T: Float> InstrumentEnum<T> {
             #[cfg(feature = "equity")]
             InstrumentEnum::Equity(equity) => equity.currency(),
             #[cfg(feature = "rates")]
-            InstrumentEnum::Rates(swap) => swap.currency(),
+            InstrumentEnum::Rates(rates) => rates.currency(),
         }
     }
 
@@ -389,9 +391,9 @@ impl<T: Float> InstrumentEnum<T> {
 
     /// Return a reference to the rates instrument if this is a Rates variant.
     #[cfg(feature = "rates")]
-    pub fn as_rates(&self) -> Option<&Swap<T>> {
+    pub fn as_rates(&self) -> Option<&RatesInstrument<T>> {
         match self {
-            InstrumentEnum::Rates(swap) => Some(swap),
+            InstrumentEnum::Rates(rates) => Some(rates),
             #[allow(unreachable_patterns)]
             _ => None,
         }
@@ -419,7 +421,7 @@ impl<T: Float> InstrumentTrait<T> for InstrumentEnum<T> {
             #[cfg(feature = "equity")]
             InstrumentEnum::Equity(equity) => equity.type_name(),
             #[cfg(feature = "rates")]
-            InstrumentEnum::Rates(_) => "RatesSwap",
+            InstrumentEnum::Rates(rates) => rates.type_name(),
         }
     }
 }
@@ -433,9 +435,9 @@ impl<T: Float> From<EquityInstrument<T>> for InstrumentEnum<T> {
 }
 
 #[cfg(feature = "rates")]
-impl<T: Float> From<Swap<T>> for InstrumentEnum<T> {
-    fn from(swap: Swap<T>) -> Self {
-        InstrumentEnum::Rates(swap)
+impl<T: Float> From<RatesInstrument<T>> for InstrumentEnum<T> {
+    fn from(rates: RatesInstrument<T>) -> Self {
+        InstrumentEnum::Rates(rates)
     }
 }
 
@@ -710,8 +712,7 @@ mod tests {
             let instrument = InstrumentEnum::Equity(equity);
 
             // Use InstrumentTrait method
-            let payoff =
-                <InstrumentEnum<f64> as InstrumentTrait<f64>>::payoff(&instrument, 110.0);
+            let payoff = <InstrumentEnum<f64> as InstrumentTrait<f64>>::payoff(&instrument, 110.0);
             assert!((payoff - 10.0).abs() < 0.01);
         }
 

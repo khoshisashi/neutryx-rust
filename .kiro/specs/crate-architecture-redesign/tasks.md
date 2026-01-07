@@ -125,38 +125,38 @@
   - 基本的なスケジュール生成をサポート
   - _Requirements: 4.5_
 
-## Task 6: 金利チE��バティブ商品E
+## Task 6: 金利デリバティブ商品
 
-- [ ] 6.1 (P) InterestRateSwap構造体�E実裁E
-  - IRS構造体を定義�E�ノーショナル、固定レグ、変動レグ、E��貨�E�E
-  - 固定レグ構造体を定義�E�スケジュール、固定レート、日数計算規紁E��E
-  - 変動レグ構造体を定義�E�スケジュール、スプレチE��、インチE��クス、日数計算規紁E��E
-  - レートインチE��クス列挙型を定義�E�EOFR, TONAR, Euribor3M, Euribor6M�E�E
-  - 金利啁E��サブenumにSwapバリアントを追加
+- [x] 6.1 (P) InterestRateSwap構造体の実装
+  - IRS構造体を定義（ノーショナル、固定レグ、変動レグ、通貨）
+  - 固定レグ構造体を定義（スケジュール、固定レート、日数計算規約）
+  - 変動レグ構造体を定義（スケジュール、スプレッド、インデックス、日数計算規約）
+  - レートインデックス列挙型を定義（SOFR, TONAR, Euribor3M, Euribor6M）
+  - 金利商品サブenumにSwapバリアントを追加
   - _Requirements: 4.1_
 
-- [ ] 6.2 (P) Swaption構造体�E実裁E
-  - Swaption構造体を定義�E�原賁E��スワチE�E、満期、ストライク、オプションタイプ！E
-  - Swaptionタイプ�E挙型を定義�E�Eayer, Receiver�E�E
-  - 金利啁E��サブenumにSwaptionバリアントを追加
+- [x] 6.2 (P) Swaption構造体の実装
+  - Swaption構造体を定義（原資産スワップ、満期、ストライク、オプションタイプ）
+  - Swaptionタイプ列挙型を定義（Payer, Receiver）
+  - 金利商品サブenumにSwaptionバリアントを追加
   - _Requirements: 4.3_
 
-- [ ] 6.3 (P) Cap/Floor構造体�E実裁E
-  - Cap構造体を定義�E�ノーショナル、スケジュール、ストライク、インチE��クス�E�E
-  - Floor構造体を定義�E�同様！E
-  - Collar構造体を定義�E�キャチE�Eストライク、フロアストライク�E�E
-  - 金利啁E��サブenumにCap, Floorバリアントを追加
+- [x] 6.3 (P) Cap/Floor構造体の実装
+  - Cap構造体を定義（ノーショナル、スケジュール、ストライク、インデックス）
+  - Floor構造体を定義（同様）
+  - Collar構造体を定義（キャップストライク、フロアストライク）
+  - 金利商品サブenumにCap, Floorバリアントを追加
   - _Requirements: 4.3_
 
-- [ ] 6.4 IRS評価ロジチE��の実裁E
-  - フォワードレート計算ロジチE��を実裁E
-  - 変動レグと固定レグのキャチE��ュフロー計算を実裁E
-  - CurveSetからチE��スカウント�Eフォワードカーブを取得して評価
+- [x] 6.4 IRS評価ロジックの実装
+  - フォワードレート計算ロジックを実装
+  - 変動レグと固定レグのキャッシュフロー計算を実装
+  - CurveSetからディスカウント・フォワードカーブを取得して評価
   - _Requirements: 4.2_
 
-- [ ] 6.5 Swaption解析解の実裁E
-  - Black76モチE��によるSwaption価格計算を実裁E
-  - BachelierモチE���E�正規モチE���E�によるSwaption価格計算を実裁E
+- [x] 6.5 Swaption解析解の実装
+  - Black76モデルによるSwaption価格計算を実装
+  - Bachelierモデル（正規モデル）によるSwaption価格計算を実装
   - 解析解モジュールに追加
   - _Requirements: 4.4_
 

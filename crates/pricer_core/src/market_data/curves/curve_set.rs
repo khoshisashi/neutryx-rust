@@ -3,7 +3,7 @@
 //! This module provides:
 //! - [`CurveSet`]: Container for managing multiple named yield curves
 
-use super::{CurveEnum, CurveName, YieldCurve};
+use super::{CurveEnum, CurveName};
 use crate::market_data::error::MarketDataError;
 use num_traits::Float;
 use std::collections::HashMap;
@@ -180,7 +180,7 @@ impl<T: Float> CurveSet<T> {
     pub fn get_or_err(&self, name: &CurveName) -> Result<&CurveEnum<T>, MarketDataError> {
         self.curves
             .get(name)
-            .ok_or_else(|| MarketDataError::CurveNotFound { name: *name })
+            .ok_or(MarketDataError::CurveNotFound { name: *name })
     }
 
     /// Check if a curve with the given name exists.
@@ -295,10 +295,9 @@ impl<T: Float> CurveSet<T> {
     /// * `Ok(&CurveEnum)` - The discount curve
     /// * `Err(MarketDataError::CurveNotFound)` - If no discount curve is configured
     pub fn discount_curve_or_err(&self) -> Result<&CurveEnum<T>, MarketDataError> {
-        self.discount_curve()
-            .ok_or(MarketDataError::CurveNotFound {
-                name: CurveName::Discount,
-            })
+        self.discount_curve().ok_or(MarketDataError::CurveNotFound {
+            name: CurveName::Discount,
+        })
     }
 
     /// Get a forward curve by name.
@@ -344,7 +343,7 @@ impl<T: Float> CurveSet<T> {
     pub fn forward_curve_or_err(&self, name: &CurveName) -> Result<&CurveEnum<T>, MarketDataError> {
         self.curves
             .get(name)
-            .ok_or_else(|| MarketDataError::CurveNotFound { name: *name })
+            .ok_or(MarketDataError::CurveNotFound { name: *name })
     }
 
     /// Iterate over all curves in the set.
@@ -390,7 +389,7 @@ impl<T: Float> CurveSet<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::market_data::curves::{CurveInterpolation, InterpolatedCurve};
+    use crate::market_data::curves::{CurveInterpolation, InterpolatedCurve, YieldCurve};
 
     // ========================================
     // Construction Tests

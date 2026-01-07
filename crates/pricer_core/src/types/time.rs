@@ -1065,11 +1065,15 @@ mod tests {
             BusinessDayConvention::Following
         );
         assert_eq!(
-            "modified following".parse::<BusinessDayConvention>().unwrap(),
+            "modified following"
+                .parse::<BusinessDayConvention>()
+                .unwrap(),
             BusinessDayConvention::ModifiedFollowing
         );
         assert_eq!(
-            "Modified_Following".parse::<BusinessDayConvention>().unwrap(),
+            "Modified_Following"
+                .parse::<BusinessDayConvention>()
+                .unwrap(),
             BusinessDayConvention::ModifiedFollowing
         );
         assert_eq!(

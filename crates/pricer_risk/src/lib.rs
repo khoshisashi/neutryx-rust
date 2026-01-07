@@ -112,6 +112,5 @@ pub use xva::{
 /// Use `pricer_risk` directly instead.
 #[deprecated(since = "0.7.0", note = "Use pricer_risk instead of pricer_risk")]
 pub mod pricer_risk {
-    //! Deprecated: Use `pricer_risk` instead.
     pub use crate::*;
 }

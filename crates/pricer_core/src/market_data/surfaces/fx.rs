@@ -342,7 +342,8 @@ impl<T: Float> FxVolatilitySurface<T> {
         // Grid is stored as volatilities[expiry_idx][delta_idx]
         // BilinearInterpolator expects zs[x_idx][y_idx] = z(xs[x_idx], ys[y_idx])
         // So we pass expiries as x-axis and deltas as y-axis
-        let interp = BilinearInterpolator::new(&self.expiries, &self.deltas, vol_slices.as_slice())?;
+        let interp =
+            BilinearInterpolator::new(&self.expiries, &self.deltas, vol_slices.as_slice())?;
 
         // Clamp for extrapolation
         let clamped_delta = if delta < d_min {
