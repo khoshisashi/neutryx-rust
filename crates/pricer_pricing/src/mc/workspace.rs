@@ -149,6 +149,50 @@ impl PathWorkspace {
         self.size_steps = 0;
     }
 
+    /// Fast reset that preserves both capacity and logical size.
+    ///
+    /// Unlike [`reset`](Self::reset), this method does not modify sizes.
+    /// It only ensures the workspace is ready for immediate reuse by
+    /// avoiding any initialization overhead.
+    ///
+    /// This is the fastest reset option when dimensions remain constant
+    /// across simulation runs, achieving true zero-allocation behavior.
+    ///
+    /// # Performance
+    ///
+    /// - `reset_fast`: O(1) - No memory operations
+    /// - `reset`: O(1) - Clears size tracking
+    /// - `ensure_capacity`: O(n) when growing
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pricer_pricing::mc::PathWorkspace;
+    ///
+    /// let mut workspace = PathWorkspace::new(1000, 100);
+    ///
+    /// // Run simulation loop
+    /// for _ in 0..1000 {
+    ///     workspace.reset_fast();
+    ///     // ... simulation work using same dimensions ...
+    /// }
+    /// ```
+    #[inline]
+    pub fn reset_fast(&mut self) {
+        // Intentionally empty - capacity and size are preserved
+        // This serves as documentation and a clear API entry point
+        // for zero-allocation simulation loops
+    }
+
+    /// Returns total memory used by all buffers in bytes.
+    ///
+    /// Useful for monitoring memory consumption and pool statistics.
+    #[inline]
+    pub fn memory_usage(&self) -> usize {
+        (self.randoms.capacity() + self.paths.capacity() + self.payoffs.capacity())
+            * std::mem::size_of::<f64>()
+    }
+
     /// Returns current path capacity.
     #[inline]
     pub fn capacity_paths(&self) -> usize {
@@ -376,5 +420,57 @@ mod tests {
         let ws = PathWorkspace::default();
         assert_eq!(ws.capacity_paths(), 0);
         assert_eq!(ws.capacity_steps(), 0);
+    }
+
+    #[test]
+    fn test_workspace_reset_fast() {
+        let mut ws = PathWorkspace::new(100, 10);
+        let size_paths = ws.size_paths();
+        let size_steps = ws.size_steps();
+        let cap_paths = ws.capacity_paths();
+        let cap_steps = ws.capacity_steps();
+
+        // Modify buffers
+        ws.randoms_mut()[0] = 42.0;
+        ws.paths_mut()[0] = 100.0;
+
+        // reset_fast should preserve everything
+        ws.reset_fast();
+
+        assert_eq!(ws.size_paths(), size_paths);
+        assert_eq!(ws.size_steps(), size_steps);
+        assert_eq!(ws.capacity_paths(), cap_paths);
+        assert_eq!(ws.capacity_steps(), cap_steps);
+
+        // Data should be preserved (not zeroed)
+        assert_eq!(ws.randoms()[0], 42.0);
+        assert_eq!(ws.paths()[0], 100.0);
+    }
+
+    #[test]
+    fn test_workspace_memory_usage() {
+        let ws = PathWorkspace::new(100, 10);
+        let mem = ws.memory_usage();
+
+        // Expected: (100*10 + 100*11 + 100) * 8 bytes
+        // = (1000 + 1100 + 100) * 8 = 2200 * 8 = 17600
+        let expected = (100 * 10 + 100 * 11 + 100) * std::mem::size_of::<f64>();
+        assert_eq!(mem, expected);
+    }
+
+    #[test]
+    fn test_workspace_zero_allocation_loop() {
+        let mut ws = PathWorkspace::new(100, 10);
+        let initial_ptr = ws.randoms().as_ptr();
+
+        // Simulate zero-allocation loop
+        for i in 0..1000 {
+            ws.reset_fast();
+            // Write some data
+            ws.randoms_mut()[0] = i as f64;
+        }
+
+        // Pointer should be the same (no reallocation)
+        assert_eq!(ws.randoms().as_ptr(), initial_ptr);
     }
 }

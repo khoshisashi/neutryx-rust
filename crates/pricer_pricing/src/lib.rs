@@ -119,6 +119,9 @@ pub mod analytical;
 // Greeks calculation types and configuration
 pub mod greeks;
 
+// Thread-local buffer pool for allocation-free simulation
+pub mod pool;
+
 // Re-export commonly used items for convenience
 pub use enzyme::{gradient, gradient_with_step, Activity};
 pub use greeks::{GreeksConfig, GreeksMode, GreeksResult};

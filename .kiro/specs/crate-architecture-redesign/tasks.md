@@ -179,28 +179,28 @@
   - MCエンジンにチE��ォルトイベント�E琁E��追加
   - _Requirements: 5.4_
 
-## Task 8: 為替チE��バティブ商品E
+## Task 8: 為替デリバティブ商品
 
-- [ ] 8.1 CurrencyPair構造体�E実裁E
-  - 通貨ペア構造体を定義�E��Eース通貨、クォート通貨�E�E
-  - スポットレート管琁E���Eを追加
-  - 既存�ECurrency列挙型を活用
+- [x] 8.1 CurrencyPair構造体の実装
+  - 通貨ペア構造体を定義（ベース通貨、クォート通貨）
+  - スポットレート管理機能を追加
+  - 既存のCurrency列挙型を活用
   - _Requirements: 6.3_
 
-- [ ] 8.2 (P) FxOption構造体�E実裁E
-  - FXオプション構造体を定義�E�通貨ペア、ストライク、満期、オプションタイプ！E
-  - 為替啁E��サブenumにOptionバリアントを追加
-  - Instrumentトレイトを実裁E
+- [x] 8.2 (P) FxOption構造体の実装
+  - FXオプション構造体を定義（通貨ペア、ストライク、満期、オプションタイプ）
+  - 為替資産サブenumにOptionバリアントを追加
+  - Instrumentトレイトを実装
   - _Requirements: 6.1_
 
-- [ ] 8.3 (P) FxForward構造体�E実裁E
-  - FXフォワード構造体を定義�E�通貨ペア、フォワードレート、満期、ノーショナル�E�E
-  - 為替啁E��サブenumにForwardバリアントを追加
+- [x] 8.3 (P) FxForward構造体の実装
+  - FXフォワード構造体を定義（通貨ペア、フォワードレート、満期、ノーショナル）
+  - 為替資産サブenumにForwardバリアントを追加
   - _Requirements: 6.1_
 
-- [ ] 8.4 Garman-KohlhagenモチE��の実裁E
-  - GK公式によるFXオプション価格計算を実裁E
-  - 国冁E�E外国金利カーブを使用したチE��スカウンチE
+- [x] 8.4 Garman-Kohlhagenモデルの実装
+  - GK公式によるFXオプション価格計算を実装
+  - 国内・外国金利カーブを使用したディスカウント
   - 解析解モジュールに追加
   - _Requirements: 6.2_
 
@@ -241,32 +241,32 @@
 
 ## Task 10: キャリブレーション基盤
 
-- [ ] 10.1 Levenberg-Marquardtソルバ�Eの実裁E
+- [x] 10.1 Levenberg-Marquardtソルバ�Eの実裁E
   - LMソルバ�E構造体を定義
   - 非線形最小二乗法�E反復計算を実裁E
   - 収束判定とパラメータ更新ロジチE��を実裁E
   - 数学ソルバ�Eモジュールに追加
   - _Requirements: 8.3_
 
-- [ ] 10.2 Calibratorトレイト�E定義
+- [x] 10.2 Calibratorトレイト�E定義
   - キャリブレーション・目皁E��数・制紁E��件メソチE��を定義
   - キャリブレーション結果構造体を定義�E�収束フラグ、イチE��ーション数、残差、最終パラメータ�E�E
   - 制紁E��件構造体を定義
   - _Requirements: 8.1_
 
-- [ ] 10.3 CalibrationError型�E実裁E
+- [x] 10.3 CalibrationError型�E実裁E
   - キャリブレーションエラー構造体を定義�E�種別、残差、イチE��ーション数、メチE��ージ�E�E
   - エラー種別列挙型を定義�E�EotConverged, InvalidConstraint, NumericalInstability, InsufficientData�E�E
   - 残差、イチE��ーション数、収束判定基準を含む詳細惁E��を提侁E
   - _Requirements: 8.4_
 
-- [ ] 10.4 SwaptionCalibratorの実裁E
+- [x] 10.4 SwaptionCalibratorの実裁E
   - Swaptionキャリブレータ構造体を定義
   - SwaptionボラチE��リチE��サーフェスへのキャリブレーションを実裁E
   - Hull-WhiteモチE��のパラメータ�E�平坁E��帰速度、�EラチE��リチE���E�を推宁E
   - _Requirements: 8.2_
 
-- [ ] 10.5 Enzyme ADを活用した勾配計箁E
+- [x] 10.5 Enzyme ADを活用した勾配計箁E
   - キャリブレーション目皁E��数のAD対忁E
   - 勾配計算によるキャリブレーション高速化
   - enzyme-modeでのチE��チE

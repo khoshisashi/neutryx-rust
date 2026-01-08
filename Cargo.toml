@@ -48,3 +48,13 @@ opt-level = 3
 
 [profile.bench]
 inherits = "release"
+
+# Profile for PGO instrumented builds (cargo-pgo)
+# Usage: cargo +nightly pgo build
+[profile.pgo-generate]
+inherits = "release"
+
+# Profile for PGO optimized builds (cargo-pgo)
+# Usage: cargo +nightly pgo optimize
+[profile.pgo-use]
+inherits = "release"

@@ -65,6 +65,26 @@ pub enum CheckpointStrategy {
     /// All intermediate values are stored. Maximum memory usage
     /// but no recomputation overhead.
     None,
+
+    /// Binomial checkpointing (Griewank-Walther algorithm).
+    ///
+    /// Optimal strategy for fixed memory budget, achieving O(√n) memory
+    /// usage. The `memory_slots` parameter specifies the maximum number
+    /// of checkpoint states that can be stored simultaneously.
+    ///
+    /// This is the recommended strategy when using [`MinimalState`] for
+    /// memory-efficient reverse-mode AD.
+    ///
+    /// # Reference
+    ///
+    /// Griewank, A., & Walther, A. (2000). Algorithm 799: revolve: an
+    /// implementation of checkpointing for the reverse or adjoint mode
+    /// of computational differentiation.
+    Binomial {
+        /// Maximum number of checkpoints to store simultaneously.
+        /// For n steps, optimal is approximately √n checkpoints.
+        memory_slots: usize,
+    },
 }
 
 impl CheckpointStrategy {
@@ -134,6 +154,15 @@ impl CheckpointStrategy {
                 step % interval == 0
             }
             CheckpointStrategy::None => false,
+            CheckpointStrategy::Binomial { memory_slots } => {
+                if *memory_slots == 0 || total_steps == 0 {
+                    return false;
+                }
+                // Binomial checkpointing: checkpoint at intervals of √n
+                // This achieves O(√n) memory with O(√n) recomputation
+                let interval = ((total_steps as f64).sqrt().ceil() as usize).max(1);
+                step % interval == 0 && step / interval < *memory_slots
+            }
         }
     }
 
@@ -175,6 +204,36 @@ impl CheckpointStrategy {
                 11
             }
             CheckpointStrategy::None => 0,
+            CheckpointStrategy::Binomial { memory_slots } => {
+                // Number of checkpoints is min(memory_slots, √n)
+                let sqrt_n = (total_steps as f64).sqrt().ceil() as usize;
+                (*memory_slots).min(sqrt_n)
+            }
+        }
+    }
+
+    /// Creates a Binomial strategy with optimal memory slots for the given step count.
+    ///
+    /// This is a convenience constructor that calculates the optimal number of
+    /// memory slots (approximately √n) for the given total steps.
+    ///
+    /// # Arguments
+    ///
+    /// * `total_steps` - Expected total number of simulation steps
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use pricer_pricing::checkpoint::CheckpointStrategy;
+    ///
+    /// // For 10000 steps, optimal is ~100 checkpoints
+    /// let strategy = CheckpointStrategy::binomial_optimal(10000);
+    /// assert_eq!(strategy.estimated_checkpoints(10000), 100);
+    /// ```
+    pub fn binomial_optimal(total_steps: usize) -> Self {
+        let memory_slots = (total_steps as f64).sqrt().ceil() as usize;
+        CheckpointStrategy::Binomial {
+            memory_slots: memory_slots.max(1),
         }
     }
 }

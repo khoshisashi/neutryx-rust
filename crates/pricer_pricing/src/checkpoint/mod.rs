@@ -15,7 +15,8 @@
 //! # Key Components
 //!
 //! - [`CheckpointStrategy`]: Determines when to save checkpoints
-//! - [`SimulationState`]: Captured state at a checkpoint
+//! - [`MinimalState`]: Lightweight state for O(√n) memory checkpointing
+//! - [`SimulationState`]: Full captured state at a checkpoint
 //! - [`CheckpointStorage`]: Storage for checkpoint states
 //! - [`CheckpointManager`]: Orchestrates checkpoint operations
 //!
@@ -48,5 +49,5 @@ mod strategy;
 
 pub use budget::MemoryBudget;
 pub use manager::{CheckpointError, CheckpointManager, CheckpointResult};
-pub use state::{CheckpointStorage, SimulationState};
+pub use state::{CheckpointStorage, MinimalState, SimulationState};
 pub use strategy::CheckpointStrategy;

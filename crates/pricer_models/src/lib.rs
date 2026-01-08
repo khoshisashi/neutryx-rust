@@ -8,6 +8,7 @@
 //! - Stochastic models (GBM, Heston, etc.)
 //! - Market data structures (curves, surfaces)
 //! - Analytical formulas for validation
+//! - Model calibration to market data
 //!
 //! ## Design Principles
 //!
@@ -20,6 +21,7 @@
 #![deny(rustdoc::private_intra_doc_links)]
 
 pub mod analytical;
+pub mod calibration;
 pub mod instruments;
 pub mod models;
 pub mod schedules;

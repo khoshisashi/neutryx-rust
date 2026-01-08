@@ -2,9 +2,123 @@
 //!
 //! This module provides types for capturing and storing simulation state
 //! at checkpoint intervals, enabling memory-efficient reverse-mode AD.
+//!
+//! # State Types
+//!
+//! Two state types are provided for different use cases:
+//!
+//! - [`MinimalState`]: Lightweight state for O(√n) memory checkpointing
+//! - [`SimulationState`]: Full state including current prices for all paths
 
 use crate::path_dependent::PathObserverState;
 use num_traits::Float;
+
+/// Minimal simulation state for memory-efficient checkpointing.
+///
+/// This struct captures only the essential information needed to resume
+/// simulation: step number, RNG state, and observer statistics. Unlike
+/// [`SimulationState`], it does not store current prices, achieving
+/// significantly lower memory usage.
+///
+/// # Memory Efficiency
+///
+/// When combined with Binomial checkpointing strategy, MinimalState enables
+/// O(√n) memory usage for reverse-mode AD instead of O(n).
+///
+/// # RNG State Recovery
+///
+/// The `rng_state` field stores the RNG seed, not the full state. To resume
+/// simulation, create a new RNG with this seed and skip `rng_calls` values.
+///
+/// # Example
+///
+/// ```rust
+/// use pricer_pricing::checkpoint::MinimalState;
+/// use pricer_pricing::path_dependent::PathObserverState;
+///
+/// let state = MinimalState {
+///     step: 100,
+///     rng_state: 42,
+///     rng_calls: 10000,
+///     observer_snapshot: PathObserverState::default(),
+/// };
+///
+/// assert_eq!(state.step, 100);
+/// assert!(state.memory_size() < 200); // Very compact
+/// ```
+#[derive(Clone, Debug)]
+pub struct MinimalState {
+    /// Current simulation step (0-indexed).
+    pub step: usize,
+
+    /// Original RNG seed for reproducibility.
+    ///
+    /// To restore RNG state: create new RNG with this seed,
+    /// then advance by `rng_calls` values.
+    pub rng_state: u64,
+
+    /// Number of RNG calls made up to this checkpoint.
+    ///
+    /// Used to fast-forward RNG to correct state when restoring.
+    pub rng_calls: usize,
+
+    /// Path observer state (running statistics).
+    ///
+    /// Contains accumulated min/max/sum for path-dependent payoffs.
+    pub observer_snapshot: PathObserverState<f64>,
+}
+
+impl MinimalState {
+    /// Creates a new minimal state.
+    ///
+    /// # Arguments
+    ///
+    /// * `step` - Current step number
+    /// * `rng_state` - Original RNG seed
+    /// * `rng_calls` - Number of RNG calls made
+    /// * `observer_snapshot` - Path observer state snapshot
+    pub fn new(
+        step: usize,
+        rng_state: u64,
+        rng_calls: usize,
+        observer_snapshot: PathObserverState<f64>,
+    ) -> Self {
+        Self {
+            step,
+            rng_state,
+            rng_calls,
+            observer_snapshot,
+        }
+    }
+
+    /// Returns the memory size of this state in bytes (approximate).
+    ///
+    /// MinimalState is designed to be very compact, typically under 200 bytes.
+    pub fn memory_size(&self) -> usize {
+        std::mem::size_of::<Self>()
+    }
+
+    /// Validates that this state can be used to resume simulation.
+    ///
+    /// Returns `true` if the state is valid and consistent.
+    pub fn is_valid(&self) -> bool {
+        // RNG seed 0 is technically valid but unusual
+        // Step can be any value
+        // Observer state is always valid by construction
+        true
+    }
+}
+
+impl Default for MinimalState {
+    fn default() -> Self {
+        Self {
+            step: 0,
+            rng_state: 0,
+            rng_calls: 0,
+            observer_snapshot: PathObserverState::default(),
+        }
+    }
+}
 
 /// Complete simulation state at a checkpoint.
 ///

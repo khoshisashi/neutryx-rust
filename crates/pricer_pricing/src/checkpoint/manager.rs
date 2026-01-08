@@ -199,6 +199,16 @@ impl<T: Float> CheckpointManager<T> {
                     CheckpointStrategy::Logarithmic { base_interval } => base_interval,
                     CheckpointStrategy::Adaptive { .. } => (self.total_steps / 10).max(1),
                     CheckpointStrategy::None => self.total_steps,
+                    CheckpointStrategy::Binomial { memory_slots } => {
+                        // Binomial: interval is √n to achieve O(√n) memory
+                        let interval = ((self.total_steps as f64).sqrt().ceil() as usize).max(1);
+                        // Limit by memory slots
+                        if memory_slots > 0 {
+                            (self.total_steps / memory_slots).max(1)
+                        } else {
+                            interval
+                        }
+                    }
                 }
             }
         }

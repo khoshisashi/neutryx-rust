@@ -96,6 +96,9 @@ pub use rates::RatesInstrument;
 #[cfg(feature = "credit")]
 pub use credit::CreditInstrument;
 
+#[cfg(feature = "fx")]
+pub use fx::FxInstrument;
+
 use num_traits::Float;
 use pricer_core::types::Currency;
 
@@ -316,9 +319,12 @@ pub enum InstrumentEnum<T: Float> {
     /// Requires `credit` feature.
     #[cfg(feature = "credit")]
     Credit(CreditInstrument<T>),
+
+    /// FX derivatives (options, forwards).
+    /// Requires `fx` feature.
+    #[cfg(feature = "fx")]
+    Fx(FxInstrument<T>),
     // Future variants (commented until implemented):
-    // #[cfg(feature = "fx")]
-    // Fx(FxInstrument<T>),
     // #[cfg(feature = "commodity")]
     // Commodity(CommodityInstrument<T>),
     // #[cfg(feature = "exotic")]
@@ -338,6 +344,8 @@ impl<T: Float> InstrumentEnum<T> {
             InstrumentEnum::Rates(rates) => rates.payoff(spot),
             #[cfg(feature = "credit")]
             InstrumentEnum::Credit(credit) => credit.payoff(spot),
+            #[cfg(feature = "fx")]
+            InstrumentEnum::Fx(fx) => fx.payoff(spot),
         }
     }
 
@@ -351,6 +359,8 @@ impl<T: Float> InstrumentEnum<T> {
             InstrumentEnum::Rates(rates) => rates.expiry(),
             #[cfg(feature = "credit")]
             InstrumentEnum::Credit(credit) => credit.expiry(),
+            #[cfg(feature = "fx")]
+            InstrumentEnum::Fx(fx) => fx.expiry(),
         }
     }
 
@@ -364,6 +374,8 @@ impl<T: Float> InstrumentEnum<T> {
             InstrumentEnum::Rates(rates) => rates.currency(),
             #[cfg(feature = "credit")]
             InstrumentEnum::Credit(credit) => credit.currency(),
+            #[cfg(feature = "fx")]
+            InstrumentEnum::Fx(fx) => fx.currency(),
         }
     }
 
@@ -376,6 +388,8 @@ impl<T: Float> InstrumentEnum<T> {
             InstrumentEnum::Rates(_) => AssetClass::Rates,
             #[cfg(feature = "credit")]
             InstrumentEnum::Credit(_) => AssetClass::Credit,
+            #[cfg(feature = "fx")]
+            InstrumentEnum::Fx(_) => AssetClass::Fx,
         }
     }
 
@@ -429,6 +443,23 @@ impl<T: Float> InstrumentEnum<T> {
             _ => None,
         }
     }
+
+    /// Return whether this is an FX instrument.
+    #[cfg(feature = "fx")]
+    #[inline]
+    pub fn is_fx(&self) -> bool {
+        matches!(self, InstrumentEnum::Fx(_))
+    }
+
+    /// Return a reference to the FX instrument if this is an Fx variant.
+    #[cfg(feature = "fx")]
+    pub fn as_fx(&self) -> Option<&FxInstrument<T>> {
+        match self {
+            InstrumentEnum::Fx(fx) => Some(fx),
+            #[allow(unreachable_patterns)]
+            _ => None,
+        }
+    }
 }
 
 impl<T: Float> InstrumentTrait<T> for InstrumentEnum<T> {
@@ -455,6 +486,8 @@ impl<T: Float> InstrumentTrait<T> for InstrumentEnum<T> {
             InstrumentEnum::Rates(rates) => rates.type_name(),
             #[cfg(feature = "credit")]
             InstrumentEnum::Credit(credit) => credit.type_name(),
+            #[cfg(feature = "fx")]
+            InstrumentEnum::Fx(fx) => fx.type_name(),
         }
     }
 }
@@ -478,6 +511,13 @@ impl<T: Float> From<RatesInstrument<T>> for InstrumentEnum<T> {
 impl<T: Float> From<CreditInstrument<T>> for InstrumentEnum<T> {
     fn from(credit: CreditInstrument<T>) -> Self {
         InstrumentEnum::Credit(credit)
+    }
+}
+
+#[cfg(feature = "fx")]
+impl<T: Float> From<FxInstrument<T>> for InstrumentEnum<T> {
+    fn from(fx: FxInstrument<T>) -> Self {
+        InstrumentEnum::Fx(fx)
     }
 }
 
