@@ -20,7 +20,7 @@
 //! ```
 
 use num_traits::Float;
-use pricer_core::types::{Currency, CurrencyPair, CurrencyError};
+use pricer_core::types::{Currency, CurrencyError, CurrencyPair};
 
 use crate::instruments::traits::InstrumentTrait;
 

@@ -335,11 +335,7 @@ fn sabr_implied_vol(
     let z = (nu / alpha) * f_mid * log_fk;
     let x_z = ((1.0 - 2.0 * rho * z + z.powi(2)).sqrt() + z - rho) / (1.0 - rho);
 
-    let x_z_ratio = if x_z.abs() < eps {
-        1.0
-    } else {
-        z / x_z.ln()
-    };
+    let x_z_ratio = if x_z.abs() < eps { 1.0 } else { z / x_z.ln() };
 
     let vol_0 = alpha / f_mid * x_z_ratio;
 

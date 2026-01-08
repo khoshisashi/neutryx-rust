@@ -327,7 +327,8 @@ mod tests {
     #[test]
     fn test_fx_forward_new_buy() {
         let pair = create_test_pair();
-        let forward = FxForward::new(pair, 1.12, 1.0, 1_000_000.0, FxForwardDirection::Buy).unwrap();
+        let forward =
+            FxForward::new(pair, 1.12, 1.0, 1_000_000.0, FxForwardDirection::Buy).unwrap();
 
         assert_eq!(forward.base_currency(), Currency::EUR);
         assert_eq!(forward.quote_currency(), Currency::USD);
@@ -431,7 +432,8 @@ mod tests {
     #[test]
     fn test_fx_forward_pair_code() {
         let pair = create_test_pair();
-        let forward = FxForward::new(pair, 1.12, 1.0, 1_000_000.0, FxForwardDirection::Buy).unwrap();
+        let forward =
+            FxForward::new(pair, 1.12, 1.0, 1_000_000.0, FxForwardDirection::Buy).unwrap();
 
         assert_eq!(forward.pair_code(), "EUR/USD");
     }
@@ -458,7 +460,8 @@ mod tests {
     #[test]
     fn test_fx_forward_clone() {
         let pair = create_test_pair();
-        let forward = FxForward::new(pair, 1.12, 1.0, 1_000_000.0, FxForwardDirection::Buy).unwrap();
+        let forward =
+            FxForward::new(pair, 1.12, 1.0, 1_000_000.0, FxForwardDirection::Buy).unwrap();
         let forward2 = forward.clone();
 
         assert!((forward.forward_rate() - forward2.forward_rate()).abs() < 1e-10);
@@ -468,7 +471,8 @@ mod tests {
     #[test]
     fn test_fx_forward_debug() {
         let pair = create_test_pair();
-        let forward = FxForward::new(pair, 1.12, 1.0, 1_000_000.0, FxForwardDirection::Buy).unwrap();
+        let forward =
+            FxForward::new(pair, 1.12, 1.0, 1_000_000.0, FxForwardDirection::Buy).unwrap();
 
         let debug_str = format!("{:?}", forward);
         assert!(debug_str.contains("FxForward"));
@@ -478,7 +482,8 @@ mod tests {
     #[test]
     fn test_usdjpy_forward() {
         let pair = CurrencyPair::new(Currency::USD, Currency::JPY, 150.0).unwrap();
-        let forward = FxForward::new(pair, 152.0, 0.5, 100_000.0, FxForwardDirection::Buy).unwrap();
+        let forward =
+            FxForward::new(pair, 152.0, 0.5, 100_000.0, FxForwardDirection::Buy).unwrap();
 
         assert_eq!(forward.base_currency(), Currency::USD);
         assert_eq!(forward.quote_currency(), Currency::JPY);

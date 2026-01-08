@@ -340,10 +340,7 @@ impl<'a, T: Float, C: CreditCurve<T>> CreditMonteCarloSimulator<'a, T, C> {
     /// # Returns
     ///
     /// Expected default time given default occurs (None if no defaults)
-    pub fn expected_default_time(
-        &self,
-        uniforms: &[T],
-    ) -> Result<Option<T>, MarketDataError> {
+    pub fn expected_default_time(&self, uniforms: &[T]) -> Result<Option<T>, MarketDataError> {
         let paths = self.simulate_paths(uniforms)?;
 
         let default_times: Vec<T> = paths.iter().filter_map(|p| p.default_time).collect();
