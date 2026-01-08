@@ -325,26 +325,26 @@ impl LevenbergMarquardtSolver {
         for i in 0..n_params {
             for j in 0..n_params {
                 let mut sum = 0.0;
-                for k in 0..n_residuals {
-                    sum += jacobian[k][i] * jacobian[k][j];
+                for row in &jacobian {
+                    sum += row[i] * row[j];
                 }
                 jtj[i][j] = sum;
             }
         }
 
         // Add λI to diagonal
-        for i in 0..n_params {
-            jtj[i][i] += lambda;
+        for (i, row) in jtj.iter_mut().enumerate() {
+            row[i] += lambda;
         }
 
         // Compute J^T r (note: we want -J^T r for the step)
         let mut jtr = vec![0.0; n_params];
-        for i in 0..n_params {
+        for (i, jtr_val) in jtr.iter_mut().enumerate() {
             let mut sum = 0.0;
-            for k in 0..n_residuals {
-                sum += jacobian[k][i] * residuals[k];
+            for (row, r) in jacobian.iter().zip(residuals.iter()) {
+                sum += row[i] * r;
             }
-            jtr[i] = -sum; // Negative for descent direction
+            *jtr_val = -sum; // Negative for descent direction
         }
 
         // Solve using Cholesky decomposition (since J^T J + λI is positive definite)
@@ -420,8 +420,8 @@ fn solve_cholesky(a: &[Vec<f64>], b: &[f64]) -> Option<Vec<f64>> {
     let mut y = vec![0.0; n];
     for i in 0..n {
         let mut sum = b[i];
-        for j in 0..i {
-            sum -= l[i][j] * y[j];
+        for (l_ij, y_j) in l[i].iter().take(i).zip(y.iter()) {
+            sum -= l_ij * y_j;
         }
         if l[i][i].abs() < 1e-30 {
             return None;

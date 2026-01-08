@@ -340,7 +340,7 @@ impl Constraint {
                 bounds,
             } => params
                 .get(*param_index)
-                .map_or(false, |&v| bounds.contains(v)),
+                .is_some_and(|&v| bounds.contains(v)),
             Constraint::LinearInequality { coefficients, rhs } => {
                 let sum: f64 = coefficients.iter().zip(params).map(|(c, p)| c * p).sum();
                 sum <= *rhs
