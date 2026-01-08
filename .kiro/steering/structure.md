@@ -59,19 +59,31 @@ market_data/
 **Location**: `crates/pricer_models/src/`
 **Purpose**: Financial instruments and pricing models (stable Rust)
 **Structure**:
-```
-instruments/  → Enum-based instrument definitions (VanillaOption, Forward, Swap)
+
+```text
+instruments/
+├── equity/    → Equity derivatives (VanillaOption, Forward)
+├── rates/     → Interest rate derivatives (IRS, Swaption, Cap/Floor)
+├── credit/    → Credit derivatives (CDS with simulation)
+├── fx/        → FX derivatives (FxOption, FxForward)
+└── traits.rs  → InstrumentTrait, CashflowInstrument
+
 models/       → Stochastic models with unified trait interface
-analytical/   → Closed-form solutions (Black-Scholes, barrier formulas)
+analytical/   → Closed-form solutions (Black-Scholes, Garman-Kohlhagen)
+calibration/  → Model calibration (Levenberg-Marquardt, swaption vol surface)
+schedules/    → Payment schedule generation (Frequency, Period, ScheduleBuilder)
 ```
 
 **Key Principles**:
 
-- Static dispatch via `enum Instrument<T: Float>` for Enzyme compatibility
+- **Hierarchical Instrument Architecture**: `InstrumentEnum<T>` wraps asset-class sub-enums (EquityInstrument, RatesInstrument, CreditInstrument, FxInstrument)
+- **Feature-Flag Asset Classes**: Each asset class gated by feature (equity, rates, credit, fx)
+- **InstrumentTrait**: Unified interface for all instruments (payoff, expiry, currency, notional)
+- **CashflowInstrument**: Extended trait for instruments with scheduled payments (swaps, bonds)
+- **Static Dispatch**: Enum-based dispatch at both top and sub-enum levels for Enzyme compatibility
+- **Schedule Generation**: `ScheduleBuilder` pattern for IRS/CDS payment schedules
 - **StochasticModel Trait**: Unified interface for stochastic processes (`evolve_step`, `initial_state`, `brownian_dim`)
 - **StochasticModelEnum**: Static dispatch enum wrapping concrete models (GBM, future: Heston, SABR)
-- **State Types**: `SingleState<T>` (1-factor), `TwoFactorState<T>` (2-factor) via `StochasticState` trait
-- **ModelParams/ModelState**: Unified enums for type-safe parameter and state handling
 
 ### Layer 3: AD Engine (pricer_pricing)
 
@@ -81,13 +93,14 @@ analytical/   → Closed-form solutions (Black-Scholes, barrier formulas)
 
 ```text
 enzyme/          → Enzyme bindings, autodiff macros
-mc/              → Monte Carlo kernel (GBM paths, workspace buffers, Greeks, MonteCarloPricer)
+mc/              → Monte Carlo kernel (GBM paths, workspace buffers, Greeks, MonteCarloPricer, thread_local)
 path_dependent/  → Path-dependent options (Asian, Barrier, Lookback) with streaming statistics
 rng/             → Random number generation (PRNG, QMC sequences)
 verify/          → Enzyme vs num-dual verification tests
 checkpoint/      → Memory management for checkpointing
 analytical/      → Closed-form solutions (geometric Asian, barrier options)
 greeks/          → Greeks calculation types (GreeksConfig, GreeksMode, GreeksResult<T>)
+pool/            → Thread-local buffer pool (ThreadLocalPool, PooledBuffer, PoolStats)
 ```
 
 **Key Principle**: **Only crate requiring nightly Rust and Enzyme**. Currently isolated (Phase 3.0) with zero pricer_* dependencies.
@@ -96,12 +109,14 @@ greeks/          → Greeks calculation types (GreeksConfig, GreeksMode, GreeksR
 
 **RNG Design**: Zero-allocation batch operations, static dispatch only, Enzyme-compatible. Supports reproducible seeding for deterministic simulations.
 
-**Monte Carlo Features** (Phase 3.2):
+**Monte Carlo Features** (Phase 3.2+):
 
-- Pre-allocated workspace buffers (`PathWorkspace`) for allocation-free simulation
+- Pre-allocated workspace buffers (`PathWorkspace`, `CheckpointWorkspace`) for allocation-free simulation
 - GBM path generation with log-space formulation
 - Smooth payoff functions for AD compatibility
 - Greeks via bump-and-revalue with forward-mode AD prototype
+- **Thread-Local Buffer Pool** (`pool/`): RAII buffer management with `PooledBuffer` for zero-allocation hot paths
+- **Parallel Workspaces** (`mc/thread_local.rs`): `ThreadLocalWorkspacePool` and `ParallelWorkspaces` for Rayon integration
 
 **Path-Dependent Options** (Phase 4, Implemented):
 
@@ -214,5 +229,5 @@ Current roadmap (see README.md):
 
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-07_ — Added Greeks module documentation (GreeksConfig, GreeksMode, GreeksResult)
+_Updated: 2026-01-08_ — Added hierarchical instrument architecture (multi-asset class), thread-local buffer pool, calibration/schedules modules
 _Document patterns, not file trees. New files following patterns should not require updates_

@@ -81,7 +81,13 @@
       "Bash(git checkout:*)",
       "Bash(powershell:*)",
       "Bash(cargo metadata:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(cmd.exe /c \"cd /d c:\\\\Users\\\\khosh\\\\neutryx-rust\\\\neutryx-rust && cargo fmt --all -- --check 2>&1\")",
+      "Bash(cmd.exe /c \"cd /d c:\\\\Users\\\\khosh\\\\neutryx-rust\\\\neutryx-rust && cargo clippy --workspace --exclude pricer_pricing -- -D warnings 2>&1\":*)",
+      "Bash(cmd.exe /c \"cd /d c:\\\\Users\\\\khosh\\\\neutryx-rust\\\\neutryx-rust && cargo test --workspace --exclude pricer_pricing 2>&1\")",
+      "Bash(cmd.exe:*)",
+      "Bash(powershell.exe -Command \"cd c:\\\\Users\\\\khosh\\\\neutryx-rust\\\\neutryx-rust; cargo test --workspace --exclude pricer_pricing 2>&1 | Select-Object -First 100\")",
+      "Bash(powershell.exe -Command:*)"
     ]
   }
 }
