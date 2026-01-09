@@ -105,4 +105,3 @@ impl CliConfig {
         Ok(config)
     }
 }
-
