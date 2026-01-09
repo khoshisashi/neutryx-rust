@@ -8,9 +8,9 @@
 //! ## Model Categories
 //!
 //! Models are organized by category (enabled via feature flags):
-//! - [`equity`]: Equity models (GBM) - default
-//! - [`rates`]: Interest rate models (Hull-White, CIR)
-//! - [`hybrid`]: Multi-factor and correlated models
+//! - `equity`: Equity models (GBM) - default
+//! - `rates`: Interest rate models (Hull-White, CIR)
+//! - `hybrid`: Multi-factor and correlated models
 //!
 //! ## Design Philosophy
 //!
