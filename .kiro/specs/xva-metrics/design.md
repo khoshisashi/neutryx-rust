@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document specifies the technical design for the XVA metrics module in `pricer_xva` (L4). The design covers CVA, DVA, and FVA calculations with Rayon parallelisation.
+This document specifies the technical design for the XVA metrics module in `pricer_risk` (L4). As part of the comprehensive bank derivatives pricing library, this module covers CVA, DVA, and FVA calculations with Rayon parallelisation.
+
+**Context**: XVA calculations integrate with the broader multi-asset class pricing infrastructure, consuming exposure profiles generated from Rates, FX, Equity, Credit, and Commodity instruments.
 
 ---
 
@@ -11,7 +13,7 @@ This document specifies the technical design for the XVA metrics module in `pric
 ### Module Structure
 
 ```
-crates/pricer_xva/src/xva/
+crates/pricer_risk/src/xva/
 ├── mod.rs           # Module exports and XvaCalculator
 ├── cva.rs           # CVA calculation
 ├── dva.rs           # DVA calculation

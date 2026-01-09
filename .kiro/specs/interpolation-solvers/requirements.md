@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This specification defines requirements for Phase 1.3: Numerical Methods - Interpolation and Solvers. The implementation targets `crates/pricer_core/src/math/interpolators/` and `solvers/`, providing foundational numerical infrastructure for the XVA pricing library. All components must support automatic differentiation (AD) through compatibility with `Dual64` (num-dual) and future Enzyme integration.
+This specification defines requirements for Phase 1.3: Numerical Methods - Interpolation and Solvers. The implementation targets `crates/pricer_core/src/math/interpolators/` and `solvers/`, providing foundational numerical infrastructure for the bank derivatives pricing library. All components must support automatic differentiation (AD) through compatibility with `Dual64` (num-dual) and future Enzyme integration.
 
 ## Requirements
 

@@ -27,7 +27,7 @@ components = ["rustfmt", "clippy"]
 **ファイル**: `crates/pricer_kernel/Cargo.toml`
 
 **主要な変更点**:
-- ✅ **完全分離**: pricer_core、pricer_models、pricer_xvaへの依存を削除
+- ✅ **完全分離**: pricer_core、pricer_models、pricer_riskへの依存を削除
 - ✅ LLVM 18バインディング (`llvm-sys = "180"`) を追加
 - ✅ dev-dependenciesに`approx`を追加（勾配検証用）
 - ✅ 将来の拡張のため `enzyme-ad` feature flagを予約

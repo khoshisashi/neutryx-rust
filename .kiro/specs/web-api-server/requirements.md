@@ -5,7 +5,7 @@ REST APIサーバー実装（pricer_server）- Axumを使用したプライシ�
 
 ## 導入
 
-本仕様書は、Neutryx XVA Pricing Libraryの既存機能をHTTP APIとして公開するためのWebサーバー実装（pricer_server）の要件を定義します。pricer_serverは、Layer 5として新規クレート（`pricer_server`）を追加し、Axumフレームワークを使用してRESTful APIを提供します。stable Rustで動作し、既存のL1-L4機能（pricer_core、pricer_models、pricer_kernel、pricer_xva）をHTTPエンドポイントとして公開します。
+本仕様書は、Neutryx Bank Derivatives Pricing Libraryの既存機能をHTTP APIとして公開するためのWebサーバー実装（service_gateway）の要件を定義します。service_gatewayはAxumフレームワークを使用してRESTful APIを提供します。stable Rustで動作し、既存のL1-L4機能（pricer_core、pricer_models、pricer_pricing、pricer_risk）をHTTPエンドポイントとして公開します。
 
 主要なエンドポイントは以下の通りです:
 - オプション価格計算（バニラ、パス依存型）

@@ -4,7 +4,7 @@
 
 **Purpose**: This feature establishes the foundational automatic differentiation infrastructure within the `pricer_kernel` crate (Layer 3), enabling LLVM-level gradient computation via Enzyme for high-performance financial derivative pricing.
 
-**Users**: Quantitative developers and researchers utilising the XVA pricing library will benefit from automatic gradient computation without manual derivative implementations.
+**Users**: Quantitative developers and researchers utilising the bank derivatives pricing library will benefit from automatic gradient computation without manual derivative implementations.
 
 **Impact**: Creates the isolated Layer 3 crate with nightly Rust toolchain, LLVM bindings, and verification infrastructure, maintaining strict separation from stable crates (L1/L2/L4).
 

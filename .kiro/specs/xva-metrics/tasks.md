@@ -2,7 +2,7 @@
 
 ## Overview
 
-Implementation tasks for the XVA metrics module in `pricer_xva` (L4).
+Implementation tasks for the XVA metrics module in `pricer_risk` (L4). This module is one component of the comprehensive bank derivatives pricing library's risk analytics layer.
 
 ---
 

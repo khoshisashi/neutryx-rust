@@ -4,6 +4,8 @@ Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life
 
 ## Project Context
 
+**Neutryx** is a production-grade **derivatives pricing library** for Tier-1 banks, featuring multi-asset class coverage (Rates, FX, Equity, Credit, Commodity), Enzyme automatic differentiation for high-performance Greeks, and integrated XVA/risk analytics.
+
 ### Architecture: A-I-P-S Stream
 
 The workspace enforces a strict unidirectional data flow:

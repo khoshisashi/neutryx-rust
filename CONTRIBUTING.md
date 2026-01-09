@@ -19,7 +19,7 @@ cd neutryx-rust
 # Install stable toolchain (for L1/L2/L4 layers)
 rustup default stable
 
-# Optional: Install nightly toolchain (for L3/pricer_kernel with Enzyme AD)
+# Optional: Install nightly toolchain (for L3/pricer_pricing with Enzyme AD)
 rustup toolchain install nightly
 
 # Build the project
@@ -39,7 +39,7 @@ cargo clippy -- -D warnings
 | L1 | pricer_core | stable | Core utilities, interpolation, types |
 | L2 | pricer_models | stable | Financial models (Black-Scholes, Hull-White, CIR) |
 | L3 | pricer_pricing | nightly | Enzyme AD, Monte Carlo |
-| L4 | pricer_risk | stable | XVA calculations, portfolio |
+| L4 | pricer_risk | stable | Risk analytics, XVA, portfolio |
 
 **Note:** L3 (pricer_pricing) requires nightly for Enzyme AD features. For most contributions, stable toolchain is sufficient.
 

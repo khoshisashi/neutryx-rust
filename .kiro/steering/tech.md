@@ -126,7 +126,5 @@ docker run -it neutryx-enzyme
 
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-09_ — Migrated to A-I-P-S architecture (v2.1)
-_Created: 2025-12-29_
-_Updated: 2026-01-09_ — Updated feature flags (added commodity, exotic, all)
+_Updated: 2026-01-09_ — Pivoted from XVA-focused to comprehensive bank derivatives pricer
 _Document standards and patterns, not every dependency_

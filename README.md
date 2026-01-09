@@ -1,13 +1,14 @@
-# Neutryx Rust - XVA Pricing Library with Enzyme AD
+# Neutryx Rust - Bank Derivatives Pricing Library with Enzyme AD
 
-A production-grade XVA (Credit Valuation Adjustment) pricing library in Rust, powered by **Enzyme automatic differentiation** for high-performance Greeks computation.
+A production-grade **derivatives pricing library** for Tier-1 banks in Rust, powered by **Enzyme automatic differentiation** for high-performance Greeks computation.
 
 ## 🎯 Project Goals
 
-- **Bank-grade pricing**: CVA, DVA, FVA calculations for derivatives portfolios
+- **Multi-Asset Class Pricing**: Comprehensive coverage of Rates, FX, Equity, Credit, and Commodity derivatives
 - **Cutting-edge AD**: Enzyme (LLVM-level AD) for C++-competitive performance
 - **Production stability**: A-I-P-S architecture isolating experimental code
 - **Dual-mode verification**: Enzyme vs num-dual for correctness validation
+- **XVA & Risk Analytics**: CVA, DVA, FVA calculations with exposure metrics (EE, EPE, PFE)
 
 ## 🏗️ Architecture
 
@@ -34,7 +35,7 @@ neutryx-rust/
 │   ├── pricer_models/        # L2: Instrument Definitions & Stochastic Models
 │   ├── pricer_optimiser/     # L2.5: Calibration, Bootstrapping & Solvers
 │   ├── pricer_pricing/       # L3: AD Engine (Enzyme) & Monte Carlo Kernel
-│   ├── pricer_risk/          # L4: XVA, Portfolio Risk & Aggregation
+│   ├── pricer_risk/          # L4: Risk Analytics, XVA & Portfolio Aggregation
 │   │
 │   │   # --- S: Service Layer (Output) ---
 │   ├── service_cli/          # Command Line Operations (Batch/Ops)
@@ -217,7 +218,7 @@ cargo bench
 - [x] **Phase 2**: Business logic (L2) - instruments, models
 - [ ] **Phase 3**: Enzyme integration (L3) - AD bindings, verification
 - [ ] **Phase 4**: Advanced MC - checkpointing, path-dependent options
-- [x] **Phase 5**: XVA application (L4) - CVA, DVA, FVA, exposure metrics
+- [x] **Phase 5**: Risk Analytics (L4) - XVA (CVA, DVA, FVA), exposure metrics
 - [x] **Phase 6**: A-I-P-S Architecture - adapters, infra, service layers
 - [ ] **Phase 7**: Production hardening - docs, benchmarks, CI/CD
 
@@ -249,8 +250,9 @@ cargo test --workspace --exclude pricer_pricing
 ## 🔗 References
 
 - [Enzyme AD](https://enzyme.mit.edu/) - LLVM-level automatic differentiation
-- [XVA Pricing](https://en.wikipedia.org/wiki/XVA) - Credit valuation adjustment
+- [Derivatives Pricing](https://en.wikipedia.org/wiki/Derivative_(finance)) - Financial derivatives
+- [XVA](https://en.wikipedia.org/wiki/XVA) - Credit valuation adjustments
 
 ---
 
-**Status**: ✅ A-I-P-S architecture implemented | 🚧 Phase 3 (Enzyme AD) in progress
+**Status**: ✅ A-I-P-S architecture implemented | 🚧 Multi-asset class expansion in progress

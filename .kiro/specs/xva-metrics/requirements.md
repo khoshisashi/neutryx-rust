@@ -2,7 +2,9 @@
 
 ## Overview
 
-This specification defines requirements for the XVA (Valuation Adjustments) metrics module in `pricer_xva` (Layer 4). The module provides CVA, DVA, and FVA calculations for derivatives portfolios with Rayon-based parallelisation.
+This specification defines requirements for the XVA (Valuation Adjustments) metrics module in `pricer_risk` (Layer 4). As part of the comprehensive bank derivatives pricing library, this module provides CVA, DVA, and FVA calculations for derivatives portfolios with Rayon-based parallelisation.
+
+**Context**: XVA is one component of the broader risk analytics layer, complementing instrument pricing across Rates, FX, Equity, Credit, and Commodity asset classes.
 
 ---
 

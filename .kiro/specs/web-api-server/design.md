@@ -2,11 +2,11 @@
 
 ## Overview
 
-**目的**: 本機能は、Neutryx XVA Pricing Libraryの既存計算機能をHTTP REST APIとして公開し、外部クライアントアプリケーションからのアクセスを可能にする。Layer 5 (pricer_server) として新規クレートを追加し、Axumフレームワークを使用して安定したWebサーバーを構築する。
+**目的**: 本機能は、Neutryx Bank Derivatives Pricing Libraryの既存計算機能をHTTP REST APIとして公開し、外部クライアントアプリケーションからのアクセスを可能にする。service_gateway としてAxumフレームワークを使用して安定したWebサーバーを構築する。
 
 **ユーザー**: 定量アナリスト、リスク管理者、信用リスクアナリスト、API統合開発者、インフラストラクチャ運用者が、HTTP経由でオプション価格計算、ギリシャ指標計算、XVA計算を実行するために利用する。
 
-**Impact**: 既存の4層アーキテクチャ (L1: pricer_core, L2: pricer_models, L3: pricer_kernel, L4: pricer_xva) に新規Layer 5を追加する。stable Rustで動作し、L3 (nightly必須) をoptional feature flagとして統合する。
+**Impact**: 既存の4層アーキテクチャ (L1: pricer_core, L2: pricer_models, L3: pricer_pricing, L4: pricer_risk) の上にService Layer (service_gateway) を構築する。stable Rustで動作し、L3 (nightly必須) をoptional feature flagとして統合する。
 
 ### Goals
 - Axumベースの安定したHTTPサーバー実装 (stable Rust)
@@ -30,7 +30,7 @@
 
 - **L1 (pricer_core)**: 数学関数、型、トレイト、市場データ抽象化 (stable Rust)
 - **L2 (pricer_models)**: 金融商品、確率モデル、分析解 (stable Rust)
-- **L3 (pricer_kernel)**: Monte Carlo + Enzyme AD (nightly Rust必須)
+- **L3 (pricer_pricing)**: Monte Carlo + Enzyme AD (nightly Rust必須)
 - **L4 (pricer_xva)**: ポートフォリオ分析、XVA計算、並列処理 (stable Rust)
 
 **Integration Points**:
@@ -1029,7 +1029,7 @@ pub fn tracing_layer() -> TraceLayer</* ... */> {
       info(
           title = "Neutryx Pricer API",
           version = "1.0.0",
-          description = "REST API for XVA pricing library"
+          description = "REST API for bank derivatives pricing library"
       )
   )]
   pub struct ApiDoc;
@@ -1334,7 +1334,7 @@ CMD ["pricer_server"]
   "info": {
     "title": "Neutryx Pricer API",
     "version": "1.0.0",
-    "description": "REST API for XVA pricing library"
+    "description": "REST API for bank derivatives pricing library"
   },
   "paths": {
     "/api/v1/price/vanilla": {

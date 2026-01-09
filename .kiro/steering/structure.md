@@ -242,13 +242,14 @@ pool/            → Thread-local buffer pool (ThreadLocalPool, PooledBuffer, Po
 ### pricer_risk (L4)
 
 **Location**: `crates/pricer_risk/src/`
-**Purpose**: Portfolio analytics and XVA calculations (stable Rust)
+**Purpose**: Portfolio analytics, XVA, and risk metrics (stable Rust)
 **Structure**:
 
 ```text
 portfolio/  → Trade, Counterparty, NettingSet, PortfolioBuilder
 exposure/   → EE, EPE, PFE, EEPE, ENE calculators
 xva/        → CVA, DVA, FVA calculators with XvaCalculator
+regulatory/ → SA-CCR, FRTB, SIMM (planned)
 soa/        → Structure of Arrays (TradeSoA, ExposureSoA)
 parallel/   → Rayon-based parallelisation config
 ```
@@ -361,5 +362,5 @@ use super::types::DualNumber;
 
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-09_ — Migrated to A-I-P-S architecture (v2.1)
+_Updated: 2026-01-09_ — Pivoted from XVA-focused to comprehensive bank derivatives pricer
 _Document patterns, not file trees. New files following patterns should not require updates_

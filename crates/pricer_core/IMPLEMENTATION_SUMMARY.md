@@ -2,7 +2,7 @@
 
 ## Overview
 
-All tasks from `tasks.md` have been successfully implemented for the math-foundation-phase1 specification. The pricer_core crate now provides a complete mathematical foundation for the XVA pricing library.
+All tasks from `tasks.md` have been successfully implemented for the math-foundation-phase1 specification. The pricer_core crate now provides a complete mathematical foundation for the bank derivatives pricing library.
 
 ## Implemented Modules
 
@@ -227,4 +227,4 @@ cargo test --doc -p pricer_core
 Ready for:
 1. Running the verification commands above
 2. Proceeding to Phase 2 (Layer 2: pricer_models implementation)
-3. Integration with Enzyme AD (Layer 3: pricer_kernel)
+3. Integration with Enzyme AD (Layer 3: pricer_pricing)
