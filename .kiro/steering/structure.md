@@ -160,7 +160,7 @@ schedules/    → Payment schedule generation (Frequency, Period, ScheduleBuilde
 - **Static Dispatch**: Enum-based dispatch at both top and sub-enum levels for Enzyme compatibility
 - **Schedule Generation**: `ScheduleBuilder` pattern for IRS/CDS payment schedules
 - **StochasticModel Trait**: Unified interface for stochastic processes (`evolve_step`, `initial_state`, `brownian_dim`)
-- **StochasticModelEnum**: Static dispatch enum wrapping concrete models (GBM, Hull-White, CIR; future: Heston, SABR)
+- **StochasticModelEnum**: Static dispatch enum wrapping concrete models (GBM, Heston, SABR, Hull-White, CIR)
 
 ### pricer_optimiser (L2.5) [NEW]
 
@@ -362,5 +362,5 @@ use super::types::DualNumber;
 
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-09_ — Pivoted from XVA-focused to comprehensive bank derivatives pricer
+_Updated: 2026-01-09_ — Heston and SABR models now implemented (removed from "future")
 _Document patterns, not file trees. New files following patterns should not require updates_
