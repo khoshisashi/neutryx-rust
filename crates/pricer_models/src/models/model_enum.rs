@@ -680,9 +680,7 @@ mod tests {
         #[test]
         fn test_model_enum_cir_path() {
             let model = StochasticModelEnum::<f64>::cir();
-            let params = ModelParams::CIR(
-                CIRParams::new(0.1, 0.05, 0.03, 0.04).unwrap(),
-            );
+            let params = ModelParams::CIR(CIRParams::new(0.1, 0.05, 0.03, 0.04).unwrap());
 
             let n_steps = 10;
             let dt = 1.0 / 252.0;
@@ -709,9 +707,7 @@ mod tests {
 
         #[test]
         fn test_model_params_cir_accessors() {
-            let params = ModelParams::CIR(
-                CIRParams::new(0.1, 0.05, 0.02, 0.03).unwrap(),
-            );
+            let params = ModelParams::CIR(CIRParams::new(0.1, 0.05, 0.02, 0.03).unwrap());
             assert_eq!(params.spot(), 0.03); // initial_rate
             assert_eq!(params.rate(), 0.1); // mean_reversion
             assert_eq!(params.volatility(), 0.02);

@@ -102,7 +102,12 @@ impl<T: Float> CIRParams<T> {
     /// let invalid = CIRParams::new(-0.1_f64, 0.05, 0.05, 0.03);
     /// assert!(invalid.is_none());
     /// ```
-    pub fn new(mean_reversion: T, long_term_mean: T, volatility: T, initial_rate: T) -> Option<Self> {
+    pub fn new(
+        mean_reversion: T,
+        long_term_mean: T,
+        volatility: T,
+        initial_rate: T,
+    ) -> Option<Self> {
         if mean_reversion <= T::zero()
             || long_term_mean <= T::zero()
             || volatility <= T::zero()

@@ -233,7 +233,10 @@ impl<T: Float> CorrelationMatrix<T> {
             }
         }
 
-        Ok(CholeskyFactor { data: lower, dim: n })
+        Ok(CholeskyFactor {
+            data: lower,
+            dim: n,
+        })
     }
 }
 
