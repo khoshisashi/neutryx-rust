@@ -1,9 +1,26 @@
 [workspace]
 members = [
+    # --- A: Adapter Layer (Input) ---
+    "crates/adapter_feeds",
+    "crates/adapter_fpml",
+    "crates/adapter_loader",
+
+    # --- I: Infra Layer (Foundation) ---
+    "crates/infra_config",
+    "crates/infra_master",
+    "crates/infra_store",
+
+    # --- P: Pricer Layer (The Kernel) ---
     "crates/pricer_core",
     "crates/pricer_models",
+    "crates/pricer_optimiser",
     "crates/pricer_pricing",
     "crates/pricer_risk",
+
+    # --- R: Runtime Layer (Output) ---
+    "crates/runtime_cli",
+    "crates/runtime_python",
+    "crates/runtime_server",
 ]
 resolver = "2"
 
@@ -23,7 +40,7 @@ num-dual = "0.9"
 rand = "0.8"
 rand_distr = "0.4"
 
-# Parallelization
+# Parallelisation
 rayon = "1.10"
 
 # Date/time
@@ -33,13 +50,49 @@ chrono = { version = "0.4", features = ["serde"] }
 thiserror = "2.0"
 anyhow = "1.0"
 
-# Serialization
+# Serialisation
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Configuration
+config = "0.14"
+
+# Async runtime
+tokio = { version = "1.42", features = ["full"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# CLI
+clap = { version = "4.4", features = ["derive"] }
+
+# Web frameworks
+axum = { version = "0.7", features = ["json"] }
+tonic = "0.12"
+prost = "0.13"
+
+# Python bindings
+pyo3 = { version = "0.22", features = ["extension-module"] }
+
+# XML parsing
+quick-xml = "0.37"
+
+# File formats
+csv = "1.3"
+parquet = { version = "54.0", default-features = false }
+
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres"] }
 
 # Testing
 approx = "0.5"
 proptest = "1.6"
 criterion = "0.5"
+
+# System
+num_cpus = "1.16"
 
 [profile.release]
 lto = true

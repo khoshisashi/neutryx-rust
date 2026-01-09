@@ -1,0 +1,68 @@
+[package]
+name = "runtime_server"
+description = "gRPC/REST API Server for Neutryx XVA Pricing Library"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "neutryx-server"
+path = "src/main.rs"
+
+[dependencies]
+# Workspace dependencies
+thiserror.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+
+# Async runtime
+tokio = { version = "1.42", features = ["full"] }
+
+# gRPC (Tonic)
+tonic = "0.12"
+prost = "0.13"
+
+# REST (Axum)
+axum = { version = "0.7", features = ["json"] }
+tower = "0.5"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
+# Serialisation
+serde_json = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Configuration
+config = "0.14"
+
+# System
+num_cpus = "1.16"
+
+# Internal dependencies (following A-I-P-R: R depends on P, I, A)
+pricer_core = { path = "../pricer_core" }
+pricer_models = { path = "../pricer_models" }
+pricer_optimiser = { path = "../pricer_optimiser" }
+pricer_pricing = { path = "../pricer_pricing" }
+pricer_risk = { path = "../pricer_risk" }
+infra_config = { path = "../infra_config" }
+infra_master = { path = "../infra_master" }
+infra_store = { path = "../infra_store" }
+adapter_feeds = { path = "../adapter_feeds" }
+adapter_loader = { path = "../adapter_loader" }
+
+[build-dependencies]
+tonic-build = "0.12"
+
+[features]
+default = ["rest"]
+# Enable REST API (Axum)
+rest = []
+# Enable gRPC API (Tonic)
+grpc = []
+
+[dev-dependencies]
+reqwest = { version = "0.12", features = ["json"] }

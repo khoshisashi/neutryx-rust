@@ -4,6 +4,23 @@ Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life
 
 ## Project Context
 
+### Architecture: A-I-P-R Stream
+
+The workspace enforces a strict unidirectional data flow:
+
+```text
+A: Adapter   → adapter_feeds, adapter_fpml, adapter_loader
+I: Infra     → infra_config, infra_master, infra_store
+P: Pricer    → pricer_core (L1), pricer_models (L2), pricer_optimiser (L2.5), pricer_pricing (L3), pricer_risk (L4)
+R: Runtime   → runtime_cli, runtime_python, runtime_server
+```
+
+**Dependency Rules**:
+1. **R**untimes may depend on any **P**, **I**, or **A** crate.
+2. **P**ricer crates must never depend on **R** or **A** crates.
+3. **I**nfra crates must never depend on **P** or **R** crates.
+4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **R**.
+
 ### Paths
 - Steering: `.kiro/steering/`
 - Specs: `.kiro/specs/`
@@ -11,7 +28,7 @@ Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life
 ### Steering vs Specification
 
 **Steering** (`.kiro/steering/`) - Guide AI with project-wide rules and context
-**Specs** (`.kiro/specs/`) - Formalize development process for individual features
+**Specs** (`.kiro/specs/`) - Formalise development process for individual features
 
 ### Active Specifications
 - Check `.kiro/specs/` for active specifications
@@ -19,6 +36,7 @@ Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life
 
 ## Development Guidelines
 - Think in English, generate responses in Japanese. All Markdown content written to project files (e.g., requirements.md, design.md, tasks.md, research.md, validation reports) MUST be written in the target language configured for this specification (see spec.json.language).
+- **British English**: Use `optimiser`, `serialisation`, `visualisation`, `modelling`
 
 ## Minimal Workflow
 - Phase 0 (optional): `/kiro:steering`, `/kiro:steering-custom`

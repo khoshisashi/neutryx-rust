@@ -117,7 +117,7 @@ CURRENT_RESULTS=$(find "$BENCHMARK_DIR" -name "*.json" -type f 2>/dev/null || tr
 
 if [[ -z "$CURRENT_RESULTS" ]]; then
     log_warn "No benchmark results found in $BENCHMARK_DIR"
-    log_info "Run 'cargo bench --bench kernel_iai' first"
+    log_info "Run 'cargo bench -p pricer_pricing --bench engine_iai' first"
     exit 0
 fi
 
@@ -287,7 +287,7 @@ if [[ $REGRESSED_BENCHMARKS -gt 0 ]]; then
         echo "  $REGRESSED_BENCHMARKS benchmark(s) exceeded the ${THRESHOLD}% threshold."
         echo ""
         echo "To update baseline after review:"
-        echo "  cargo bench --bench kernel_iai -- --save-baseline=$BASELINE"
+        echo "  cargo bench -p pricer_pricing --bench engine_iai -- --save-baseline=$BASELINE"
     fi
     exit 1
 else

@@ -2,6 +2,15 @@
 
 A production-grade **XVA (Credit Valuation Adjustment) pricing library** for derivatives portfolios, delivering bank-grade CVA/DVA/FVA calculations with cutting-edge performance through Enzyme automatic differentiation.
 
+## Architecture: A-I-P-R Stream
+
+The workspace enforces a strict unidirectional data flow that mirrors alphabetical order:
+
+1. **A**dapter: Ingestion and normalisation of external data (The Raw Inputs)
+2. **I**nfra: System-wide definitions, persistence, and configuration (The Foundation)
+3. **P**ricer: Mathematical modelling, optimisation, and risk computation (The Kernel)
+4. **R**untime: Execution environments and interfaces (The Outputs)
+
 ## Core Capabilities
 
 - **Credit Valuation Adjustments**: CVA, DVA, FVA calculations for derivatives portfolios
@@ -13,9 +22,9 @@ A production-grade **XVA (Credit Valuation Adjustment) pricing library** for der
 - **Thread-Local Buffer Pool**: Allocation-free simulation with RAII buffer management
 - **Path-Dependent Options**: Asian (arithmetic/geometric), Barrier (all 8 variants), Lookback (fixed/floating) with streaming statistics
 - **Analytical Solutions**: Geometric Asian (Kemna-Vorst), Barrier (Merton/Rubinstein-Reiner) for MC verification
-- **Portfolio Analytics**: Parallelized portfolio-level XVA computations with SoA optimization
+- **Portfolio Analytics**: Parallelised portfolio-level XVA computations with SoA optimisation
 - **Market Data Infrastructure**: AD-compatible yield curves and volatility surfaces with interpolation
-- **Model Calibration**: Swaption volatility surface calibration with Levenberg-Marquardt
+- **Model Calibration**: Swaption volatility surface calibration with Levenberg-Marquardt (pricer_optimiser)
 - **Interest Rate Models**: Hull-White, Cox-Ingersoll-Ross (CIR) with mean reversion
 - **Correlated Processes**: Multi-factor correlation via Cholesky decomposition
 
@@ -28,12 +37,13 @@ A production-grade **XVA (Credit Valuation Adjustment) pricing library** for der
 
 ## Value Proposition
 
-- **Isolation of Experimental Code**: 4-layer architecture confines nightly Rust/Enzyme to Layer 3, keeping 75% of codebase production-stable
+- **Unidirectional Data Flow**: A-I-P-R architecture ensures clear separation of concerns
+- **Isolation of Experimental Code**: Enzyme confined to pricer_pricing, keeping 75% of codebase production-stable
 - **Correctness First**: Built-in verification through dual AD backends (Enzyme + num-dual)
 - **Differentiability by Design**: Smooth approximations replace discontinuities throughout
-- **Performance Without Compromise**: Static dispatch and LLVM optimization for zero-cost abstractions
+- **Performance Without Compromise**: Static dispatch and LLVM optimisation for zero-cost abstractions
 
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-09_ — Added interest rate models (Hull-White, CIR) and correlated processes
+_Updated: 2026-01-09_ — Migrated to A-I-P-R architecture (v2.0)
 _Focus on patterns and purpose, not exhaustive feature lists_

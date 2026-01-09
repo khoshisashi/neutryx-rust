@@ -1,18 +1,25 @@
 # Project Structure
 
-## Organization Philosophy
+## Organisation Philosophy
 
-**Layer-Based Architecture with Dependency Flow**:
-Strict bottom-up dependencies, isolating experimental technology (Enzyme) to Layer 3 while keeping foundation and application stable.
+**A-I-P-R Unidirectional Data Flow**:
+The workspace structure enforces a strict unidirectional data flow that mirrors the alphabetical order of the directory names (**A**dapter → **I**nfra → **P**ricer → **R**untime). This logical progression ensures that the file system itself acts as an architectural map, guiding developers from data ingestion to computation and finally to delivery.
 
+```text
+A: Adapter   → Ingestion and normalisation of external data (The Raw Inputs)
+I: Infra     → System-wide definitions, persistence, and configuration (The Foundation)
+P: Pricer    → Mathematical modelling, optimisation, and risk computation (The Kernel)
+R: Runtime   → Execution environments and interfaces (The Outputs)
 ```
-L1 (pricer_core)    → No dependencies, pure Rust traits/types
-L2 (pricer_models)  → Depends on L1 only
-L3 (pricer_pricing) → Currently isolated (Phase 3.0), will integrate L1+L2 in Phase 4
-L4 (pricer_risk)    → Depends on L1+L2+L3, stable Rust
-```
 
-**Phase 3.0 Isolation**: L3 intentionally has zero pricer_* dependencies for complete Enzyme infrastructure isolation. L1/L2 integration planned for Phase 4.
+### Dependency Rules
+
+1. **R**untimes may depend on any **P**, **I**, or **A** crate.
+2. **P**ricer crates must never depend on **R** or **A** crates.
+3. **I**nfra crates must never depend on **P** or **R** crates.
+4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **R**.
+
+---
 
 ## Directory Patterns
 
@@ -22,15 +29,83 @@ L4 (pricer_risk)    → Depends on L1+L2+L3, stable Rust
 **Purpose**: Workspace configuration and top-level metadata
 **Key Files**:
 - `Cargo.toml` - Workspace members, shared dependencies, release profile
-- `rust-toolchain.toml` - Default stable toolchain (nightly pinned for L3)
+- `rust-toolchain.toml` - Default stable toolchain (nightly pinned for pricer_pricing)
 - `README.md` - User-facing documentation
 
-### Layer 1: Foundation (pricer_core)
+---
+
+## A: Adapter Layer (Input)
+
+**Responsibility**: To sanitise external chaos into internal order. This layer depends only on `pricer_core` (for types) and `infra_master` (for identifiers).
+
+### adapter_feeds
+
+**Location**: `crates/adapter_feeds/src/`
+**Purpose**: Real-time/Snapshot market data parsers
+**Function**: Handles connectivity to market data providers (Reuters, Bloomberg, internal lakes).
+**Scope**: Normalises raw quotes (Bid/Ask, Last) into standardised `MarketQuote` structs.
+
+### adapter_fpml
+
+**Location**: `crates/adapter_fpml/src/`
+**Purpose**: Trade definition parsers (FpML/XML)
+**Function**: Parses complex XML/FpML trade structures.
+**Scope**: Maps FpML elements to `pricer_models::Instrument` enums.
+
+### adapter_loader
+
+**Location**: `crates/adapter_loader/src/`
+**Purpose**: Flat file loaders (CSV/Parquet) & CSA details
+**Function**: Bulk loading of CSV, JSON, or Parquet files.
+**Scope**: Manages CSA (Credit Support Annex) terms, counterparty details, and netting set configurations.
+
+---
+
+## I: Infra Layer (Foundation)
+
+**Responsibility**: To provide the static foundation and persistence mechanisms required before calculation begins.
+
+### infra_config
+
+**Location**: `crates/infra_config/src/`
+**Purpose**: System configuration & environment management
+**Function**: Loads runtime settings (TOML/YAML/Env Vars).
+**Scope**: Defines memory limits for the AD engine, thread pool sizes, and database connection strings.
+
+### infra_master
+
+**Location**: `crates/infra_master/src/`
+**Purpose**: Static master data (Calendars, Currencies, ISINs)
+**Function**: The "Source of Truth" for static finance data.
+**Scope**: Holiday calendars (TARGET, NY, JP), Currency definitions (ISO 4217), and Day Count Convention lookups.
+
+### infra_store
+
+**Location**: `crates/infra_store/src/`
+**Purpose**: Persistence & State (SQLx, Redis, TimeScale)
+**Function**: Database Access Layer (DAL).
+**Scope**: Implements `Save` and `Load` traits for Trades and Risk Reports using `sqlx` (Postgres) or other backends. Isolates I/O dependencies from the kernel.
+
+---
+
+## P: Pricer Layer (The Kernel)
+
+**Responsibility**: Pure quantitative computation. Experimental AD technology (Enzyme) confined to pricer_pricing, keeping 75% of codebase production-stable.
+
+```text
+L1: pricer_core      → Foundation (Stable)
+L2: pricer_models    → Business Logic (Stable)
+L2.5: pricer_optimiser → Calibration & Solvers (Stable)
+L3: pricer_pricing   → AD Engine (Nightly + Enzyme)
+L4: pricer_risk      → Application (Stable)
+```
+
+### pricer_core (L1)
 
 **Location**: `crates/pricer_core/src/`
 **Purpose**: Math types, traits, smoothing functions, market data abstractions (stable Rust)
 **Structure**:
-```
+```text
 math/
 ├── smoothing.rs    → Smooth approximations (smooth_max, smooth_indicator)
 ├── interpolators/  → Interpolation methods (linear, bilinear, cubic_spline, monotonic, smooth_interp)
@@ -54,7 +129,7 @@ market_data/
 - Zero dependencies on other pricer_* crates, pure foundation
 - All market data structures generic over `T: Float` for AD compatibility
 
-### Layer 2: Business Logic (pricer_models)
+### pricer_models (L2)
 
 **Location**: `crates/pricer_models/src/`
 **Purpose**: Financial instruments and pricing models (stable Rust)
@@ -73,7 +148,6 @@ models/       → Stochastic models with unified trait interface
   ├── rates/    → Interest rate models: Hull-White, CIR (feature-gated)
   └── hybrid/   → Correlated multi-factor models (feature-gated)
 analytical/   → Closed-form solutions (Black-Scholes, Garman-Kohlhagen)
-calibration/  → Model calibration (Levenberg-Marquardt, swaption vol surface)
 schedules/    → Payment schedule generation (Frequency, Period, ScheduleBuilder)
 ```
 
@@ -88,7 +162,23 @@ schedules/    → Payment schedule generation (Frequency, Period, ScheduleBuilde
 - **StochasticModel Trait**: Unified interface for stochastic processes (`evolve_step`, `initial_state`, `brownian_dim`)
 - **StochasticModelEnum**: Static dispatch enum wrapping concrete models (GBM, Hull-White, CIR; future: Heston, SABR)
 
-### Layer 3: AD Engine (pricer_pricing)
+### pricer_optimiser (L2.5) [NEW]
+
+**Location**: `crates/pricer_optimiser/src/`
+**Purpose**: Calibration, Bootstrapping & Solvers
+**Position**: Logically sits between Models (Definition) and Pricing (Calculation).
+**Function**: Solves inverse problems to construct valid model objects.
+**Structure**:
+
+```text
+bootstrapping/  → Yield Curve stripping from OIS/Swap rates (multi-curve)
+calibration/    → Stochastic model calibration (Hull-White α/σ from swaptions)
+solvers/        → Levenberg-Marquardt, BFGS algorithms
+```
+
+**Integration**: Calls `pricer_pricing` to obtain gradients (via Enzyme) for efficient parameter search.
+
+### pricer_pricing (L3)
 
 **Location**: `crates/pricer_pricing/src/`
 **Purpose**: Monte Carlo + Enzyme AD (nightly Rust, LLVM plugin)
@@ -149,7 +239,7 @@ pool/            → Thread-local buffer pool (ThreadLocalPool, PooledBuffer, Po
 - `GreeksMode`: Calculation mode selection (BumpAndRevalue, AAD, NumDual)
 - `GreeksResult<T>`: Generic result type for Greeks calculations (AD-compatible)
 
-### Layer 4: Application (pricer_risk)
+### pricer_risk (L4)
 
 **Location**: `crates/pricer_risk/src/`
 **Purpose**: Portfolio analytics and XVA calculations (stable Rust)
@@ -160,17 +250,67 @@ portfolio/  → Trade, Counterparty, NettingSet, PortfolioBuilder
 exposure/   → EE, EPE, PFE, EEPE, ENE calculators
 xva/        → CVA, DVA, FVA calculators with XvaCalculator
 soa/        → Structure of Arrays (TradeSoA, ExposureSoA)
-parallel/   → Rayon-based parallelization config
+parallel/   → Rayon-based parallelisation config
 ```
 
 **Key Principle**: Consumer of L1+L2+L3, orchestrates portfolio-level computations with parallel processing.
 
-### Infrastructure
+---
+
+## R: Runtime Layer (Output)
+
+**Responsibility**: Delivery of results to end-users or systems.
+
+### runtime_cli
+
+**Location**: `crates/runtime_cli/src/`
+**Purpose**: Command Line Operations (Batch/Ops)
+**Function**: Operational entry point.
+**Commands**: `neutryx calibrate`, `neutryx price --portfolio trade_file.csv`.
+**Structure**:
+
+```text
+commands/   → Subcommand implementations (calibrate, price, report)
+config/     → CLI configuration loading
+main.rs     → Entry point with clap argument parsing
+```
+
+### runtime_python
+
+**Location**: `crates/runtime_python/src/`
+**Purpose**: PyO3 Bindings (Research/Jupyter)
+**Function**: Research interface (critical for PhD/JAX comparison).
+**Scope**: Exposes Rust structs as Python classes via PyO3. Allows direct manipulation of `pricer_optimiser` for notebook-based calibration experiments.
+**Structure**:
+
+```text
+bindings/   → PyO3 class wrappers (PyInstrument, PyModel, PyOptimiser)
+lib.rs      → Module registration and Python module definition
+```
+
+### runtime_server
+
+**Location**: `crates/runtime_server/src/`
+**Purpose**: gRPC/REST API (Microservices)
+**Function**: Production integration point.
+**Scope**: gRPC (Tonic) and REST (Axum) endpoints for microservice deployment.
+**Structure**:
+
+```text
+grpc/       → Tonic service implementations
+rest/       → Axum route handlers
+proto/      → Protocol buffer definitions
+main.rs     → Server entry point
+```
+
+---
+
+## Infrastructure
 
 **Docker**: `docker/`
 
-- `Dockerfile.stable` - L1/L2/L4 builds (no Enzyme)
-- `Dockerfile.nightly` - L3 with Enzyme LLVM plugin
+- `Dockerfile.stable` - A/I/P/R builds (no Enzyme)
+- `Dockerfile.nightly` - pricer_pricing with Enzyme LLVM plugin
 
 **Scripts**: `scripts/`
 
@@ -180,18 +320,19 @@ parallel/   → Rayon-based parallelization config
 
 **CI/CD**: `.github/workflows/`
 
-- `ci.yml` - Separate jobs for stable (L1/L2/L4) and nightly (L3)
-- `release.yml` - Release automation and changelog generation (Phase 6)
+- `ci.yml` - Separate jobs for stable and nightly builds
+- `release.yml` - Release automation and changelog generation
 
-## Naming Conventions
+## Naming Conventions (British English)
 
-- **Crates**: `pricer_*` prefix, snake_case (`pricer_core`, `pricer_pricing`)
+- **Spelling**: Strictly adhere to British English (e.g., `optimiser`, `serialisation`, `visualisation`, `modelling`)
+- **Crates**: Layer prefix, snake_case (`adapter_feeds`, `infra_config`, `pricer_core`, `runtime_cli`)
 - **Modules**: snake_case (`monte_carlo`, `smoothing`)
 - **Traits**: PascalCase (`Priceable`, `Differentiable`)
-- **Types**: PascalCase (`DualNumber`, `VanillaOption`)
+- **Types**: PascalCase (`DualNumber`, `VanillaOption`, `CalibrationEngine`)
 - **Functions**: snake_case (`smooth_max`, `price_european`)
 
-## Import Organization
+## Import Organisation
 
 **Absolute imports** for cross-crate dependencies:
 
@@ -210,27 +351,15 @@ use super::types::DualNumber;
 
 **No path aliases** - workspace imports are explicit.
 
-## Code Organization Principles
+## Code Organisation Principles
 
-1. **Bottom-Up Dependencies**: No circular dependencies, L4 never imported by L1/L2/L3
-2. **Feature Flag Isolation**: L1 supports both `num-dual-mode` (default) and `enzyme-mode`
-3. **Static Dispatch**: Prefer `enum` over `Box<dyn Trait>` for Enzyme optimization
+1. **A-I-P-R Data Flow**: Unidirectional dependencies from Adapter → Infra → Pricer → Runtime
+2. **Feature Flag Isolation**: pricer_core supports both `num-dual-mode` (default) and `enzyme-mode`
+3. **Static Dispatch**: Prefer `enum` over `Box<dyn Trait>` for Enzyme optimisation
 4. **Smooth by Default**: All discontinuous functions have smooth approximations
 5. **Test Co-Location**: Unit tests in same file as implementation (`#[cfg(test)]`)
 
-## Phase-Based Development
-
-Current roadmap (see README.md):
-
-- Phase 0: Workspace scaffolding (complete)
-- Phase 1: L1 foundation - types, traits, smoothing, market data (complete)
-- Phase 2: L2 business logic - instruments, models (complete)
-- Phase 3: L3 Enzyme integration - AD infrastructure, MC kernel (largely complete; Phase 3.2 bump-and-revalue Greeks)
-- Phase 4: Advanced MC - checkpointing, path-dependent options, analytical solutions (complete)
-- Phase 5: L4 XVA - CVA/DVA/FVA, exposure metrics, parallelization (complete)
-- Phase 6: Production hardening - docs, benchmarks, CI/CD (in progress)
-
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-09_ — Added rates models (Hull-White, CIR) and hybrid/correlated model structure
+_Updated: 2026-01-09_ — Migrated to A-I-P-R architecture (v2.0)
 _Document patterns, not file trees. New files following patterns should not require updates_

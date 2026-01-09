@@ -2,43 +2,64 @@
 
 ## Architecture
 
-**4-Layer Isolation Design**: Experimental AD technology confined to Layer 3, enabling 75% of codebase to use stable Rust while isolating Enzyme (nightly Rust + LLVM plugin) dependencies.
+**A-I-P-R Unidirectional Data Flow**: The workspace enforces a strict unidirectional data flow mirroring alphabetical order (**A**dapter → **I**nfra → **P**ricer → **R**untime). This logical progression guides developers from data ingestion to computation and finally to delivery.
 
 ```text
-L1: pricer_core     → Foundation (Stable)
-L2: pricer_models   → Business Logic (Stable)
-L3: pricer_pricing  → AD Engine (Nightly + Enzyme, currently isolated)
-L4: pricer_risk     → Application (Stable)
+A: Adapter   → adapter_feeds, adapter_fpml, adapter_loader
+I: Infra     → infra_config, infra_master, infra_store
+P: Pricer    → pricer_core (L1), pricer_models (L2), pricer_optimiser (L2.5), pricer_pricing (L3), pricer_risk (L4)
+R: Runtime   → runtime_cli, runtime_python, runtime_server
 ```
 
-**Phase 3.0 Note**: L3 currently has zero pricer_* dependencies (complete isolation). L1/L2 integration planned for Phase 4.
+**Dependency Rules**:
+1. **R**untimes may depend on any **P**, **I**, or **A** crate.
+2. **P**ricer crates must never depend on **R** or **A** crates.
+3. **I**nfra crates must never depend on **P** or **R** crates.
+4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **R**.
 
 ## Core Technologies
 
 - **Language**: Rust Edition 2021
-- **Nightly Toolchain**: `nightly-2025-01-15` (workspace default, L3-first development)
-- **Stable Compatibility**: L1/L2/L4 (pricer_core, pricer_models, pricer_risk) can build on stable when excluding L3
+- **Nightly Toolchain**: `nightly-2025-01-15` (workspace default, pricer_pricing-first development)
+- **Stable Compatibility**: All crates except pricer_pricing can build on stable
 - **AD Backend**: Enzyme LLVM plugin (LLVM 18 required)
 - **Build System**: Cargo workspace with resolver = "2"
 
 ## Key Libraries
 
+### Core
 - **Numeric**: `num-traits`, `num-dual` (verification mode)
-- **Parallelization**: `rayon` (portfolio-level parallelism)
+- **Parallelisation**: `rayon` (portfolio-level parallelism)
 - **Random**: `rand`, `rand_distr` (Monte Carlo, Ziggurat algorithm for normals)
 - **Time**: `chrono` (date arithmetic, day count conventions)
-- **LLVM Bindings**: `llvm-sys = "180"` (optional, `enzyme-ad` feature in L3)
-- **Serialization**: `serde` (optional, ISO 4217 currency support)
+- **LLVM Bindings**: `llvm-sys = "180"` (optional, `enzyme-ad` feature in pricer_pricing)
+- **Serialisation**: `serde` (optional, ISO 4217 currency support)
 - **Error Handling**: `thiserror` (structured error types)
 - **Testing**: `approx`, `proptest`, `criterion`
 - **Benchmarking**: `criterion` (time-based), `iai-callgrind` (instruction-count for CI reproducibility)
+
+### Adapter Layer
+- **XML Parsing**: `quick-xml` (FpML parsing in adapter_fpml)
+- **File Formats**: `csv`, `parquet` (data loading in adapter_loader)
+- **Market Data**: WebSocket/REST clients for adapter_feeds
+
+### Infra Layer
+- **Configuration**: `config` crate (TOML/YAML/Env vars in infra_config)
+- **Database**: `sqlx` (async PostgreSQL in infra_store)
+- **Caching**: `redis` (optional, state management)
+
+### Runtime Layer
+- **CLI**: `clap` (argument parsing in runtime_cli)
+- **Python Bindings**: `pyo3` (runtime_python)
+- **gRPC**: `tonic` (runtime_server)
+- **REST**: `axum` (runtime_server)
 
 ## Development Standards
 
 ### Type Safety
 
 - Strict type checking, no `unsafe` except in Enzyme bindings
-- Static dispatch via `enum` (not `Box<dyn Trait>`) for Enzyme optimization
+- Static dispatch via `enum` (not `Box<dyn Trait>`) for Enzyme optimisation
 - Per-instrument configurable `smoothing_epsilon` for differentiability
 
 ### Code Quality
@@ -64,7 +85,7 @@ L4: pricer_risk     → Application (Stable)
 ### Required Tools
 
 - Rust nightly-2025-01-15 (workspace default)
-- LLVM 18 (for Enzyme in L3)
+- LLVM 18 (for Enzyme in pricer_pricing)
 - Docker (recommended for reproducible Enzyme builds)
 
 ### Common Commands
@@ -74,7 +95,7 @@ L4: pricer_risk     → Application (Stable)
 cargo build --workspace --exclude pricer_pricing
 cargo test --workspace --exclude pricer_pricing
 
-# Dev (with Enzyme - L3)
+# Dev (with Enzyme - pricer_pricing)
 export RUSTFLAGS="-C llvm-args=-load=/usr/local/lib/LLVMEnzyme-18.so"
 cargo +nightly build -p pricer_pricing
 cargo +nightly test -p pricer_pricing
@@ -88,21 +109,24 @@ docker run -it neutryx-enzyme
 
 | Decision | Rationale |
 |----------|-----------|
-| **4-Layer Architecture** | Isolate experimental Enzyme code (L3) from stable production code (L1/L2/L4) |
+| **A-I-P-R Architecture** | Unidirectional data flow from Adapters through Infrastructure and Pricing to Runtimes |
+| **Pricer Layer Hierarchy** | L1→L2→L2.5→L3→L4 isolates experimental Enzyme code |
 | **Static Dispatch (enum)** | Enzyme performs better with concrete types than trait objects |
 | **StochasticModel Trait** | Unified interface for stochastic processes with enum-based dispatch |
 | **Dual-Mode Verification** | Enzyme (performance) + num-dual (correctness) for validation |
 | **Smooth Approximations** | Replace all discontinuities (if/max) with differentiable functions |
-| **Feature Flags** | `num-dual-mode` (default), `enzyme-mode`, `serde` for serialization; Asset classes: `equity` (default), `rates`, `credit`, `fx`, `commodity`, `exotic`; Convenience: `all` |
+| **Feature Flags** | `num-dual-mode` (default), `enzyme-mode`, `serde` for serialisation; Asset classes: `equity` (default), `rates`, `credit`, `fx`, `commodity`, `exotic`; Convenience: `all` |
 
-## Performance Optimization
+## Performance Optimisation
 
-- **LTO**: Link-time optimization enabled in release profile
-- **Single Codegen Unit**: `codegen-units = 1` for maximum optimization
-- **Structure of Arrays (SoA)**: Memory layout for vectorization (L4)
+- **LTO**: Link-time optimisation enabled in release profile
+- **Single Codegen Unit**: `codegen-units = 1` for maximum optimisation
+- **Structure of Arrays (SoA)**: Memory layout for vectorisation (pricer_risk)
 - **Rayon Parallelism**: Portfolio-level parallel processing
 
 ---
+_Created: 2025-12-29_
+_Updated: 2026-01-09_ — Migrated to A-I-P-R architecture (v2.0)
 _Created: 2025-12-29_
 _Updated: 2026-01-09_ — Updated feature flags (added commodity, exotic, all)
 _Document standards and patterns, not every dependency_

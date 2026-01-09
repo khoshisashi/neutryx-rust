@@ -6,41 +6,63 @@ A production-grade XVA (Credit Valuation Adjustment) pricing library in Rust, po
 
 - **Bank-grade pricing**: CVA, DVA, FVA calculations for derivatives portfolios
 - **Cutting-edge AD**: Enzyme (LLVM-level AD) for C++-competitive performance
-- **Production stability**: 4-layer architecture isolating experimental code
+- **Production stability**: A-I-P-R architecture isolating experimental code
 - **Dual-mode verification**: Enzyme vs num-dual for correctness validation
 
 ## 🏗️ Architecture
 
-### 4-Layer Design
+### A-I-P-R Unidirectional Data Flow
 
-```
+The workspace structure enforces a strict unidirectional data flow that mirrors the alphabetical order (**A**dapter → **I**nfra → **P**ricer → **R**untime). This logical progression ensures that the file system itself acts as an architectural map.
+
+```text
 neutryx-rust/
 ├── crates/
-│   ├── pricer_core/      # L1: Foundation (Stable Rust)
-│   ├── pricer_models/    # L2: Business Logic (Stable Rust)
-│   ├── pricer_pricing/    # L3: AD Engine (Nightly Rust + Enzyme)
-│   └── pricer_risk/       # L4: Application (Stable Rust)
+│   │
+│   │   # --- A: Adapter Layer (Input) ---
+│   ├── adapter_feeds/        # Real-time/Snapshot market data parsers
+│   ├── adapter_fpml/         # Trade definition parsers (FpML/XML)
+│   ├── adapter_loader/       # Flat file loaders (CSV/Parquet) & CSA details
+│   │
+│   │   # --- I: Infra Layer (Foundation) ---
+│   ├── infra_config/         # System configuration & environment management
+│   ├── infra_master/         # Static master data (Calendars, Currencies, ISINs)
+│   ├── infra_store/          # Persistence & State (SQLx, Redis, TimeScale)
+│   │
+│   │   # --- P: Pricer Layer (The Kernel) ---
+│   ├── pricer_core/          # L1: Math, Traits, Types (Stable)
+│   ├── pricer_models/        # L2: Instrument Definitions & Stochastic Models
+│   ├── pricer_optimiser/     # L2.5: Calibration, Bootstrapping & Solvers
+│   ├── pricer_pricing/       # L3: AD Engine (Enzyme) & Monte Carlo Kernel
+│   ├── pricer_risk/          # L4: XVA, Portfolio Risk & Aggregation
+│   │
+│   │   # --- R: Runtime Layer (Output) ---
+│   ├── runtime_cli/          # Command Line Operations (Batch/Ops)
+│   ├── runtime_python/       # PyO3 Bindings (Research/Jupyter)
+│   └── runtime_server/       # gRPC/REST API (Microservices)
 ```
 
-| Layer | Purpose | Rust | Enzyme | Status |
-|-------|---------|------|--------|--------|
-| L1: pricer_core | Math types, traits, smoothing | Stable | No | ✅ Complete |
-| L2: pricer_models | Instruments, models, analytical | Stable | No | ✅ Complete |
-| L3: pricer_pricing | Monte Carlo, Enzyme AD | **Nightly** | **Yes** | 🚧 In Progress |
-| L4: pricer_risk | Portfolio, XVA, parallelization | Stable | No | ✅ Complete |
+### Layer Overview
 
-### Design Principles
+| Layer | Crates | Purpose | Rust | Enzyme |
+|-------|--------|---------|------|--------|
+| **A**dapter | adapter_* | External data ingestion | Stable | No |
+| **I**nfra | infra_* | Configuration, persistence | Stable | No |
+| **P**ricer | pricer_* | Quantitative computation | Mixed | L3 only |
+| **R**untime | runtime_* | User interfaces | Stable | No |
 
-1. **Enzyme Isolation**: Experimental AD code confined to L3 only
-2. **Static Dispatch**: Enum-based instruments (not `dyn Trait`) for Enzyme optimization
-3. **Smooth Approximations**: All discontinuities smoothed for differentiability
-4. **Dual-Mode Verification**: Both Enzyme and num-dual backends for validation
+### Dependency Rules
+
+1. **R**untimes may depend on any **P**, **I**, or **A** crate.
+2. **P**ricer crates must never depend on **R** or **A** crates.
+3. **I**nfra crates must never depend on **P** or **R** crates.
+4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **R**.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- **Rust**: Stable (for L1/L2/L4) + Nightly (for L3)
+- **Rust**: Stable (for most crates) + Nightly (for pricer_pricing)
 - **LLVM 18**: Required for Enzyme
 - **Docker**: Recommended for reproducible builds
 
@@ -55,14 +77,14 @@ rustup component add --toolchain nightly-2025-01-15 rustfmt clippy
 ### Build (Stable Crates Only)
 
 ```bash
-# Build L1, L2, L4 (no Enzyme required)
+# Build all except pricer_pricing (no Enzyme required)
 cargo build --workspace --exclude pricer_pricing
 
 # Run tests
 cargo test --workspace --exclude pricer_pricing
 ```
 
-### Build with Enzyme (L3)
+### Build with Enzyme (pricer_pricing)
 
 #### Option 1: Docker (Recommended)
 
@@ -91,9 +113,52 @@ cargo +nightly build -p pricer_pricing
 cargo +nightly test -p pricer_pricing
 ```
 
+### CLI Usage
+
+```bash
+# Build the CLI
+cargo build -p runtime_cli --release
+
+# Check system configuration
+./target/release/neutryx check
+
+# Price a portfolio
+./target/release/neutryx price --portfolio trades.csv
+
+# Calibrate a model
+./target/release/neutryx calibrate --market-data swaptions.csv --model-type hull-white
+```
+
+### Server Usage
+
+```bash
+# Start the REST API server
+cargo run -p runtime_server
+
+# Health check
+curl http://localhost:8080/health
+
+# Price an instrument
+curl -X POST http://localhost:8080/api/v1/price \
+  -H "Content-Type: application/json" \
+  -d '{"instrument_type": "vanilla_option", "strike": 100, "expiry": 1.0, "spot": 100, "volatility": 0.2, "rate": 0.05}'
+```
+
+### Python Usage
+
+```bash
+# Build Python bindings (requires maturin)
+pip install maturin
+cd crates/runtime_python
+maturin develop
+
+# Use in Python
+python -c "import neutryx; print(neutryx.version())"
+```
+
 ## 📚 Documentation
 
-- **[Implementation Plan](/.claude/plans/bubbly-conjuring-torvalds.md)**: Complete technical design
+- **[System Design Document](docs/design/SDD.md)**: Architecture details
 - **API Docs**: `cargo doc --open` (stable crates)
 
 ## 🧪 Testing
@@ -123,48 +188,13 @@ cargo bench
 
 ## 🛠️ Development
 
-### Project Structure
-
-```
-neutryx-rust/
-├── crates/
-│   ├── pricer_core/src/
-│   │   ├── math/              # Smoothing functions
-│   │   ├── traits/            # Priceable, Differentiable
-│   │   └── types/             # Dual numbers, time
-│   ├── pricer_models/src/
-│   │   ├── analytical/        # Black-Scholes, barriers
-│   │   ├── instruments/       # Options, swaps
-│   │   └── models/            # Stochastic models
-│   │       ├── equity/        # GBM (feature-gated)
-│   │       ├── rates/         # Hull-White, CIR (feature-gated)
-│   │       └── hybrid/        # Correlated multi-factor (feature-gated)
-│   ├── pricer_pricing/src/
-│   │   ├── enzyme/            # Enzyme bindings
-│   │   ├── mc/                # Monte Carlo kernel
-│   │   ├── checkpoint/        # Memory management
-│   │   └── verify/            # Verification tests
-│   └── pricer_risk/src/
-│       ├── portfolio/         # Trade structures
-│       ├── xva/               # CVA, DVA, FVA
-│       ├── soa/               # Structure of Arrays
-│       └── parallel/          # Rayon parallelization
-├── docker/
-│   ├── Dockerfile.stable      # L1/L2/L4 builds
-│   └── Dockerfile.nightly     # L3 with Enzyme
-├── scripts/
-│   ├── install_enzyme.sh      # Enzyme installation
-│   └── verify_enzyme.sh       # Enzyme verification
-└── .github/workflows/
-    └── ci.yml                 # CI/CD pipeline
-```
-
 ### Coding Guidelines
 
-1. **Smoothing**: Use `smooth_max`, `smooth_indicator` instead of `if` conditions
-2. **Static Dispatch**: Prefer `enum` over `Box<dyn Trait>`
-3. **Per-Instrument Epsilon**: Each instrument has configurable `smoothing_epsilon`
-4. **Enzyme-Friendly Loops**: Use fixed-size `for` loops, not `while`
+1. **British English**: Use `optimiser`, `serialisation`, `modelling`
+2. **Smoothing**: Use `smooth_max`, `smooth_indicator` instead of `if` conditions
+3. **Static Dispatch**: Prefer `enum` over `Box<dyn Trait>`
+4. **Per-Instrument Epsilon**: Each instrument has configurable `smoothing_epsilon`
+5. **Enzyme-Friendly Loops**: Use fixed-size `for` loops, not `while`
 
 ### Feature Flags
 
@@ -188,7 +218,8 @@ neutryx-rust/
 - [ ] **Phase 3**: Enzyme integration (L3) - AD bindings, verification
 - [ ] **Phase 4**: Advanced MC - checkpointing, path-dependent options
 - [x] **Phase 5**: XVA application (L4) - CVA, DVA, FVA, exposure metrics
-- [ ] **Phase 6**: Production hardening - docs, benchmarks, CI/CD
+- [x] **Phase 6**: A-I-P-R Architecture - adapters, infra, runtime layers
+- [ ] **Phase 7**: Production hardening - docs, benchmarks, CI/CD
 
 ## 📊 Performance Targets
 
@@ -206,33 +237,20 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
-Contributions welcome! Please:
+Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-Ensure all tests pass:
 ```bash
-# Stable crates
-cargo test --workspace --exclude pricer_pricing
-
-# Pricer kernel (requires Enzyme)
-cargo +nightly test -p pricer_pricing
-
-# Formatting and linting
+# Before submitting
 cargo fmt --all -- --check
-cargo clippy --all-targets --all-features -- -D warnings
+cargo clippy --all-targets -- -D warnings
+cargo test --workspace --exclude pricer_pricing
 ```
 
 ## 🔗 References
 
 - [Enzyme AD](https://enzyme.mit.edu/) - LLVM-level automatic differentiation
 - [XVA Pricing](https://en.wikipedia.org/wiki/XVA) - Credit valuation adjustment
-- [Implementation Plan](/.claude/plans/bubbly-conjuring-torvalds.md) - Full technical design
 
 ---
 
-**Status**: ✅ Phases 1, 2, 5 complete | 🚧 Phase 3 (Enzyme AD) in progress
+**Status**: ✅ A-I-P-R architecture implemented | 🚧 Phase 3 (Enzyme AD) in progress
