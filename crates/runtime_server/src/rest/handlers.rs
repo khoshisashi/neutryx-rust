@@ -116,16 +116,13 @@ pub async fn price_instrument(
 
             let is_call = request.is_call.unwrap_or(true);
             if is_call {
-                request.spot * nd1
-                    - request.strike * (-request.rate * request.expiry).exp() * nd2
+                request.spot * nd1 - request.strike * (-request.rate * request.expiry).exp() * nd2
             } else {
                 request.strike * (-request.rate * request.expiry).exp() * normal_cdf(-d2)
                     - request.spot * normal_cdf(-d1)
             }
         }
-        "forward" => {
-            request.spot * (request.rate * request.expiry).exp() - request.strike
-        }
+        "forward" => request.spot * (request.rate * request.expiry).exp() - request.strike,
         other => {
             return Err(ServerError::InvalidRequest(format!(
                 "Unknown instrument type: {}",

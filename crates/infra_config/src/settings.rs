@@ -5,7 +5,7 @@ use config::{Config, Environment, File};
 use serde::Deserialize;
 
 /// Main application settings.
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, Default)]
 pub struct Settings {
     /// Engine configuration
     #[serde(default)]
@@ -33,15 +33,6 @@ impl Settings {
 
         let settings: Settings = config.try_deserialize()?;
         Ok(settings)
-    }
-}
-
-impl Default for Settings {
-    fn default() -> Self {
-        Self {
-            engine: EngineConfig::default(),
-            database: DatabaseConfig::default(),
-        }
     }
 }
 

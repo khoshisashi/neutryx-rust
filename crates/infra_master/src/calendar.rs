@@ -98,7 +98,7 @@ impl Calendar {
             (1, 1) |   // New Year's Day
             (5, 1) |   // Labour Day
             (12, 25) | // Christmas Day
-            (12, 26)   // Boxing Day
+            (12, 26) // Boxing Day
         )
     }
 
@@ -111,7 +111,7 @@ impl Calendar {
             (month, day),
             (1, 1) |   // New Year's Day
             (7, 4) |   // Independence Day
-            (12, 25)   // Christmas Day
+            (12, 25) // Christmas Day
         )
     }
 
@@ -124,7 +124,7 @@ impl Calendar {
             (month, day),
             (1, 1) |   // New Year's Day
             (1, 2) |   // Bank Holiday
-            (1, 3)     // Bank Holiday
+            (1, 3) // Bank Holiday
         )
     }
 
@@ -137,7 +137,7 @@ impl Calendar {
             (month, day),
             (1, 1) |   // New Year's Day
             (12, 25) | // Christmas Day
-            (12, 26)   // Boxing Day
+            (12, 26) // Boxing Day
         )
     }
 }

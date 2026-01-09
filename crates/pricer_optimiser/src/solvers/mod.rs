@@ -4,11 +4,11 @@
 //! - Levenberg-Marquardt for nonlinear least squares
 //! - BFGS for general unconstrained optimisation
 
-mod levenberg_marquardt;
 mod bfgs;
+mod levenberg_marquardt;
 
-pub use levenberg_marquardt::{LevenbergMarquardt, LevenbergMarquardtConfig};
 pub use bfgs::{Bfgs, BfgsConfig};
+pub use levenberg_marquardt::{LevenbergMarquardt, LevenbergMarquardtConfig};
 
 /// Optimisation result.
 #[derive(Debug, Clone)]

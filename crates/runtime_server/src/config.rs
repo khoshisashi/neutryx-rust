@@ -50,15 +50,13 @@ impl ServerConfig {
             .map(|v| v.parse().unwrap_or(true))
             .unwrap_or(true);
 
-        let rest_addr = std::env::var("NEUTRYX_REST_ADDR")
-            .unwrap_or_else(|_| default_rest_addr());
+        let rest_addr = std::env::var("NEUTRYX_REST_ADDR").unwrap_or_else(|_| default_rest_addr());
 
         let grpc_enabled = std::env::var("NEUTRYX_GRPC_ENABLED")
             .map(|v| v.parse().unwrap_or(false))
             .unwrap_or(false);
 
-        let grpc_addr = std::env::var("NEUTRYX_GRPC_ADDR")
-            .unwrap_or_else(|_| default_grpc_addr());
+        let grpc_addr = std::env::var("NEUTRYX_GRPC_ADDR").unwrap_or_else(|_| default_grpc_addr());
 
         let workers = std::env::var("NEUTRYX_WORKERS")
             .map(|v| v.parse().unwrap_or_else(|_| default_workers()))

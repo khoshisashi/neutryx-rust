@@ -7,12 +7,7 @@ use tracing::info;
 use crate::{CliError, Result};
 
 /// Run the price command
-pub fn run(
-    portfolio: &str,
-    date: Option<&str>,
-    num_paths: usize,
-    format: &str,
-) -> Result<()> {
+pub fn run(portfolio: &str, date: Option<&str>, num_paths: usize, format: &str) -> Result<()> {
     info!("Starting pricing...");
     info!("  Portfolio: {}", portfolio);
     info!("  Date: {}", date.unwrap_or("today"));

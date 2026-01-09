@@ -142,8 +142,7 @@ pub fn price_black_scholes(
     if option.is_call {
         spot * nd1 - option.strike * (-rate * option.expiry).exp() * nd2
     } else {
-        option.strike * (-rate * option.expiry).exp() * normal_cdf(-d2)
-            - spot * normal_cdf(-d1)
+        option.strike * (-rate * option.expiry).exp() * normal_cdf(-d2) - spot * normal_cdf(-d1)
     }
 }
 

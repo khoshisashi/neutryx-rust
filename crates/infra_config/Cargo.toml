@@ -18,6 +18,9 @@ anyhow.workspace = true
 # Serialisation
 serde = { workspace = true }
 
+# System utilities
+num_cpus.workspace = true
+
 [features]
 default = []
 

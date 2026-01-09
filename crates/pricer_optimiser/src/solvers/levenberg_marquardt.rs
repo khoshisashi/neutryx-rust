@@ -69,6 +69,7 @@ impl LevenbergMarquardt {
     /// # Returns
     ///
     /// An `OptimisationResult` containing the optimal parameters.
+    #[allow(clippy::needless_range_loop)]
     pub fn solve<F>(
         &self,
         initial: &[f64],
@@ -182,11 +183,14 @@ impl Default for LevenbergMarquardt {
 fn solve_linear_system(a: &[Vec<f64>], b: &[f64]) -> Result<Vec<f64>, OptimiserError> {
     let n = b.len();
     if a.len() != n || a.iter().any(|row| row.len() != n) {
-        return Err(OptimiserError::InvalidBounds("Matrix dimension mismatch".to_string()));
+        return Err(OptimiserError::InvalidBounds(
+            "Matrix dimension mismatch".to_string(),
+        ));
     }
 
     // Create augmented matrix
-    let mut aug: Vec<Vec<f64>> = a.iter()
+    let mut aug: Vec<Vec<f64>> = a
+        .iter()
         .zip(b.iter())
         .map(|(row, bi)| {
             let mut new_row = row.clone();
@@ -249,16 +253,14 @@ mod tests {
     #[test]
     fn test_rosenbrock() {
         let lm = LevenbergMarquardt::new();
-        
+
         // Minimise (1-x)² + 100(y-x²)² starting from (-1, 1)
         // Optimal at (1, 1)
-        let residuals = |p: &[f64]| {
-            vec![1.0 - p[0], 10.0 * (p[1] - p[0] * p[0])]
-        };
+        let residuals = |p: &[f64]| vec![1.0 - p[0], 10.0 * (p[1] - p[0] * p[0])];
 
         let result = lm.solve(&[-1.0, 1.0], residuals);
         assert!(result.is_ok());
-        
+
         let result = result.unwrap();
         assert!((result.parameters[0] - 1.0).abs() < 0.1);
         assert!((result.parameters[1] - 1.0).abs() < 0.1);

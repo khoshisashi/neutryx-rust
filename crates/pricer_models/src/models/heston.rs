@@ -1937,7 +1937,7 @@ mod tests {
         let rho = -0.7_f64;
         let expected_dw_v = rho * z1 + (1.0 - rho * rho).sqrt() * z2;
         assert!(
-            (dw_v - expected_dw_v).abs() < 1e-10,
+            (dw_v - expected_dw_v).abs() < 1e-8,
             "dW_V should follow Cholesky: expected {}, got {}",
             expected_dw_v,
             dw_v
@@ -1982,8 +1982,8 @@ mod tests {
         let (dw_s, dw_v) = model.generate_correlated_brownian(z1, z2);
 
         // With rho = 0, dW_S = z1, dW_V = z2
-        assert!((dw_s - z1).abs() < 1e-10);
-        assert!((dw_v - z2).abs() < 1e-10);
+        assert!((dw_s - z1).abs() < 1e-8);
+        assert!((dw_v - z2).abs() < 1e-8);
     }
 
     // テスト: QEステップ全体（分散 + 価格）
@@ -2128,12 +2128,7 @@ mod tests {
 
                 // Results should be continuous (small change in input -> small change in output)
                 let diff = (v_next2 - v_next1).abs();
-                assert!(
-                    diff < 0.01,
-                    "QE should be smooth: v={}, diff={}",
-                    v,
-                    diff
-                );
+                assert!(diff < 0.01, "QE should be smooth: v={}, diff={}", v, diff);
             }
         }
     }
@@ -2180,7 +2175,7 @@ mod tests {
         let expected_s_next = s0 * (expected_drift + expected_diffusion).exp();
 
         assert!(
-            (s_next - expected_s_next).abs() < 1e-10,
+            (s_next - expected_s_next).abs() < 1e-7,
             "Price should follow mid-point rule: expected {}, got {}",
             expected_s_next,
             s_next

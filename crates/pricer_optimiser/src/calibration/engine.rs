@@ -68,6 +68,7 @@ impl CalibrationEngine {
     /// # Returns
     ///
     /// A `CalibrationResult` containing the calibrated parameters.
+    #[allow(clippy::needless_range_loop)]
     pub fn calibrate<F>(
         &self,
         initial_params: &[f64],
@@ -162,11 +163,11 @@ mod tests {
     #[test]
     fn test_simple_calibration() {
         let engine = CalibrationEngine::new();
-        
+
         // Simple test: calibrate a = 2 such that a * x = y
         let market_prices = vec![2.0, 4.0, 6.0]; // y = 2x for x = 1, 2, 3
         let initial = vec![1.0]; // Start with a = 1
-        
+
         let pricer = |params: &[f64]| {
             let a = params[0];
             vec![a * 1.0, a * 2.0, a * 3.0]
@@ -174,7 +175,7 @@ mod tests {
 
         let result = engine.calibrate(&initial, &market_prices, pricer);
         assert!(result.is_ok());
-        
+
         let result = result.unwrap();
         assert!((result.parameters[0] - 2.0).abs() < 0.1);
     }

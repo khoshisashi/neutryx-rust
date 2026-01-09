@@ -63,6 +63,7 @@ impl Bfgs {
     /// # Returns
     ///
     /// An `OptimisationResult` containing the optimal parameters.
+    #[allow(clippy::needless_range_loop)]
     pub fn minimise<F>(
         &self,
         initial: &[f64],
@@ -112,7 +113,11 @@ impl Bfgs {
             let slope: f64 = p.iter().zip(g.iter()).map(|(pi, gi)| pi * gi).sum();
 
             for _ in 0..self.config.max_line_search {
-                let x_new: Vec<f64> = x.iter().zip(p.iter()).map(|(xi, pi)| xi + alpha * pi).collect();
+                let x_new: Vec<f64> = x
+                    .iter()
+                    .zip(p.iter())
+                    .map(|(xi, pi)| xi + alpha * pi)
+                    .collect();
                 let f_new = objective(&x_new);
                 func_evals += 1;
 
@@ -156,6 +161,7 @@ impl Bfgs {
     }
 
     /// Compute gradient via finite differences.
+    #[allow(clippy::needless_range_loop)]
     fn gradient<F>(&self, x: &[f64], objective: &F, func_evals: &mut usize) -> Vec<f64>
     where
         F: Fn(&[f64]) -> f64,
@@ -177,6 +183,7 @@ impl Bfgs {
     }
 
     /// BFGS inverse Hessian update.
+    #[allow(clippy::needless_range_loop)]
     fn bfgs_update(&self, h_inv: &mut [Vec<f64>], s: &[f64], y: &[f64], sy: f64) {
         let n = s.len();
         let rho = 1.0 / sy;
@@ -193,7 +200,8 @@ impl Bfgs {
 
         for i in 0..n {
             for j in 0..n {
-                h_inv[i][j] += rho * ((1.0 + rho * yhy) * s[i] * s[j] - hy[i] * s[j] - s[i] * hy[j]);
+                h_inv[i][j] +=
+                    rho * ((1.0 + rho * yhy) * s[i] * s[j] - hy[i] * s[j] - s[i] * hy[j]);
             }
         }
     }
@@ -212,13 +220,13 @@ mod tests {
     #[test]
     fn test_quadratic() {
         let bfgs = Bfgs::new();
-        
+
         // Minimise (x-2)² + (y-3)² starting from (0, 0)
         let objective = |p: &[f64]| (p[0] - 2.0).powi(2) + (p[1] - 3.0).powi(2);
 
         let result = bfgs.minimise(&[0.0, 0.0], objective);
         assert!(result.is_ok());
-        
+
         let result = result.unwrap();
         assert!((result.parameters[0] - 2.0).abs() < 0.01);
         assert!((result.parameters[1] - 3.0).abs() < 0.01);

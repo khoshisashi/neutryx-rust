@@ -1,7 +1,7 @@
 //! Curve bootstrapping implementation.
 
-use crate::error::OptimiserError;
 use crate::bootstrapping::BootstrapResult;
+use crate::error::OptimiserError;
 
 /// Configuration for curve bootstrapping.
 #[derive(Debug, Clone)]
@@ -37,6 +37,7 @@ pub enum InterpolationMethod {
 
 /// Curve bootstrapper for yield curve construction.
 pub struct CurveBootstrapper {
+    #[allow(dead_code)] // Will be used when bootstrap implementation is completed
     config: BootstrapConfig,
 }
 
@@ -83,7 +84,7 @@ impl CurveBootstrapper {
 
         // Simple bootstrapping (iterative stripping)
         let mut discount_factors = Vec::with_capacity(pillars.len());
-        
+
         for (i, (&t, &rate)) in pillars.iter().zip(swap_rates.iter()).enumerate() {
             let df = if i == 0 {
                 // First pillar: df = 1 / (1 + r * t)
@@ -92,13 +93,17 @@ impl CurveBootstrapper {
                 // Subsequent pillars: solve for df using previous discount factors
                 let mut sum = 0.0;
                 for j in 0..i {
-                    let dt = if j == 0 { pillars[j] } else { pillars[j] - pillars[j - 1] };
+                    let dt = if j == 0 {
+                        pillars[j]
+                    } else {
+                        pillars[j] - pillars[j - 1]
+                    };
                     sum += rate * dt * discount_factors[j];
                 }
                 let dt_last = t - pillars[i - 1];
                 (1.0 - sum) / (1.0 + rate * dt_last)
             };
-            
+
             discount_factors.push(df);
         }
 

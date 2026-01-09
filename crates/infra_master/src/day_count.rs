@@ -1,12 +1,13 @@
 //! Day count convention definitions.
 
 /// Day count convention for interest calculations.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DayCountConvention {
     /// Actual/360
     Actual360,
     /// Actual/365 Fixed
+    #[default]
     Actual365Fixed,
     /// Actual/365.25
     Actual36525,
@@ -22,11 +23,7 @@ pub enum DayCountConvention {
 
 impl DayCountConvention {
     /// Calculate the year fraction between two dates.
-    pub fn year_fraction(
-        &self,
-        start: chrono::NaiveDate,
-        end: chrono::NaiveDate,
-    ) -> f64 {
+    pub fn year_fraction(&self, start: chrono::NaiveDate, end: chrono::NaiveDate) -> f64 {
         let days = (end - start).num_days() as f64;
 
         match self {
@@ -39,9 +36,7 @@ impl DayCountConvention {
             }
             DayCountConvention::Thirty360Bond
             | DayCountConvention::Thirty360European
-            | DayCountConvention::ThirtyE360Isda => {
-                self.thirty_360_days(start, end) / 360.0
-            }
+            | DayCountConvention::ThirtyE360Isda => self.thirty_360_days(start, end) / 360.0,
         }
     }
 
@@ -65,12 +60,6 @@ impl DayCountConvention {
         };
 
         (360 * (y2 - y1) + 30 * (m2 - m1) + (d2_adj - d1_adj)) as f64
-    }
-}
-
-impl Default for DayCountConvention {
-    fn default() -> Self {
-        DayCountConvention::Actual365Fixed
     }
 }
 

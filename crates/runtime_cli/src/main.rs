@@ -113,26 +113,18 @@ fn main() -> Result<()> {
             market_data,
             model_type,
             output,
-        } => {
-            commands::calibrate::run(&market_data, &model_type, output.as_deref())
-        }
+        } => commands::calibrate::run(&market_data, &model_type, output.as_deref()),
         Commands::Price {
             portfolio,
             date,
             num_paths,
             format,
-        } => {
-            commands::price::run(&portfolio, date.as_deref(), num_paths, &format)
-        }
+        } => commands::price::run(&portfolio, date.as_deref(), num_paths, &format),
         Commands::Report {
             report_type,
             portfolio,
             output_dir,
-        } => {
-            commands::report::run(&report_type, &portfolio, &output_dir)
-        }
-        Commands::Check => {
-            commands::check::run()
-        }
+        } => commands::report::run(&report_type, &portfolio, &output_dir),
+        Commands::Check => commands::check::run(),
     }
 }
