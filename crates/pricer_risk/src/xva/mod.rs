@@ -75,7 +75,7 @@ use std::collections::HashMap;
 /// Configuration for XVA calculations.
 ///
 /// Holds parameters that apply across all netting sets and counterparties.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct XvaConfig {
     /// Own credit parameters for DVA calculation.
     pub own_credit: Option<OwnCreditParams>,
@@ -83,16 +83,6 @@ pub struct XvaConfig {
     pub funding: FundingParams,
     /// Whether to enable bilateral CVA/DVA calculations.
     pub bilateral: bool,
-}
-
-impl Default for XvaConfig {
-    fn default() -> Self {
-        Self {
-            own_credit: None,
-            funding: FundingParams::zero(),
-            bilateral: false,
-        }
-    }
 }
 
 impl XvaConfig {

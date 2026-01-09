@@ -10,18 +10,13 @@ use pricer_core::traits::calibration::{
 use super::{ModelCalibrator, ModelCalibratorConfig};
 
 /// Type of volatility used in calibration.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum VolatilityType {
     /// Log-normal (Black76) volatility.
+    #[default]
     LogNormal,
     /// Normal (Bachelier) volatility.
     Normal,
-}
-
-impl Default for VolatilityType {
-    fn default() -> Self {
-        Self::LogNormal
-    }
 }
 
 /// A single point on the swaption volatility surface.

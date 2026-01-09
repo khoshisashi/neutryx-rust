@@ -623,7 +623,7 @@ impl<T: Float> HestonModel<T> {
     /// QE scheme matches the first two moments:
     /// - E[V_{t+dt}|V_t] = theta + (V_t - theta) * exp(-kappa * dt)
     /// - Var[V_{t+dt}|V_t] = (V_t * xi^2 * exp(-kappa*dt) / kappa) * (1 - exp(-kappa*dt))
-    ///                     + (theta * xi^2 / (2*kappa)) * (1 - exp(-kappa*dt))^2
+    ///   + (theta * xi^2 / (2*kappa)) * (1 - exp(-kappa*dt))^2
     pub fn compute_qe_moments(&self, v_current: T, dt: T) -> (T, T, T) {
         let kappa = self.params.kappa;
         let theta = self.params.theta;

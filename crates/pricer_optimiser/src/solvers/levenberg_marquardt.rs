@@ -217,8 +217,9 @@ fn solve_linear_system(a: &[Vec<f64>], b: &[f64]) -> Result<Vec<f64>, OptimiserE
         // Eliminate column
         for k in (i + 1)..n {
             let factor = aug[k][i] / aug[i][i];
-            for j in i..=n {
-                aug[k][j] -= factor * aug[i][j];
+            let aug_i_slice: Vec<f64> = aug[i][i..=n].to_vec();
+            for (aug_k_j, aug_i_j) in aug[k][i..=n].iter_mut().zip(aug_i_slice.iter()) {
+                *aug_k_j -= factor * aug_i_j;
             }
         }
     }
