@@ -2,14 +2,14 @@
 
 A production-grade **XVA (Credit Valuation Adjustment) pricing library** for derivatives portfolios, delivering bank-grade CVA/DVA/FVA calculations with cutting-edge performance through Enzyme automatic differentiation.
 
-## Architecture: A-I-P-R Stream
+## Architecture: A-I-P-S Stream
 
 The workspace enforces a strict unidirectional data flow that mirrors alphabetical order:
 
 1. **A**dapter: Ingestion and normalisation of external data (The Raw Inputs)
 2. **I**nfra: System-wide definitions, persistence, and configuration (The Foundation)
 3. **P**ricer: Mathematical modelling, optimisation, and risk computation (The Kernel)
-4. **R**untime: Execution environments and interfaces (The Outputs)
+4. **S**ervice: Execution environments and interfaces (The Outputs)
 
 ## Core Capabilities
 
@@ -37,7 +37,7 @@ The workspace enforces a strict unidirectional data flow that mirrors alphabetic
 
 ## Value Proposition
 
-- **Unidirectional Data Flow**: A-I-P-R architecture ensures clear separation of concerns
+- **Unidirectional Data Flow**: A-I-P-S architecture ensures clear separation of concerns
 - **Isolation of Experimental Code**: Enzyme confined to pricer_pricing, keeping 75% of codebase production-stable
 - **Correctness First**: Built-in verification through dual AD backends (Enzyme + num-dual)
 - **Differentiability by Design**: Smooth approximations replace discontinuities throughout
@@ -45,5 +45,5 @@ The workspace enforces a strict unidirectional data flow that mirrors alphabetic
 
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-09_ — Migrated to A-I-P-R architecture (v2.0)
+_Updated: 2026-01-09_ — Migrated to A-I-P-S architecture (v2.1)
 _Focus on patterns and purpose, not exhaustive feature lists_

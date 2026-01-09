@@ -1,5 +1,5 @@
 [package]
-name = "runtime_python"
+name = "service_python"
 description = "PyO3 Python Bindings for Neutryx XVA Pricing Library"
 version.workspace = true
 edition.workspace = true
@@ -19,7 +19,7 @@ pyo3 = { version = "0.22", features = ["extension-module"] }
 thiserror.workspace = true
 num-traits.workspace = true
 
-# Internal dependencies (following A-I-P-R: R depends on P, I, A)
+# Internal dependencies (following A-I-P-S: S depends on P, I, A)
 pricer_core = { path = "../pricer_core" }
 pricer_models = { path = "../pricer_models" }
 pricer_optimiser = { path = "../pricer_optimiser" }

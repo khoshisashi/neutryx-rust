@@ -25,10 +25,31 @@
 
 <!-- Mark which crate(s) are modified -->
 
+### Pricer Layer
+
 - [ ] pricer_core (L1)
 - [ ] pricer_models (L2)
+- [ ] pricer_optimiser (L2.5)
 - [ ] pricer_pricing (L3)
 - [ ] pricer_risk (L4)
+
+### Service Layer
+
+- [ ] service_cli
+- [ ] service_gateway
+- [ ] service_python
+
+### Infra Layer
+
+- [ ] infra_config
+- [ ] infra_master
+- [ ] infra_store
+
+### Adapter Layer
+
+- [ ] adapter_feeds
+- [ ] adapter_fpml
+- [ ] adapter_loader
 
 ## Changes Made
 

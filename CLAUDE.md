@@ -4,7 +4,7 @@ Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life
 
 ## Project Context
 
-### Architecture: A-I-P-R Stream
+### Architecture: A-I-P-S Stream
 
 The workspace enforces a strict unidirectional data flow:
 
@@ -12,14 +12,14 @@ The workspace enforces a strict unidirectional data flow:
 A: Adapter   → adapter_feeds, adapter_fpml, adapter_loader
 I: Infra     → infra_config, infra_master, infra_store
 P: Pricer    → pricer_core (L1), pricer_models (L2), pricer_optimiser (L2.5), pricer_pricing (L3), pricer_risk (L4)
-R: Runtime   → runtime_cli, runtime_python, runtime_server
+S: Service   → service_cli, service_gateway, service_python
 ```
 
 **Dependency Rules**:
-1. **R**untimes may depend on any **P**, **I**, or **A** crate.
-2. **P**ricer crates must never depend on **R** or **A** crates.
-3. **I**nfra crates must never depend on **P** or **R** crates.
-4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **R**.
+1. **S**ervices may depend on any **P**, **I**, or **A** crate.
+2. **P**ricer crates must never depend on **S** or **A** crates.
+3. **I**nfra crates must never depend on **P** or **S** crates.
+4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **S**.
 
 ### Paths
 - Steering: `.kiro/steering/`

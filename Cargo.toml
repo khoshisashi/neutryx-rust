@@ -17,10 +17,10 @@ members = [
     "crates/pricer_pricing",
     "crates/pricer_risk",
 
-    # --- R: Runtime Layer (Output) ---
-    "crates/runtime_cli",
-    "crates/runtime_python",
-    "crates/runtime_server",
+    # --- S: Service Layer (Output) ---
+    "crates/service_cli",
+    "crates/service_gateway",
+    "crates/service_python",
 ]
 resolver = "2"
 

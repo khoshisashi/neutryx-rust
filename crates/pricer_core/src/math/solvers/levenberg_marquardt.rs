@@ -398,8 +398,8 @@ fn solve_cholesky(a: &[Vec<f64>], b: &[f64]) -> Option<Vec<f64>> {
     for i in 0..n {
         for j in 0..=i {
             let mut sum = a[i][j];
-            for k in 0..j {
-                sum -= l[i][k] * l[j][k];
+            for (l_ik, l_jk) in l[i].iter().take(j).zip(l[j].iter().take(j)) {
+                sum -= l_ik * l_jk;
             }
 
             if i == j {

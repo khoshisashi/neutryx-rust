@@ -3104,82 +3104,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "runtime_cli"
-version = "0.1.0"
-dependencies = [
- "adapter_feeds",
- "adapter_fpml",
- "adapter_loader",
- "anyhow",
- "clap",
- "config",
- "infra_config",
- "infra_master",
- "infra_store",
- "num_cpus",
- "pricer_core",
- "pricer_models",
- "pricer_optimiser",
- "pricer_pricing",
- "pricer_risk",
- "rayon",
- "serde",
- "tempfile",
- "thiserror",
- "toml",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "runtime_python"
-version = "0.1.0"
-dependencies = [
- "infra_config",
- "infra_master",
- "num-traits",
- "pricer_core",
- "pricer_models",
- "pricer_optimiser",
- "pricer_pricing",
- "pricer_risk",
- "pyo3",
- "thiserror",
-]
-
-[[package]]
-name = "runtime_server"
-version = "0.1.0"
-dependencies = [
- "adapter_feeds",
- "adapter_loader",
- "anyhow",
- "axum",
- "config",
- "infra_config",
- "infra_master",
- "infra_store",
- "num_cpus",
- "pricer_core",
- "pricer_models",
- "pricer_optimiser",
- "pricer_pricing",
- "pricer_risk",
- "prost",
- "reqwest",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "tonic",
- "tonic-build",
- "tower 0.5.2",
- "tower-http 0.5.2",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "rust-ini"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3409,6 +3333,82 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "service_cli"
+version = "0.1.0"
+dependencies = [
+ "adapter_feeds",
+ "adapter_fpml",
+ "adapter_loader",
+ "anyhow",
+ "clap",
+ "config",
+ "infra_config",
+ "infra_master",
+ "infra_store",
+ "num_cpus",
+ "pricer_core",
+ "pricer_models",
+ "pricer_optimiser",
+ "pricer_pricing",
+ "pricer_risk",
+ "rayon",
+ "serde",
+ "tempfile",
+ "thiserror",
+ "toml",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "service_gateway"
+version = "0.1.0"
+dependencies = [
+ "adapter_feeds",
+ "adapter_loader",
+ "anyhow",
+ "axum",
+ "config",
+ "infra_config",
+ "infra_master",
+ "infra_store",
+ "num_cpus",
+ "pricer_core",
+ "pricer_models",
+ "pricer_optimiser",
+ "pricer_pricing",
+ "pricer_risk",
+ "prost",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tonic",
+ "tonic-build",
+ "tower 0.5.2",
+ "tower-http 0.5.2",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "service_python"
+version = "0.1.0"
+dependencies = [
+ "infra_config",
+ "infra_master",
+ "num-traits",
+ "pricer_core",
+ "pricer_models",
+ "pricer_optimiser",
+ "pricer_pricing",
+ "pricer_risk",
+ "pyo3",
+ "thiserror",
 ]
 
 [[package]]

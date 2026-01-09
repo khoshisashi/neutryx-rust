@@ -34,8 +34,8 @@ pub fn run() -> Result<()> {
     println!("  CPU cores: {}", num_cpus::get());
     println!();
 
-    // Check available modules (A-I-P-R architecture)
-    println!("Available Modules (A-I-P-R Architecture):");
+    // Check available modules (A-I-P-S architecture)
+    println!("Available Modules (A-I-P-S Architecture):");
     println!();
     println!("  [A] Adapter Layer:");
     println!("    ✓ adapter_feeds");
@@ -54,10 +54,10 @@ pub fn run() -> Result<()> {
     println!("    ✓ pricer_pricing (L3)");
     println!("    ✓ pricer_risk (L4)");
     println!();
-    println!("  [R] Runtime Layer:");
-    println!("    ✓ runtime_cli");
-    println!("    ✓ runtime_python");
-    println!("    ✓ runtime_server");
+    println!("  [S] Service Layer:");
+    println!("    ✓ service_cli");
+    println!("    ✓ service_gateway");
+    println!("    ✓ service_python");
     println!();
 
     println!("All checks passed!");

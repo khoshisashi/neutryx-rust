@@ -2,22 +2,22 @@
 
 ## Organisation Philosophy
 
-**A-I-P-R Unidirectional Data Flow**:
-The workspace structure enforces a strict unidirectional data flow that mirrors the alphabetical order of the directory names (**A**dapter → **I**nfra → **P**ricer → **R**untime). This logical progression ensures that the file system itself acts as an architectural map, guiding developers from data ingestion to computation and finally to delivery.
+**A-I-P-S Unidirectional Data Flow**:
+The workspace structure enforces a strict unidirectional data flow that mirrors the alphabetical order of the directory names (**A**dapter → **I**nfra → **P**ricer → **S**ervice). This logical progression ensures that the file system itself acts as an architectural map, guiding developers from data ingestion to computation and finally to delivery.
 
 ```text
 A: Adapter   → Ingestion and normalisation of external data (The Raw Inputs)
 I: Infra     → System-wide definitions, persistence, and configuration (The Foundation)
 P: Pricer    → Mathematical modelling, optimisation, and risk computation (The Kernel)
-R: Runtime   → Execution environments and interfaces (The Outputs)
+S: Service   → Execution environments and interfaces (The Outputs)
 ```
 
 ### Dependency Rules
 
-1. **R**untimes may depend on any **P**, **I**, or **A** crate.
-2. **P**ricer crates must never depend on **R** or **A** crates.
-3. **I**nfra crates must never depend on **P** or **R** crates.
-4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **R**.
+1. **S**ervices may depend on any **P**, **I**, or **A** crate.
+2. **P**ricer crates must never depend on **S** or **A** crates.
+3. **I**nfra crates must never depend on **P** or **S** crates.
+4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **S**.
 
 ---
 
@@ -257,13 +257,13 @@ parallel/   → Rayon-based parallelisation config
 
 ---
 
-## R: Runtime Layer (Output)
+## S: Service Layer (Output)
 
 **Responsibility**: Delivery of results to end-users or systems.
 
-### runtime_cli
+### service_cli
 
-**Location**: `crates/runtime_cli/src/`
+**Location**: `crates/service_cli/src/`
 **Purpose**: Command Line Operations (Batch/Ops)
 **Function**: Operational entry point.
 **Commands**: `neutryx calibrate`, `neutryx price --portfolio trade_file.csv`.
@@ -275,23 +275,10 @@ config/     → CLI configuration loading
 main.rs     → Entry point with clap argument parsing
 ```
 
-### runtime_python
+### service_gateway
 
-**Location**: `crates/runtime_python/src/`
-**Purpose**: PyO3 Bindings (Research/Jupyter)
-**Function**: Research interface (critical for PhD/JAX comparison).
-**Scope**: Exposes Rust structs as Python classes via PyO3. Allows direct manipulation of `pricer_optimiser` for notebook-based calibration experiments.
-**Structure**:
-
-```text
-bindings/   → PyO3 class wrappers (PyInstrument, PyModel, PyOptimiser)
-lib.rs      → Module registration and Python module definition
-```
-
-### runtime_server
-
-**Location**: `crates/runtime_server/src/`
-**Purpose**: gRPC/REST API (Microservices)
+**Location**: `crates/service_gateway/src/`
+**Purpose**: gRPC/REST API Gateway (Microservices)
 **Function**: Production integration point.
 **Scope**: gRPC (Tonic) and REST (Axum) endpoints for microservice deployment.
 **Structure**:
@@ -303,13 +290,26 @@ proto/      → Protocol buffer definitions
 main.rs     → Server entry point
 ```
 
+### service_python
+
+**Location**: `crates/service_python/src/`
+**Purpose**: PyO3 Bindings (Research/Jupyter)
+**Function**: Research interface (critical for PhD/JAX comparison).
+**Scope**: Exposes Rust structs as Python classes via PyO3. Allows direct manipulation of `pricer_optimiser` for notebook-based calibration experiments.
+**Structure**:
+
+```text
+bindings/   → PyO3 class wrappers (PyInstrument, PyModel, PyOptimiser)
+lib.rs      → Module registration and Python module definition
+```
+
 ---
 
 ## Infrastructure
 
 **Docker**: `docker/`
 
-- `Dockerfile.stable` - A/I/P/R builds (no Enzyme)
+- `Dockerfile.stable` - A/I/P/S builds (no Enzyme)
 - `Dockerfile.nightly` - pricer_pricing with Enzyme LLVM plugin
 
 **Scripts**: `scripts/`
@@ -326,7 +326,7 @@ main.rs     → Server entry point
 ## Naming Conventions (British English)
 
 - **Spelling**: Strictly adhere to British English (e.g., `optimiser`, `serialisation`, `visualisation`, `modelling`)
-- **Crates**: Layer prefix, snake_case (`adapter_feeds`, `infra_config`, `pricer_core`, `runtime_cli`)
+- **Crates**: Layer prefix, snake_case (`adapter_feeds`, `infra_config`, `pricer_core`, `service_cli`)
 - **Modules**: snake_case (`monte_carlo`, `smoothing`)
 - **Traits**: PascalCase (`Priceable`, `Differentiable`)
 - **Types**: PascalCase (`DualNumber`, `VanillaOption`, `CalibrationEngine`)
@@ -353,7 +353,7 @@ use super::types::DualNumber;
 
 ## Code Organisation Principles
 
-1. **A-I-P-R Data Flow**: Unidirectional dependencies from Adapter → Infra → Pricer → Runtime
+1. **A-I-P-S Data Flow**: Unidirectional dependencies from Adapter → Infra → Pricer → Service
 2. **Feature Flag Isolation**: pricer_core supports both `num-dual-mode` (default) and `enzyme-mode`
 3. **Static Dispatch**: Prefer `enum` over `Box<dyn Trait>` for Enzyme optimisation
 4. **Smooth by Default**: All discontinuous functions have smooth approximations
@@ -361,5 +361,5 @@ use super::types::DualNumber;
 
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-09_ — Migrated to A-I-P-R architecture (v2.0)
+_Updated: 2026-01-09_ — Migrated to A-I-P-S architecture (v2.1)
 _Document patterns, not file trees. New files following patterns should not require updates_

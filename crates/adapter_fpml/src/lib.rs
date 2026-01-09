@@ -7,7 +7,7 @@
 //!
 //! ## Architecture Position
 //!
-//! Part of the **A**dapter layer in the A-I-P-R architecture.
+//! Part of the **A**dapter layer in the A-I-P-S architecture.
 //! Depends on `pricer_core` (for types), `pricer_models` (for instrument definitions),
 //! and `infra_master` (for identifiers).
 //!

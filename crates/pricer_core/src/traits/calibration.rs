@@ -266,7 +266,7 @@ impl Default for ParameterBounds {
 }
 
 /// Constraint types for calibration.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub enum Constraint {
     /// Parameter bounds constraint.
     Bounds {

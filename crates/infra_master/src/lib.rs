@@ -9,8 +9,8 @@
 //!
 //! ## Architecture Position
 //!
-//! Part of the **I**nfra layer in the A-I-P-R architecture.
-//! Must not depend on **P**ricer or **R**untime crates.
+//! Part of the **I**nfra layer in the A-I-P-S architecture.
+//! Must not depend on **P**ricer or **S**ervice crates.
 //!
 //! ## Example
 //!

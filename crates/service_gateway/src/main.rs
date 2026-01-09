@@ -4,7 +4,7 @@
 //!
 //! # Architecture
 //!
-//! As part of the **R**untime layer in the A-I-P-R architecture, this crate
+//! As part of the **S**ervice layer in the A-I-P-S architecture, this crate
 //! provides network interfaces for microservice deployment.
 //!
 //! # Endpoints

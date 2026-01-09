@@ -40,6 +40,7 @@ pub struct PriceResponse {
 
 /// Portfolio pricing request
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct PortfolioRequest {
     pub instruments: Vec<PriceRequest>,
     pub compute_greeks: Option<bool>,
@@ -54,6 +55,7 @@ pub struct PortfolioResponse {
 
 /// Calibration request
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct CalibrateRequest {
     pub model_type: String,
     pub market_data: serde_json::Value,
@@ -69,6 +71,7 @@ pub struct CalibrateResponse {
 
 /// Exposure request
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct ExposureRequest {
     pub portfolio: Vec<PriceRequest>,
     pub time_grid: Vec<f64>,

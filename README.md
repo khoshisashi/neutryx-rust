@@ -6,14 +6,14 @@ A production-grade XVA (Credit Valuation Adjustment) pricing library in Rust, po
 
 - **Bank-grade pricing**: CVA, DVA, FVA calculations for derivatives portfolios
 - **Cutting-edge AD**: Enzyme (LLVM-level AD) for C++-competitive performance
-- **Production stability**: A-I-P-R architecture isolating experimental code
+- **Production stability**: A-I-P-S architecture isolating experimental code
 - **Dual-mode verification**: Enzyme vs num-dual for correctness validation
 
 ## 🏗️ Architecture
 
-### A-I-P-R Unidirectional Data Flow
+### A-I-P-S Unidirectional Data Flow
 
-The workspace structure enforces a strict unidirectional data flow that mirrors the alphabetical order (**A**dapter → **I**nfra → **P**ricer → **R**untime). This logical progression ensures that the file system itself acts as an architectural map.
+The workspace structure enforces a strict unidirectional data flow that mirrors the alphabetical order (**A**dapter → **I**nfra → **P**ricer → **S**ervice). This logical progression ensures that the file system itself acts as an architectural map.
 
 ```text
 neutryx-rust/
@@ -36,10 +36,10 @@ neutryx-rust/
 │   ├── pricer_pricing/       # L3: AD Engine (Enzyme) & Monte Carlo Kernel
 │   ├── pricer_risk/          # L4: XVA, Portfolio Risk & Aggregation
 │   │
-│   │   # --- R: Runtime Layer (Output) ---
-│   ├── runtime_cli/          # Command Line Operations (Batch/Ops)
-│   ├── runtime_python/       # PyO3 Bindings (Research/Jupyter)
-│   └── runtime_server/       # gRPC/REST API (Microservices)
+│   │   # --- S: Service Layer (Output) ---
+│   ├── service_cli/          # Command Line Operations (Batch/Ops)
+│   ├── service_gateway/      # gRPC/REST API Gateway (Microservices)
+│   └── service_python/       # PyO3 Bindings (Research/Jupyter)
 ```
 
 ### Layer Overview
@@ -49,14 +49,14 @@ neutryx-rust/
 | **A**dapter | adapter_* | External data ingestion | Stable | No |
 | **I**nfra | infra_* | Configuration, persistence | Stable | No |
 | **P**ricer | pricer_* | Quantitative computation | Mixed | L3 only |
-| **R**untime | runtime_* | User interfaces | Stable | No |
+| **S**ervice | service_* | User interfaces | Stable | No |
 
 ### Dependency Rules
 
-1. **R**untimes may depend on any **P**, **I**, or **A** crate.
-2. **P**ricer crates must never depend on **R** or **A** crates.
-3. **I**nfra crates must never depend on **P** or **R** crates.
-4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **R**.
+1. **S**ervices may depend on any **P**, **I**, or **A** crate.
+2. **P**ricer crates must never depend on **S** or **A** crates.
+3. **I**nfra crates must never depend on **P** or **S** crates.
+4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **S**.
 
 ## 🚀 Quick Start
 
@@ -117,7 +117,7 @@ cargo +nightly test -p pricer_pricing
 
 ```bash
 # Build the CLI
-cargo build -p runtime_cli --release
+cargo build -p service_cli --release
 
 # Check system configuration
 ./target/release/neutryx check
@@ -133,7 +133,7 @@ cargo build -p runtime_cli --release
 
 ```bash
 # Start the REST API server
-cargo run -p runtime_server
+cargo run -p service_gateway
 
 # Health check
 curl http://localhost:8080/health
@@ -149,7 +149,7 @@ curl -X POST http://localhost:8080/api/v1/price \
 ```bash
 # Build Python bindings (requires maturin)
 pip install maturin
-cd crates/runtime_python
+cd crates/service_python
 maturin develop
 
 # Use in Python
@@ -218,7 +218,7 @@ cargo bench
 - [ ] **Phase 3**: Enzyme integration (L3) - AD bindings, verification
 - [ ] **Phase 4**: Advanced MC - checkpointing, path-dependent options
 - [x] **Phase 5**: XVA application (L4) - CVA, DVA, FVA, exposure metrics
-- [x] **Phase 6**: A-I-P-R Architecture - adapters, infra, runtime layers
+- [x] **Phase 6**: A-I-P-S Architecture - adapters, infra, service layers
 - [ ] **Phase 7**: Production hardening - docs, benchmarks, CI/CD
 
 ## 📊 Performance Targets
@@ -253,4 +253,4 @@ cargo test --workspace --exclude pricer_pricing
 
 ---
 
-**Status**: ✅ A-I-P-R architecture implemented | 🚧 Phase 3 (Enzyme AD) in progress
+**Status**: ✅ A-I-P-S architecture implemented | 🚧 Phase 3 (Enzyme AD) in progress

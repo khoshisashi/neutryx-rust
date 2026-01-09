@@ -8,7 +8,8 @@ use std::path::Path;
 use crate::{CliError, Result};
 
 /// CLI configuration
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
+#[allow(dead_code)]
 pub struct CliConfig {
     /// General settings
     #[serde(default)]
@@ -25,6 +26,7 @@ pub struct CliConfig {
 
 /// General CLI settings
 #[derive(Debug, Deserialize, Default)]
+#[allow(dead_code)]
 pub struct GeneralConfig {
     /// Log level
     #[serde(default = "default_log_level")]
@@ -37,6 +39,7 @@ pub struct GeneralConfig {
 
 /// Pricing configuration
 #[derive(Debug, Deserialize, Default)]
+#[allow(dead_code)]
 pub struct PricingConfig {
     /// Default number of Monte Carlo paths
     #[serde(default = "default_num_paths")]
@@ -53,6 +56,7 @@ pub struct PricingConfig {
 
 /// Database configuration
 #[derive(Debug, Deserialize, Default)]
+#[allow(dead_code)]
 pub struct DatabaseConfig {
     /// Database URL
     #[serde(default)]
@@ -85,6 +89,7 @@ fn default_pool_size() -> u32 {
 
 impl CliConfig {
     /// Load configuration from a TOML file
+    #[allow(dead_code)]
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
 
@@ -101,12 +106,3 @@ impl CliConfig {
     }
 }
 
-impl Default for CliConfig {
-    fn default() -> Self {
-        Self {
-            general: GeneralConfig::default(),
-            pricing: PricingConfig::default(),
-            database: DatabaseConfig::default(),
-        }
-    }
-}

@@ -7,7 +7,7 @@
 //!
 //! ## Architecture Position
 //!
-//! Layer 2.5 in the **P**ricer layer of the A-I-P-R architecture.
+//! Layer 2.5 in the **P**ricer layer of the A-I-P-S architecture.
 //! Depends on `pricer_core` (L1) and `pricer_models` (L2).
 //! Can optionally use `pricer_pricing` (L3) for gradient computation via Enzyme.
 //!

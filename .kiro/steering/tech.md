@@ -2,20 +2,20 @@
 
 ## Architecture
 
-**A-I-P-R Unidirectional Data Flow**: The workspace enforces a strict unidirectional data flow mirroring alphabetical order (**A**dapter → **I**nfra → **P**ricer → **R**untime). This logical progression guides developers from data ingestion to computation and finally to delivery.
+**A-I-P-S Unidirectional Data Flow**: The workspace enforces a strict unidirectional data flow mirroring alphabetical order (**A**dapter → **I**nfra → **P**ricer → **S**ervice). This logical progression guides developers from data ingestion to computation and finally to delivery.
 
 ```text
 A: Adapter   → adapter_feeds, adapter_fpml, adapter_loader
 I: Infra     → infra_config, infra_master, infra_store
 P: Pricer    → pricer_core (L1), pricer_models (L2), pricer_optimiser (L2.5), pricer_pricing (L3), pricer_risk (L4)
-R: Runtime   → runtime_cli, runtime_python, runtime_server
+S: Service   → service_cli, service_gateway, service_python
 ```
 
 **Dependency Rules**:
-1. **R**untimes may depend on any **P**, **I**, or **A** crate.
-2. **P**ricer crates must never depend on **R** or **A** crates.
-3. **I**nfra crates must never depend on **P** or **R** crates.
-4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **R**.
+1. **S**ervices may depend on any **P**, **I**, or **A** crate.
+2. **P**ricer crates must never depend on **S** or **A** crates.
+3. **I**nfra crates must never depend on **P** or **S** crates.
+4. **A**dapter crates depend only on **I** (for definitions) or **P** (for target types), never on **S**.
 
 ## Core Technologies
 
@@ -48,11 +48,11 @@ R: Runtime   → runtime_cli, runtime_python, runtime_server
 - **Database**: `sqlx` (async PostgreSQL in infra_store)
 - **Caching**: `redis` (optional, state management)
 
-### Runtime Layer
-- **CLI**: `clap` (argument parsing in runtime_cli)
-- **Python Bindings**: `pyo3` (runtime_python)
-- **gRPC**: `tonic` (runtime_server)
-- **REST**: `axum` (runtime_server)
+### Service Layer
+- **CLI**: `clap` (argument parsing in service_cli)
+- **Python Bindings**: `pyo3` (service_python)
+- **gRPC**: `tonic` (service_gateway)
+- **REST**: `axum` (service_gateway)
 
 ## Development Standards
 
@@ -109,7 +109,7 @@ docker run -it neutryx-enzyme
 
 | Decision | Rationale |
 |----------|-----------|
-| **A-I-P-R Architecture** | Unidirectional data flow from Adapters through Infrastructure and Pricing to Runtimes |
+| **A-I-P-S Architecture** | Unidirectional data flow from Adapters through Infrastructure and Pricing to Services |
 | **Pricer Layer Hierarchy** | L1→L2→L2.5→L3→L4 isolates experimental Enzyme code |
 | **Static Dispatch (enum)** | Enzyme performs better with concrete types than trait objects |
 | **StochasticModel Trait** | Unified interface for stochastic processes with enum-based dispatch |
@@ -126,7 +126,7 @@ docker run -it neutryx-enzyme
 
 ---
 _Created: 2025-12-29_
-_Updated: 2026-01-09_ — Migrated to A-I-P-R architecture (v2.0)
+_Updated: 2026-01-09_ — Migrated to A-I-P-S architecture (v2.1)
 _Created: 2025-12-29_
 _Updated: 2026-01-09_ — Updated feature flags (added commodity, exotic, all)
 _Document standards and patterns, not every dependency_

@@ -5,6 +5,7 @@ use serde::Deserialize;
 
 /// Server configuration
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct ServerConfig {
     /// Enable REST API
     #[serde(default = "default_true")]
