@@ -206,33 +206,33 @@
 
 ## Task 9: 確率モデル拡張
 
-- [ ] 9.1 StochasticModelトレイトへのnum_factors追加
+- [x] 9.1 StochasticModelトレイトへのnum_factors追加
   - ファクター数取得メソッドを追加
   - 既存のGBMでnum_factors = 1を実装
   - 1ファクター/2ファクター/マルチファクターモデルの統一的扱い
   - _Requirements: 4.1_
 
-- [ ] 9.2 Hull-White 1Fモデルの実装
+- [x] 9.2 Hull-White 1Fモデルの実装
   - Hull-White構造体を定義（平均回帰速度、ボラティリティ、初期カーブ）
   - StochasticModelトレイトを実装
   - 短期金利パス生成のevolve_stepを実装
   - 金利モデルサブモジュールに追加
   - _Requirements: 4.2_
 
-- [ ] 9.3 (P) CIRモデルの実装
+- [x] 9.3 (P) CIRモデルの実装
   - Cox-Ingersoll-Ross構造体を定義
   - StochasticModelトレイトを実装
   - Feller条件のバリデーションを追加
   - 金利モデルサブモジュールに追加
   - _Requirements: 4.2_
 
-- [ ] 9.4 StochasticModelEnumへの新モデル追加
+- [x] 9.4 StochasticModelEnumへの新モデル追加
   - HullWhite, CIRバリアントをStochasticModelEnumに追加
   - 静的ディスパッチを維持
   - enumバリアント追加のみで拡張可能な構造を確認
   - _Requirements: 4.3_
 
-- [ ] 9.5 CorrelatedModels（Cholesky分解）の実装
+- [x] 9.5 CorrelatedModels（Cholesky分解）の実装
   - 相関モデル構造体を定義（モデルリスト、相関行列、Cholesky分解済み行列）
   - 相関行列のCholesky分解を実装
   - 相関ブラウン運動の生成を実装
@@ -279,33 +279,33 @@
 
 ## Task 11: リスクファクター管理
 
-- [ ] 11.1 RiskFactorトレイトの定義
+- [x] 11.1 RiskFactorトレイトの定義
   - リスクファクタートレイトを定義（ファクター種別、バンプ、シナリオ適用）
   - リスクファクター種別列挙型を定義（InterestRate, Credit, Fx, Equity, Commodity, Volatility）
   - pricer_core/traits/に追加
   - _Requirements: 10.1_
 
-- [ ] 11.2 BumpScenarioとRiskFactorShiftの実装
+- [x] 11.2 BumpScenarioとRiskFactorShiftの実装
   - リスクファクターシフト構造体を定義（ファクター種別、シフト種別、値）
   - シフト種別列挙型を定義（Absolute, Relative, Parallel, Twist, Butterfly）
   - 各リスクファクターの独立・同時シフトをサポート
   - _Requirements: 10.2_
 
-- [ ] 11.3 GreeksAggregatorの実装
+- [x] 11.3 GreeksAggregatorの実装
   - Greeks集約構造体を定義
   - 集約手法列挙型を定義（Simple, NotionalWeighted, CorrelationAdjusted）
   - ポートフォリオレベルDelta, Gamma, Vegaを計算するメソッドを実装
   - PortfolioGreeks構造体を定義
   - _Requirements: 10.3_
 
-- [ ] 11.4 ScenarioEngineの実装
+- [x] 11.4 ScenarioEngineの実装
   - シナリオエンジン構造体を定義
   - シナリオ構造体を定義（名前、シフトリスト）
   - シナリオ実行・全シナリオ実行メソッドを実装
   - ScenarioPnL構造体を定義
   - _Requirements: 10.4_
 
-- [ ] 11.5 プリセットシナリオの追加
+- [x] 11.5 プリセットシナリオの追加
   - パラレルシフト（+1bp, +10bp, +100bp）を追加
   - ツイストシナリオ（短期↑長期↓）を追加
   - バタフライシナリオ（中期スパイク）を追加

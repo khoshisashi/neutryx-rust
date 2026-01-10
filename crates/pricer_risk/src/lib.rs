@@ -91,6 +91,7 @@ pub mod demo;
 pub mod exposure;
 pub mod parallel;
 pub mod portfolio;
+pub mod scenarios;
 pub mod soa;
 pub mod xva;
 
@@ -102,6 +103,10 @@ pub use portfolio::{
     NettingSetId, Portfolio, PortfolioBuilder, PortfolioError, Trade, TradeBuilder, TradeId,
 };
 pub use soa::{ExposureSoA, TradeSoA};
+pub use scenarios::{
+    AggregationMethod, BumpScenario, GreeksAggregator, PortfolioGreeks, PresetScenario,
+    PresetScenarioType, RiskFactorShift, Scenario, ScenarioEngine, ScenarioPnL, ScenarioResult,
+};
 pub use xva::{
     compute_cva, compute_cva_with_survival, compute_dva, compute_dva_with_survival, compute_fba,
     compute_fca, compute_fva, generate_flat_discount_factors, CounterpartyXva, FundingParams,
