@@ -101,6 +101,10 @@ mod verify_enzyme;
 #[cfg(all(test, feature = "l1l2-integration"))]
 mod integration_tests;
 
+// Demo: Pricing context for lazy-arc-pricing-kernel demonstration
+#[cfg(feature = "l1l2-integration")]
+pub mod context;
+
 // Phase 3.1a: Random number generation infrastructure
 pub mod rng;
 

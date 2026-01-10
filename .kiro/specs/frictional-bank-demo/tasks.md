@@ -1,0 +1,212 @@
+# Implementation Plan
+
+## Tasks
+
+- [ ] 1. ワークスペース統合とディレクトリ構造の構築
+- [ ] 1.1 デモクレートをワークスペースに登録する
+  - root Cargo.toml の members に demo/frictional_bank と demo/gui を追加
+  - 既存の demo/upstream_systems と demo/downstream_systems が正しく登録されているか確認
+  - workspace 依存関係（tokio, serde, tracing, clap, ratatui）を追加
+  - _Requirements: 8.1, 8.4_
+- [ ] 1.2 (P) デモ出力ディレクトリ構造を作成する
+  - demo/data/output/reports/ ディレクトリを作成
+  - demo/data/output/settlement/ ディレクトリを作成
+  - demo/data/output/regulatory/ ディレクトリを作成
+  - .gitkeep ファイルを配置してディレクトリを Git 管理下に
+  - _Requirements: 5.5_
+
+- [ ] 2. サンプルデータの作成
+- [ ] 2.1 (P) 取引データを作成する
+  - Equity 取引（バニラオプション、フォワード）の CSV を作成
+  - Rates 取引（IRS、スワプション）の CSV を作成
+  - FX 取引（FX フォワード、FX オプション）の CSV を作成
+  - CDS 取引の FpML XML ファイルを作成
+  - adapter_loader で読み込み可能な形式にする
+  - _Requirements: 5.1_
+- [ ] 2.2 (P) マーケットデータを作成する
+  - USD/EUR/JPY イールドカーブのテノールとレートを CSV で定義
+  - 主要銘柄（AAPL, GOOGL, MSFT）のボラティリティサーフェスを CSV で定義
+  - 参照エンティティのクレジットスプレッドを CSV で定義
+  - 主要通貨ペアの FX スポットレートを CSV で定義
+  - _Requirements: 5.2_
+- [ ] 2.3 (P) カウンターパーティデータを作成する
+  - 5 社のカウンターパーティ情報（ID、名称、格付け）を CSV で定義
+  - ネッティングセット定義（セット ID、所属取引）を CSV で定義
+  - CSA 契約情報（担保閾値、MTA、通貨）を CSV で定義
+  - _Requirements: 5.3_
+- [ ] 2.4 (P) 設定ファイルを作成する
+  - demo_config.toml にデフォルトシナリオ設定を記述
+  - 主要市場の休日カレンダー（TARGET、NY、JP）を CSV で定義
+  - ISO 4217 通貨マスタを CSV で定義
+  - _Requirements: 5.4_
+
+- [ ] 3. frictional_bank クレートの基盤構築
+- [ ] 3.1 クレートスケルトンと設定読み込み機能を実装する
+  - demo/frictional_bank/Cargo.toml を作成し全 Neutryx クレートを依存に追加
+  - DemoScenario 列挙型（Eod, Intraday, Stress）を定義
+  - DemoConfig 構造体を定義し demo_config.toml からデシリアライズ
+  - 設定検証ロジック（data_dir 存在確認、必須フィールド検証）を実装
+  - _Requirements: 3.4, 3.5_
+- [ ] 3.2 CLI インターフェースを実装する
+  - clap を使用してサブコマンド（eod, intraday, stress）を定義
+  - --config オプションで設定ファイルパスを指定可能に
+  - --data-dir オプションでサンプルデータディレクトリを指定可能に
+  - --gui フラグで TUI ダッシュボード起動を制御
+  - tracing-subscriber を初期化してログ出力を設定
+  - _Requirements: 3.6, 9.5_
+
+- [ ] 4. EOD バッチシナリオの実装
+- [ ] 4.1 Orchestrator コア構造を実装する
+  - Orchestrator 構造体を定義（config, upstream, gateway_client, downstream）
+  - new() コンストラクタで依存コンポーネントを初期化
+  - DemoError 列挙型を定義してエラーハンドリングを統一
+  - _Requirements: 3.1_
+- [ ] 4.2 EOD データフロー制御を実装する
+  - upstream_systems から取引データとマーケットデータを取得
+  - adapter_fpml と adapter_loader を使用してデータを正規化
+  - pricer_risk で XVA 計算を実行
+  - service_gateway REST API を呼び出して価格計算結果を取得
+  - _Requirements: 3.1, 7.1, 7.2, 7.3, 7.4, 7.5_
+- [ ] 4.3 EOD 結果出力を実装する
+  - downstream_systems の RegulatorApi に規制報告を送信
+  - downstream_systems の SwiftReceiver に決済指図を送信
+  - downstream_systems の ReportSink にレポートを出力
+  - EodSummary 構造体に処理結果（成功/失敗件数、実行時間）を集約
+  - 標準出力にサマリーを表示
+  - _Requirements: 2.1, 2.2, 2.3, 2.5, 9.1, 9.4_
+
+- [ ] 5. イントラデイシナリオの実装
+- [ ] 5.1 リアルタイムマーケットデータ受信を実装する
+  - upstream_systems の MarketDataProvider からティッカーストリームを受信
+  - 受信したクォートを adapter_feeds 経由で正規化
+  - 設定可能な更新間隔（デフォルト 100ms）でデータを処理
+  - _Requirements: 1.1, 1.2, 1.3, 3.2_
+- [ ] 5.2 リアルタイムリスク更新を実装する
+  - マーケットデータ更新をトリガーに価格再計算を実行
+  - pricer_risk でエクスポージャーメトリクスを更新
+  - service_gateway に更新されたリスクメトリクスを送信
+  - _Requirements: 3.2, 7.4_
+- [ ] 5.3 WebSocket 配信連携を実装する
+  - service_gateway からのリスクメトリクスを downstream_systems の WebSocketSink に転送
+  - RiskMetricsUpdated イベントを broadcast channel で配信
+  - 接続状態の監視と再接続ロジックを実装
+  - _Requirements: 2.4, 9.2_
+
+- [ ] 6. ストレステストシナリオの実装
+- [ ] 6.1 複数ストレスシナリオの並列実行を実装する
+  - 複数のストレスシナリオ定義（金利ショック、クレジットスプレッド拡大、FX 変動）を読み込み
+  - rayon を使用してシナリオを並列実行
+  - 各シナリオの結果を StressSummary に集約
+  - _Requirements: 3.3, 9.3_
+- [ ] 6.2 ストレス結果レポートを実装する
+  - シナリオごとの PnL 影響を計算
+  - 最悪ケースシナリオを特定
+  - 結果サマリーを標準出力とファイルに出力
+  - _Requirements: 9.3, 9.4_
+
+- [ ] 7. service_gateway WebSocket 拡張
+- [ ] 7.1 (P) WebSocket エンドポイントを追加する
+  - axum の ws feature を Cargo.toml で有効化
+  - /ws/risk エンドポイントを Router に追加
+  - WebSocketUpgrade を使用して接続をアップグレード
+  - 接続ハンドラで送受信を分離（split() パターン）
+  - _Requirements: 2.4_
+- [ ] 7.2 (P) WebSocket メッセージプロトコルを実装する
+  - WsMessage 列挙型（RiskUpdate, Heartbeat, Error）を定義
+  - RiskMetrics 構造体を定義（CVA, DVA, FVA, EPE, ENE, timestamp）
+  - downstream_systems の WebSocketMessage と互換性を持たせる
+  - JSON シリアライゼーションを実装
+  - _Requirements: 2.4, 4.6_
+- [ ] 7.3 リスクメトリクス broadcast を実装する
+  - tokio broadcast channel を使用して接続クライアントに配信
+  - ハートビートを定期送信（30 秒間隔）
+  - 接続数とメッセージ統計をログ出力
+  - _Requirements: 2.4_
+
+- [ ] 8. demo_gui TUI ダッシュボードの実装
+- [ ] 8.1 TUI アプリケーション基盤を構築する
+  - demo/gui/Cargo.toml を作成し ratatui, crossterm, tokio を依存に追加
+  - DemoApp 構造体を定義（タブ状態、ポートフォリオ、リスク、取引、チャート）
+  - ratatui::init() でターミナルを初期化
+  - イベントループを実装（キー入力、WebSocket 更新、タイマー）
+  - _Requirements: 4.1, 4.6_
+- [ ] 8.2 タブナビゲーションを実装する
+  - Tab 列挙型（Portfolio, Risk, Trades, Charts）を定義
+  - キーボードショートカット（1-4 キー、Tab キー）でタブ切替
+  - 現在のタブをハイライト表示
+  - _Requirements: 4.1_
+- [ ] 8.3 PortfolioView を実装する
+  - ポートフォリオ構成をテーブル形式で表示
+  - 資産クラス別の内訳を表示
+  - 合計評価額をサマリー表示
+  - _Requirements: 4.2_
+- [ ] 8.4 RiskView を実装する
+  - CVA、DVA、FVA をラベル付き数値で表示
+  - EE、EPE、PFE をスパークラインまたはゲージで表示
+  - 最終更新時刻を表示
+  - _Requirements: 4.3_
+- [ ] 8.5 TradeBlotter を実装する
+  - 取引一覧をスクロール可能なテーブルで表示
+  - 取引 ID、商品タイプ、想定元本、満期日を列として表示
+  - 取引状態（Active、Matured、Cancelled）を色分け表示
+  - _Requirements: 4.4_
+- [ ] 8.6 Charts を実装する
+  - ratatui の Chart ウィジェットで価格推移を折れ線グラフで表示
+  - リスクメトリクスの時系列推移を表示
+  - X 軸にタイムスタンプ、Y 軸にメトリクス値を設定
+  - _Requirements: 4.5_
+- [ ] 8.7 WebSocket クライアントを実装する
+  - service_gateway の /ws/risk に接続
+  - 受信した RiskUpdate メッセージで DemoApp 状態を更新
+  - 接続状態を UI に表示（Connected/Disconnected）
+  - 切断時の自動再接続（最大 3 回）を実装
+  - _Requirements: 4.6_
+
+- [ ] 9. Jupyter ノートブックの作成
+- [ ] 9.1 (P) プライシングデモノートブックを作成する
+  - service_python バインディングをインポートして初期化
+  - Equity バニラオプションの価格計算をデモ
+  - Rates IRS の価格計算をデモ
+  - FX オプションの価格計算をデモ
+  - CDS の価格計算をデモ
+  - 結果を Pandas DataFrame で表示
+  - _Requirements: 6.1, 6.6_
+- [ ] 9.2 (P) キャリブレーションデモノートブックを作成する
+  - pricer_optimiser の Python バインディングを使用
+  - Hull-White モデルのキャリブレーションをデモ
+  - キャリブレーション結果をグラフで可視化
+  - _Requirements: 6.2_
+- [ ] 9.3 (P) リスク分析デモノートブックを作成する
+  - ポートフォリオの構築をデモ
+  - エクスポージャー（EE、EPE、PFE）計算をデモ
+  - 結果を時系列グラフで表示
+  - _Requirements: 6.3_
+- [ ] 9.4 (P) XVA 計算デモノートブックを作成する
+  - CVA 計算のワークフローをデモ
+  - DVA 計算のワークフローをデモ
+  - FVA 計算のワークフローをデモ
+  - 結果を比較テーブルで表示
+  - _Requirements: 6.4_
+- [ ] 9.5 (P) パフォーマンスベンチマークノートブックを作成する
+  - Enzyme AD モードでの Greeks 計算をデモ
+  - num-dual モードでの Greeks 計算をデモ
+  - 実行時間を比較するグラフを作成
+  - _Requirements: 6.5_
+
+- [ ] 10. 統合テストと検証
+- [ ] 10.1 upstream_systems と downstream_systems の統合検証を実施する
+  - upstream_systems から生成したデータが adapter_* で正しくパースされることを確認
+  - downstream_systems が service_gateway からの出力を正しく受信することを確認
+  - A-I-P-S 依存関係ルールに違反していないことをビルドで確認
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 7.6_
+- [ ] 10.2 ワークスペースビルド検証を実施する
+  - cargo build --workspace で全クレートがビルドされることを確認
+  - cargo test --workspace で全テストがパスすることを確認
+  - pricer_pricing 除外時の stable ビルドを確認
+  - _Requirements: 8.2, 8.3, 8.5_
+- [ ] 10.3 デモシナリオ E2E テストを実施する
+  - cargo run -p frictional_bank -- eod の正常終了を確認
+  - cargo run -p frictional_bank -- intraday の起動と終了を確認
+  - cargo run -p frictional_bank -- stress の正常終了を確認
+  - 各シナリオの実行サマリーが正しく出力されることを確認
+  - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_

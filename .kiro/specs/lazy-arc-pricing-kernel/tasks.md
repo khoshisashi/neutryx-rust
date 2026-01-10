@@ -28,40 +28,40 @@
   - Cargo.toml で pricer_core 依存のみを確認（他の pricer crate への依存なし）
   - _Requirements: 1.7, 6.1_
 
-- [ ] 2. 遅延評価キャッシュ機構の実装（pricer_optimiser L2.5）
-- [ ] 2.1 (P) MarketProvider 構造体とキャッシュを実装する
+- [x] 2. 遅延評価キャッシュ機構の実装（pricer_optimiser L2.5）
+- [x] 2.1 (P) MarketProvider 構造体とキャッシュを実装する
   - RwLock<HashMap<Currency, Arc<CurveEnum>>> で curve_cache を保持
   - RwLock<HashMap<Currency, Arc<VolSurfaceEnum>>> で vol_cache を保持
   - new() でキャッシュを空で初期化
   - _Requirements: 2.1, 2.2_
 
-- [ ] 2.2 カーブの遅延取得メソッドを実装する
+- [x] 2.2 カーブの遅延取得メソッドを実装する
   - get_curve(ccy) でまず読み取りロックでキャッシュを確認
   - キャッシュヒット時は即座に Arc をクローンして返却
   - キャッシュミス時は書き込みロックを取得し、ダブルチェック後に構築
   - 構築時に "[Optimiser] Bootstrapping Yield Curve for {currency}..." をログ出力
   - _Requirements: 2.3, 2.4, 2.7, 5.1_
 
-- [ ] 2.3 ボラティリティサーフェスの遅延取得メソッドを実装する
+- [x] 2.3 ボラティリティサーフェスの遅延取得メソッドを実装する
   - get_vol(ccy) でカーブと同様の遅延評価パターンを実装
   - キャッシュヒット時はログなしで Arc を返却
   - キャッシュミス時に "[Optimiser] Calibrating SABR Surface for {currency}..." をログ出力
   - _Requirements: 2.5, 2.6, 5.2_
 
-- [ ] 2.4 モジュール公開と依存性設定を行う
+- [x] 2.4 モジュール公開と依存性設定を行う
   - provider.rs を pricer_optimiser/src/ に作成
   - lib.rs で pub mod provider を追加
   - Cargo.toml で pricer_models と pricer_core のみに依存を確認
   - _Requirements: 6.2_
 
-- [ ] 3. プライシングコンテキストとカーネルの実装（pricer_pricing L3）
-- [ ] 3.1 (P) 参照ベースの PricingContext を実装する
+- [x] 3. プライシングコンテキストとカーネルの実装（pricer_pricing L3）
+- [x] 3.1 (P) 参照ベースの PricingContext を実装する
   - ライフタイム 'a を持つ PricingContext 構造体を定義
   - discount_curve: &'a CurveEnum で割引カーブ参照を保持
   - adjustment_vol: Option<&'a VolSurfaceEnum> でオプショナルな Vol 参照を保持
   - _Requirements: 3.1, 3.2_
 
-- [ ] 3.2 プライシングカーネル関数を実装する
+- [x] 3.2 プライシングカーネル関数を実装する
   - price_single_trade(&ModelEnum, &InstrumentEnum, &PricingContext) -> f64 を定義
   - モデルの evolve で状態を更新
   - VanillaSwap の場合は state - fixed_rate でペイオフ計算
@@ -70,19 +70,19 @@
   - HashMap 検索や動的アロケーションを一切使用しない
   - _Requirements: 3.3, 3.4, 3.5, 3.6_
 
-- [ ] 3.3 モジュール公開と依存性設定を行う
+- [x] 3.3 モジュール公開と依存性設定を行う
   - context.rs を pricer_pricing/src/ に作成
   - lib.rs で pub mod context を追加
   - Cargo.toml で pricer_models と pricer_core のみに依存を確認
   - _Requirements: 6.3_
 
-- [ ] 4. ポートフォリオオーケストレーションの実装（pricer_risk L4）
-- [ ] 4.1 (P) Trade 構造体を実装する
+- [x] 4. ポートフォリオオーケストレーションの実装（pricer_risk L4）
+- [x] 4.1 (P) Trade 構造体を実装する
   - id: String, ccy: Currency, model: ModelEnum, instrument: InstrumentEnum フィールドを定義
   - 必要に応じて Debug, Clone を derive
   - _Requirements: 4.1_
 
-- [ ] 4.2 Pull-then-Push 並列処理関数を実装する
+- [x] 4.2 Pull-then-Push 並列処理関数を実装する
   - run_portfolio_pricing(&[Trade], &MarketProvider) を定義
   - rayon::par_iter() でトレードを並列処理
   - 各トレードで market.get_curve(trade.ccy) を呼び出し（Pull フェーズ）
@@ -91,14 +91,14 @@
   - price_single_trade を呼び出してPVを計算（Push フェーズ）
   - _Requirements: 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
 
-- [ ] 4.3 モジュール公開と依存性設定を行う
+- [x] 4.3 モジュール公開と依存性設定を行う
   - demo.rs を pricer_risk/src/ に作成
   - lib.rs で pub mod demo を追加
   - Cargo.toml で pricer_models, pricer_optimiser, pricer_pricing, rayon に依存を設定
   - _Requirements: 6.4_
 
-- [ ] 5. 統合とエンドツーエンド検証
-- [ ] 5.1 CLI デモエントリポイントを実装する
+- [x] 5. 統合とエンドツーエンド検証
+- [x] 5.1 CLI デモエントリポイントを実装する
   - service_cli に demo サブコマンドまたは main 関数を追加
   - MarketProvider を初期化
   - 4つのトレード（USD Vanilla x2, USD CMS, JPY Vanilla）を作成
@@ -106,14 +106,14 @@
   - Cargo.toml で pricer_models, pricer_optimiser, pricer_risk に依存を設定
   - _Requirements: 6.5_
 
-- [ ] 5.2 ログ出力パターンでアーキテクチャを検証する
+- [x] 5.2 ログ出力パターンでアーキテクチャを検証する
   - USD カーブのブートストラップログが1回のみ出力されることを確認（Arc キャッシュ検証）
   - VanillaSwap のみ処理時に Vol キャリブレーションログが出ないことを確認（遅延評価検証）
   - CmsSwap 処理時に USD Vol キャリブレーションログが1回のみ出力されることを確認
   - JPY カーブのブートストラップログが出力されることを確認
   - _Requirements: 5.3, 5.4, 5.5_
 
-- [ ]* 5.3 ユニットテストを追加する
+- [x]* 5.3 ユニットテストを追加する
   - ModelEnum::evolve の状態遷移テスト
   - InstrumentEnum::requires_vol() の戻り値テスト
   - CurveEnum::get_df() の計算精度テスト
