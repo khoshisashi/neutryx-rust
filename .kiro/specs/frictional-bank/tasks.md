@@ -215,7 +215,7 @@ FrictionalBankデモシステムの実装タスク。既存demo/inputs、demo/ou
   - 矢印キーでリスト選択
   - _Requirements: 5.8_
 
-- [ ]* 9.8 時系列チャート実装（オプション）
+- [x] 9.8 時系列チャート実装（オプション）
   - エクスポージャー推移チャート
   - ratatuiのChart widget活用
   - _Requirements: 5.6_
@@ -279,13 +279,13 @@ FrictionalBankデモシステムの実装タスク。既存demo/inputs、demo/ou
 
 ---
 
-- [ ]* 12. Webダッシュボード実装（オプション）
-- [ ]* 12.1 (P) Webフロントエンド基盤
+- [x] 12. Webダッシュボード実装（オプション）
+- [x] 12.1 (P) Webフロントエンド基盤
   - ブラウザベースダッシュボードUI
   - レスポンシブレイアウト
   - _Requirements: 8.1, 8.4_
 
-- [ ]* 12.2 (P) Web-Gateway統合
+- [x] 12.2 (P) Web-Gateway統合
   - service_gateway REST API呼び出し
   - WebSocketリアルタイム更新受信
   - _Requirements: 8.2, 8.3_

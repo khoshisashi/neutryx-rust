@@ -1,9 +1,10 @@
 //! Screen rendering functions for the TUI.
 
-use crate::app::{RiskMetrics, TradeRow};
+use crate::app::{ExposureTimeSeries, RiskMetrics, TradeRow};
 use ratatui::{
     prelude::*,
-    widgets::{Block, Borders, Cell, Paragraph, Row, Table},
+    symbols,
+    widgets::{Axis, Block, Borders, Cell, Chart, Dataset, GraphType, Paragraph, Row, Table},
 };
 
 /// Format a number with thousands separators
@@ -301,4 +302,112 @@ pub fn draw_trade_blotter(frame: &mut Frame, area: Rect, trade: Option<&TradeRow
     let blotter = Paragraph::new(content)
         .block(Block::default().title(" Trade Details ").borders(Borders::ALL));
     frame.render_widget(blotter, area);
+}
+
+/// Draw exposure chart screen with time series
+pub fn draw_exposure_chart(frame: &mut Frame, area: Rect, series: &ExposureTimeSeries) {
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Min(0), Constraint::Length(4)])
+        .split(area);
+
+    // Prepare chart data
+    let ee_data: Vec<(f64, f64)> = series.ee_data();
+    let epe_data: Vec<(f64, f64)> = series.epe_data();
+    let pfe_data: Vec<(f64, f64)> = series.pfe_data();
+    let ene_data: Vec<(f64, f64)> = series.ene_data();
+
+    let x_bounds = series.x_bounds();
+    let y_bounds = series.y_bounds();
+
+    // Create datasets for the chart
+    let datasets = vec![
+        Dataset::default()
+            .name("PFE (95%)")
+            .marker(symbols::Marker::Braille)
+            .graph_type(GraphType::Line)
+            .style(Style::default().fg(Color::Yellow))
+            .data(&pfe_data),
+        Dataset::default()
+            .name("EE")
+            .marker(symbols::Marker::Braille)
+            .graph_type(GraphType::Line)
+            .style(Style::default().fg(Color::Cyan))
+            .data(&ee_data),
+        Dataset::default()
+            .name("EPE")
+            .marker(symbols::Marker::Braille)
+            .graph_type(GraphType::Line)
+            .style(Style::default().fg(Color::Green))
+            .data(&epe_data),
+        Dataset::default()
+            .name("ENE")
+            .marker(symbols::Marker::Braille)
+            .graph_type(GraphType::Line)
+            .style(Style::default().fg(Color::Red))
+            .data(&ene_data),
+    ];
+
+    // Create X axis labels
+    let x_labels: Vec<Span> = (0..=10)
+        .map(|i| Span::raw(format!("{}Y", i)))
+        .collect();
+
+    // Create Y axis labels (format large numbers)
+    let y_min = y_bounds[0];
+    let y_max = y_bounds[1];
+    let y_labels: Vec<Span> = vec![
+        Span::raw(format_k(y_min)),
+        Span::raw(format_k((y_min + y_max) / 2.0)),
+        Span::raw(format_k(y_max)),
+    ];
+
+    let chart = Chart::new(datasets)
+        .block(
+            Block::default()
+                .title(" Exposure Profile Over Time ")
+                .borders(Borders::ALL),
+        )
+        .x_axis(
+            Axis::default()
+                .title("Time (Years)")
+                .style(Style::default().fg(Color::Gray))
+                .bounds(x_bounds)
+                .labels(x_labels),
+        )
+        .y_axis(
+            Axis::default()
+                .title("Exposure")
+                .style(Style::default().fg(Color::Gray))
+                .bounds(y_bounds)
+                .labels(y_labels),
+        );
+
+    frame.render_widget(chart, chunks[0]);
+
+    // Legend
+    let legend = Paragraph::new(vec![Line::from(vec![
+        Span::styled(" PFE(95%) ", Style::default().fg(Color::Yellow)),
+        Span::raw(" | "),
+        Span::styled(" EE ", Style::default().fg(Color::Cyan)),
+        Span::raw(" | "),
+        Span::styled(" EPE ", Style::default().fg(Color::Green)),
+        Span::raw(" | "),
+        Span::styled(" ENE ", Style::default().fg(Color::Red)),
+    ])])
+    .alignment(Alignment::Center)
+    .block(Block::default().borders(Borders::ALL).title(" Legend "));
+    frame.render_widget(legend, chunks[1]);
+}
+
+/// Format large numbers with K/M suffix
+fn format_k(n: f64) -> String {
+    let abs_n = n.abs();
+    if abs_n >= 1_000_000.0 {
+        format!("{:.1}M", n / 1_000_000.0)
+    } else if abs_n >= 1_000.0 {
+        format!("{:.0}K", n / 1_000.0)
+    } else {
+        format!("{:.0}", n)
+    }
 }

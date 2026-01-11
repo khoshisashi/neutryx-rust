@@ -26,6 +26,8 @@ pub enum Screen {
     Risk,
     /// Trade blotter with details
     TradeBlotter,
+    /// Exposure time series chart
+    Chart,
 }
 
 impl Screen {
@@ -36,7 +38,102 @@ impl Screen {
             Self::Portfolio => "Portfolio",
             Self::Risk => "Risk",
             Self::TradeBlotter => "Trade Blotter",
+            Self::Chart => "Exposure Chart",
         }
+    }
+}
+
+/// A single data point in the exposure time series
+#[derive(Debug, Clone)]
+pub struct ExposureDataPoint {
+    /// Time in years from valuation date
+    pub time: f64,
+    /// Expected Exposure
+    pub ee: f64,
+    /// Expected Positive Exposure
+    pub epe: f64,
+    /// Potential Future Exposure (95th percentile)
+    pub pfe: f64,
+    /// Expected Negative Exposure
+    pub ene: f64,
+}
+
+/// Time series of exposure data for charting
+#[derive(Debug, Clone)]
+pub struct ExposureTimeSeries {
+    /// Collection of data points over time
+    pub data_points: Vec<ExposureDataPoint>,
+}
+
+impl Default for ExposureTimeSeries {
+    fn default() -> Self {
+        // Generate sample exposure profile over 10 years
+        let data_points: Vec<ExposureDataPoint> = (0..=40)
+            .map(|i| {
+                let t = i as f64 * 0.25; // quarterly intervals
+                // Exposure typically rises then falls (tent-shaped profile)
+                let decay = (-0.15 * t).exp();
+                let growth = 1.0 - (-0.8 * t).exp();
+                let profile = growth * decay;
+
+                ExposureDataPoint {
+                    time: t,
+                    ee: 500_000.0 * profile + 100_000.0,
+                    epe: 450_000.0 * profile + 80_000.0,
+                    pfe: 900_000.0 * profile + 150_000.0,
+                    ene: -200_000.0 * profile - 50_000.0,
+                }
+            })
+            .collect();
+
+        Self { data_points }
+    }
+}
+
+impl ExposureTimeSeries {
+    /// Convert to chart data format for Expected Exposure
+    pub fn ee_data(&self) -> Vec<(f64, f64)> {
+        self.data_points
+            .iter()
+            .map(|p| (p.time, p.ee))
+            .collect()
+    }
+
+    /// Convert to chart data format for Expected Positive Exposure
+    pub fn epe_data(&self) -> Vec<(f64, f64)> {
+        self.data_points
+            .iter()
+            .map(|p| (p.time, p.epe))
+            .collect()
+    }
+
+    /// Convert to chart data format for Potential Future Exposure
+    pub fn pfe_data(&self) -> Vec<(f64, f64)> {
+        self.data_points
+            .iter()
+            .map(|p| (p.time, p.pfe))
+            .collect()
+    }
+
+    /// Convert to chart data format for Expected Negative Exposure
+    pub fn ene_data(&self) -> Vec<(f64, f64)> {
+        self.data_points
+            .iter()
+            .map(|p| (p.time, p.ene))
+            .collect()
+    }
+
+    /// Get min/max values for Y axis bounds
+    pub fn y_bounds(&self) -> [f64; 2] {
+        let min = self.data_points.iter().map(|p| p.ene).fold(f64::MAX, f64::min);
+        let max = self.data_points.iter().map(|p| p.pfe).fold(f64::MIN, f64::max);
+        [min * 1.1, max * 1.1]
+    }
+
+    /// Get max time for X axis bounds
+    pub fn x_bounds(&self) -> [f64; 2] {
+        let max_time = self.data_points.iter().map(|p| p.time).fold(0.0_f64, f64::max);
+        [0.0, max_time]
     }
 }
 
@@ -70,6 +167,7 @@ struct RenderState {
     trades: Vec<TradeRow>,
     selected_trade: usize,
     risk_metrics: RiskMetrics,
+    exposure_series: ExposureTimeSeries,
 }
 
 /// TUI Application state
@@ -82,6 +180,8 @@ pub struct TuiApp {
     selected_trade: usize,
     /// Risk metrics
     risk_metrics: RiskMetrics,
+    /// Exposure time series for charting
+    exposure_series: ExposureTimeSeries,
     /// Exit flag
     should_quit: bool,
     /// API client
@@ -106,6 +206,7 @@ impl TuiApp {
             trades: Self::sample_trades(),
             selected_trade: 0,
             risk_metrics: Self::sample_risk_metrics(),
+            exposure_series: ExposureTimeSeries::default(),
             should_quit: false,
             api_client: ApiClient::new("http://localhost:8080".to_string()),
             terminal,
@@ -165,6 +266,7 @@ impl TuiApp {
             trades: self.trades.clone(),
             selected_trade: self.selected_trade,
             risk_metrics: self.risk_metrics.clone(),
+            exposure_series: self.exposure_series.clone(),
         }
     }
 
@@ -204,6 +306,7 @@ impl TuiApp {
             KeyCode::Char('2') => self.current_screen = Screen::Portfolio,
             KeyCode::Char('3') => self.current_screen = Screen::Risk,
             KeyCode::Char('4') => self.current_screen = Screen::TradeBlotter,
+            KeyCode::Char('5') => self.current_screen = Screen::Chart,
             KeyCode::Up | KeyCode::Char('k') => {
                 if self.selected_trade > 0 {
                     self.selected_trade -= 1;
@@ -246,6 +349,7 @@ impl TuiApp {
                 let trade = state.trades.get(state.selected_trade);
                 screens::draw_trade_blotter(frame, chunks[1], trade);
             }
+            Screen::Chart => screens::draw_exposure_chart(frame, chunks[1], &state.exposure_series),
         }
 
         // Draw footer
@@ -264,7 +368,7 @@ impl TuiApp {
     /// Draw footer with keybindings
     fn draw_footer(frame: &mut Frame, area: Rect) {
         let footer_text =
-            " [1]Dashboard [2]Portfolio [3]Risk [4]Blotter | [Up/Down]Navigate | [q]Quit ";
+            " [1]Dashboard [2]Portfolio [3]Risk [4]Blotter [5]Chart | [Up/Down]Navigate | [q]Quit ";
         let footer = Paragraph::new(footer_text)
             .style(Style::default().fg(Color::DarkGray))
             .block(Block::default().borders(Borders::ALL));
@@ -302,5 +406,30 @@ mod tests {
     fn test_screen_titles() {
         assert_eq!(Screen::Dashboard.title(), "Dashboard");
         assert_eq!(Screen::Portfolio.title(), "Portfolio");
+    }
+
+    #[test]
+    fn test_chart_screen_exists() {
+        // Test that Chart screen has correct title
+        assert_eq!(Screen::Chart.title(), "Exposure Chart");
+    }
+
+    #[test]
+    fn test_exposure_time_series_default() {
+        // Test that exposure time series has default data points
+        let series = ExposureTimeSeries::default();
+        assert!(!series.data_points.is_empty());
+        assert!(series.data_points.len() >= 10);
+    }
+
+    #[test]
+    fn test_exposure_time_series_to_chart_data() {
+        // Test conversion to chart data format
+        let series = ExposureTimeSeries::default();
+        let ee_data = series.ee_data();
+        let pfe_data = series.pfe_data();
+
+        assert_eq!(ee_data.len(), series.data_points.len());
+        assert_eq!(pfe_data.len(), series.data_points.len());
     }
 }

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrictionalBank Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>FrictionalBank Dashboard</h1>
+        <div class="status" id="connection-status">Connecting...</div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+        <button class="nav-btn" data-view="portfolio">Portfolio</button>
+        <button class="nav-btn" data-view="risk">Risk</button>
+        <button class="nav-btn" data-view="exposure">Exposure Chart</button>
+    </nav>
+
+    <main>
+        <!-- Dashboard View -->
+        <section id="dashboard-view" class="view active">
+            <div class="cards-grid">
+                <div class="card">
+                    <h3>Total PV</h3>
+                    <div class="value positive" id="total-pv">-</div>
+                </div>
+                <div class="card">
+                    <h3>Trade Count</h3>
+                    <div class="value" id="trade-count">-</div>
+                </div>
+                <div class="card">
+                    <h3>CVA</h3>
+                    <div class="value negative" id="cva">-</div>
+                </div>
+                <div class="card">
+                    <h3>DVA</h3>
+                    <div class="value positive" id="dva">-</div>
+                </div>
+                <div class="card">
+                    <h3>FVA</h3>
+                    <div class="value negative" id="fva">-</div>
+                </div>
+                <div class="card">
+                    <h3>Total XVA</h3>
+                    <div class="value" id="total-xva">-</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfolio View -->
+        <section id="portfolio-view" class="view">
+            <div class="table-container">
+                <table id="portfolio-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Instrument</th>
+                            <th>Notional</th>
+                            <th>PV</th>
+                            <th>Delta</th>
+                            <th>Gamma</th>
+                            <th>Vega</th>
+                        </tr>
+                    </thead>
+                    <tbody id="portfolio-body">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Risk View -->
+        <section id="risk-view" class="view">
+            <div class="cards-grid">
+                <div class="card large">
+                    <h3>XVA Metrics</h3>
+                    <div class="metrics-list">
+                        <div class="metric-row">
+                            <span>CVA (Credit Value Adj)</span>
+                            <span class="negative" id="risk-cva">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>DVA (Debit Value Adj)</span>
+                            <span class="positive" id="risk-dva">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>FVA (Funding Value Adj)</span>
+                            <span class="negative" id="risk-fva">-</span>
+                        </div>
+                        <div class="metric-row total">
+                            <span>Total XVA</span>
+                            <span id="risk-total-xva">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card large">
+                    <h3>Exposure Metrics</h3>
+                    <div class="metrics-list">
+                        <div class="metric-row">
+                            <span>EE (Expected Exposure)</span>
+                            <span id="risk-ee">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>EPE (Expected Positive Exp)</span>
+                            <span id="risk-epe">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>PFE (Potential Future Exp)</span>
+                            <span id="risk-pfe">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exposure Chart View -->
+        <section id="exposure-view" class="view">
+            <div class="chart-container">
+                <canvas id="exposure-chart"></canvas>
+            </div>
+            <div class="chart-legend">
+                <span class="legend-item pfe">PFE (95%)</span>
+                <span class="legend-item ee">EE</span>
+                <span class="legend-item epe">EPE</span>
+                <span class="legend-item ene">ENE</span>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>FrictionalBank Demo - Neutryx Derivatives Pricing Library</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
