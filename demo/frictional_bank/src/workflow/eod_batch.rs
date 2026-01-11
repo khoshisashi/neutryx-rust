@@ -324,10 +324,16 @@ impl DemoWorkflow for EodBatchWorkflow {
 mod tests {
     use super::*;
 
+    fn test_config() -> DemoConfig {
+        let mut config = DemoConfig::default();
+        config.data_dir = std::env::temp_dir().join("frictional_bank_test");
+        config
+    }
+
     #[tokio::test]
     async fn test_eod_batch_workflow() {
         let workflow = EodBatchWorkflow::new();
-        let mut config = DemoConfig::default();
+        let mut config = test_config();
         config.max_trades = Some(10); // Small number for testing
 
         let result = workflow.run(&config, None).await.unwrap();
@@ -338,7 +344,7 @@ mod tests {
     #[tokio::test]
     async fn test_eod_batch_with_progress() {
         let workflow = EodBatchWorkflow::new();
-        let mut config = DemoConfig::default();
+        let mut config = test_config();
         config.max_trades = Some(5);
 
         let steps_received = Arc::new(std::sync::Mutex::new(Vec::new()));
@@ -403,7 +409,7 @@ mod tests {
             workflow_clone.cancel().await;
         });
 
-        let mut config = DemoConfig::default();
+        let mut config = test_config();
         config.max_trades = Some(1000); // Large enough to allow cancellation
         let result = workflow.run(&config, None).await.unwrap();
 

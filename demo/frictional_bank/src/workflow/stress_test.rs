@@ -401,10 +401,16 @@ impl DemoWorkflow for StressTestWorkflow {
 mod tests {
     use super::*;
 
+    fn test_config() -> DemoConfig {
+        let mut config = DemoConfig::default();
+        config.data_dir = std::env::temp_dir().join("frictional_bank_test");
+        config
+    }
+
     #[tokio::test]
     async fn test_stress_test_workflow() {
         let workflow = StressTestWorkflow::new();
-        let mut config = DemoConfig::default();
+        let mut config = test_config();
         config.max_trades = Some(10);
 
         let result = workflow.run(&config, None).await.unwrap();
@@ -431,7 +437,7 @@ mod tests {
             PresetScenarioType::VolatilityUp20Pct,
         ];
         let workflow = StressTestWorkflow::with_scenarios(scenarios);
-        let mut config = DemoConfig::default();
+        let mut config = test_config();
         config.max_trades = Some(5);
 
         let result = workflow.run(&config, None).await.unwrap();
@@ -452,7 +458,7 @@ mod tests {
             workflow_clone.cancel().await;
         });
 
-        let mut config = DemoConfig::default();
+        let mut config = test_config();
         config.max_trades = Some(500); // Large enough to allow cancellation
         let result = workflow.run(&config, None).await.unwrap();
 

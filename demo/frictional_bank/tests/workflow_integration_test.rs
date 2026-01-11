@@ -8,11 +8,17 @@ use frictional_bank::workflow::{
 };
 use std::sync::Arc;
 
+fn test_config() -> DemoConfig {
+    let mut config = DemoConfig::default();
+    config.data_dir = std::env::temp_dir().join("frictional_bank_test");
+    config
+}
+
 /// Test EOD batch workflow executes successfully
 #[tokio::test]
 async fn test_eod_batch_workflow_execution() {
     let workflow = EodBatchWorkflow::new();
-    let mut config = DemoConfig::default();
+    let mut config = test_config();
     config.max_trades = Some(10);
 
     let result = workflow.run(&config, None).await.unwrap();
@@ -26,7 +32,7 @@ async fn test_eod_batch_workflow_execution() {
 #[tokio::test]
 async fn test_eod_batch_with_progress() {
     let workflow = EodBatchWorkflow::new();
-    let mut config = DemoConfig::default();
+    let mut config = test_config();
     config.max_trades = Some(5);
 
     let steps = Arc::new(std::sync::Mutex::new(Vec::new()));
@@ -53,7 +59,7 @@ async fn test_eod_batch_with_progress() {
 #[tokio::test]
 async fn test_intraday_workflow_execution() {
     let workflow = IntradayWorkflow::new();
-    let mut config = DemoConfig::default();
+    let mut config = test_config();
     config.max_trades = Some(5);
 
     let result = workflow.run(&config, None).await.unwrap();
@@ -73,7 +79,7 @@ async fn test_intraday_running_state() {
 #[tokio::test]
 async fn test_stress_test_all_scenarios() {
     let workflow = StressTestWorkflow::new();
-    let mut config = DemoConfig::default();
+    let mut config = test_config();
     config.max_trades = Some(10);
 
     let result = workflow.run(&config, None).await.unwrap();
@@ -92,7 +98,7 @@ async fn test_stress_test_specific_scenarios() {
         PresetScenarioType::VolatilityUp20Pct,
     ];
     let workflow = StressTestWorkflow::with_scenarios(scenarios);
-    let mut config = DemoConfig::default();
+    let mut config = test_config();
     config.max_trades = Some(5);
 
     let result = workflow.run(&config, None).await.unwrap();
@@ -116,8 +122,6 @@ fn test_workflow_names() {
 /// Test workflow cancellation mechanism
 #[tokio::test]
 async fn test_workflow_cancellation() {
-    use std::sync::Arc;
-
     let workflow = Arc::new(EodBatchWorkflow::new());
     let workflow_clone = workflow.clone();
 
@@ -127,7 +131,7 @@ async fn test_workflow_cancellation() {
         workflow_clone.cancel().await;
     });
 
-    let mut config = DemoConfig::default();
+    let mut config = test_config();
     config.max_trades = Some(1000); // Large enough to allow cancellation
 
     let result = workflow.run(&config, None).await.unwrap();
@@ -144,7 +148,7 @@ async fn test_config_affects_trade_count() {
 
     // Test with different max_trades values
     for expected_count in [5, 10, 20] {
-        let mut config = DemoConfig::default();
+        let mut config = test_config();
         config.max_trades = Some(expected_count);
 
         let result = workflow.run(&config, None).await.unwrap();

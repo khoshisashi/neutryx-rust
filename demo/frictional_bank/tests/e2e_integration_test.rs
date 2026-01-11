@@ -6,6 +6,12 @@ use frictional_bank::config::DemoConfig;
 use frictional_bank::workflow::{DemoWorkflow, EodBatchWorkflow, IntradayWorkflow, StressTestWorkflow};
 use std::path::PathBuf;
 
+fn test_config() -> DemoConfig {
+    let mut config = DemoConfig::default();
+    config.data_dir = std::env::temp_dir().join("frictional_bank_test");
+    config
+}
+
 /// Test complete demo orchestration
 #[tokio::test]
 async fn test_complete_demo_flow() {
@@ -59,7 +65,7 @@ async fn test_complete_demo_flow() {
 /// Test sequential workflow execution
 #[tokio::test]
 async fn test_sequential_workflows() {
-    let mut config = DemoConfig::default();
+    let mut config = test_config();
     config.max_trades = Some(5);
 
     // Execute workflows sequentially
@@ -86,7 +92,7 @@ async fn test_error_handling() {
     let workflow = EodBatchWorkflow::new();
 
     // Test with zero trades (should still work, just process 100 by default)
-    let mut config = DemoConfig::default();
+    let mut config = test_config();
     config.max_trades = Some(0);
 
     let result = workflow.run(&config, None).await.unwrap();
@@ -97,7 +103,7 @@ async fn test_error_handling() {
 /// Test concurrent workflow execution
 #[tokio::test]
 async fn test_concurrent_workflows() {
-    let config = DemoConfig::default();
+    let config = test_config();
 
     // Run multiple workflows concurrently
     let eod_handle = tokio::spawn({
@@ -160,7 +166,7 @@ async fn test_with_sample_data() {
 
     // Run workflow with default config (uses generated data)
     let workflow = EodBatchWorkflow::new();
-    let mut config = DemoConfig::default();
+    let mut config = test_config();
     config.max_trades = Some(5);
 
     let result = workflow.run(&config, None).await.unwrap();
@@ -171,7 +177,7 @@ async fn test_with_sample_data() {
 #[tokio::test]
 async fn test_workflow_metrics() {
     let workflow = EodBatchWorkflow::new();
-    let mut config = DemoConfig::default();
+    let mut config = test_config();
     config.max_trades = Some(50);
 
     let result = workflow.run(&config, None).await.unwrap();

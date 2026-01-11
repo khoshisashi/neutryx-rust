@@ -1297,6 +1297,7 @@ dependencies = [
  "pricer_optimiser",
  "pricer_risk",
  "serde",
+ "tempfile",
  "thiserror",
  "tokio",
  "tokio-test",
