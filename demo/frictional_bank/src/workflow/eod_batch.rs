@@ -88,7 +88,8 @@ impl EodBatchWorkflow {
         trade_records: &[TradeRecord],
         pricing_results: &[PricingResultDemo],
     ) -> String {
-        let mut content = String::from("trade_id,instrument_type,counterparty,currency,notional,pv\n");
+        let mut content =
+            String::from("trade_id,instrument_type,counterparty,currency,notional,pv\n");
 
         for (record, result) in trade_records.iter().zip(pricing_results.iter()) {
             let instrument_type = match record.instrument_type {

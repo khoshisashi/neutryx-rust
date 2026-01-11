@@ -17,10 +17,12 @@ pub mod trade_source;
 
 /// Prelude module for convenient imports
 pub mod prelude {
-    pub use crate::file_source::{BulkDataGenerator, CsvGenerator, FileGenerator, GenerationSummary};
+    pub use crate::file_source::{
+        BulkDataGenerator, CsvGenerator, FileGenerator, GenerationSummary,
+    };
     pub use crate::market_data_provider::{
-        BloombergSim, MarketDataProvider, MeanReversionModel, PriceEvolutionModel,
-        RandomWalkModel, ReutersSim, StreamingPriceGenerator, SyntheticGenerator,
+        BloombergSim, MarketDataProvider, MeanReversionModel, PriceEvolutionModel, RandomWalkModel,
+        ReutersSim, StreamingPriceGenerator, SyntheticGenerator,
     };
     pub use crate::trade_source::{FpmlGenerator, FrontOffice, TradeSource};
 }

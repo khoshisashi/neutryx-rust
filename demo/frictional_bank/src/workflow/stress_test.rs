@@ -55,7 +55,7 @@ impl PresetScenarioType {
 
     /// Convert to pricer_risk PresetScenarioType
     #[allow(dead_code)]
-    fn to_pricer_scenario(&self) -> PricerPresetScenarioType {
+    fn to_pricer_scenario(self) -> PricerPresetScenarioType {
         match self {
             Self::InterestRateUp100bp => PricerPresetScenarioType::RateUp100bp,
             Self::InterestRateDown100bp => PricerPresetScenarioType::RateDown100bp,
@@ -427,7 +427,10 @@ mod tests {
     #[test]
     fn test_scenario_names() {
         assert_eq!(PresetScenarioType::InterestRateUp100bp.name(), "IR +100bp");
-        assert_eq!(PresetScenarioType::CreditEventDefault.name(), "Credit Default");
+        assert_eq!(
+            PresetScenarioType::CreditEventDefault.name(),
+            "Credit Default"
+        );
     }
 
     #[tokio::test]

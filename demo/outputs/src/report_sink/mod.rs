@@ -68,7 +68,9 @@ impl ReportFormat {
             ReportFormat::Json => "application/json",
             ReportFormat::Html => "text/html",
             ReportFormat::Pdf => "application/pdf",
-            ReportFormat::Excel => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ReportFormat::Excel => {
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
         }
     }
 }

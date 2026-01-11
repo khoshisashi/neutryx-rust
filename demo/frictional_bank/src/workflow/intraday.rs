@@ -109,6 +109,7 @@ impl IntradayWorkflow {
 
 /// Risk metrics for a single update
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct RiskMetrics {
     total_pv: f64,
     delta: f64,
@@ -148,7 +149,10 @@ impl DemoWorkflow for IntradayWorkflow {
         let trades_count = config.max_trades.unwrap_or(20);
         let front_office = FrontOffice::new();
         let trade_records = front_office.generate_trades(trades_count);
-        tracing::info!("Loaded {} trades for intraday monitoring", trade_records.len());
+        tracing::info!(
+            "Loaded {} trades for intraday monitoring",
+            trade_records.len()
+        );
 
         // Convert to DemoTrades for pricing
         let demo_trades: Vec<DemoTrade> = trade_records

@@ -3,7 +3,7 @@
 //! Generates CSV files for trades, market data, and counterparty information.
 
 use super::FileGenerator;
-use crate::trade_source::{InstrumentType, TradeParams, TradeRecord};
+use crate::trade_source::{TradeParams, TradeRecord};
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
@@ -58,34 +58,58 @@ impl BulkDataGenerator {
         fs::create_dir_all(&config_dir)?;
 
         // Counterparty data
-        Self::write_file(&cp_dir.join("counterparties.csv"), &CsvGenerator::counterparties_csv())?;
+        Self::write_file(
+            &cp_dir.join("counterparties.csv"),
+            &CsvGenerator::counterparties_csv(),
+        )?;
         summary.files_created += 1;
 
-        Self::write_file(&cp_dir.join("netting_sets.csv"), &CsvGenerator::netting_sets_csv())?;
+        Self::write_file(
+            &cp_dir.join("netting_sets.csv"),
+            &CsvGenerator::netting_sets_csv(),
+        )?;
         summary.files_created += 1;
 
         // Market data
-        Self::write_file(&md_dir.join("spot_rates.csv"), &CsvGenerator::spot_rates_csv())?;
+        Self::write_file(
+            &md_dir.join("spot_rates.csv"),
+            &CsvGenerator::spot_rates_csv(),
+        )?;
         summary.files_created += 1;
 
-        Self::write_file(&md_dir.join("credit_spreads.csv"), &CsvGenerator::credit_spreads_csv())?;
+        Self::write_file(
+            &md_dir.join("credit_spreads.csv"),
+            &CsvGenerator::credit_spreads_csv(),
+        )?;
         summary.files_created += 1;
 
-        Self::write_file(&md_dir.join("currencies.csv"), &CsvGenerator::currencies_csv())?;
+        Self::write_file(
+            &md_dir.join("currencies.csv"),
+            &CsvGenerator::currencies_csv(),
+        )?;
         summary.files_created += 1;
 
         // Trades
         if !trades.is_empty() {
-            Self::write_file(&trade_dir.join("trades.csv"), &CsvGenerator::trades_to_csv(trades))?;
+            Self::write_file(
+                &trade_dir.join("trades.csv"),
+                &CsvGenerator::trades_to_csv(trades),
+            )?;
             summary.files_created += 1;
             summary.trades_written = trades.len();
         }
 
         // Config
-        Self::write_file(&config_dir.join("csa_agreements.csv"), &CsvGenerator::csa_agreements_csv())?;
+        Self::write_file(
+            &config_dir.join("csa_agreements.csv"),
+            &CsvGenerator::csa_agreements_csv(),
+        )?;
         summary.files_created += 1;
 
-        Self::write_file(&config_dir.join("holidays.csv"), &CsvGenerator::holidays_csv())?;
+        Self::write_file(
+            &config_dir.join("holidays.csv"),
+            &CsvGenerator::holidays_csv(),
+        )?;
         summary.files_created += 1;
 
         Ok(summary)
@@ -96,27 +120,48 @@ impl BulkDataGenerator {
         let cp_dir = self.output_dir.join("counterparties");
         fs::create_dir_all(&cp_dir)?;
 
-        Self::write_file(&cp_dir.join("counterparties.csv"), &CsvGenerator::counterparties_csv())?;
-        Self::write_file(&cp_dir.join("netting_sets.csv"), &CsvGenerator::netting_sets_csv())?;
+        Self::write_file(
+            &cp_dir.join("counterparties.csv"),
+            &CsvGenerator::counterparties_csv(),
+        )?;
+        Self::write_file(
+            &cp_dir.join("netting_sets.csv"),
+            &CsvGenerator::netting_sets_csv(),
+        )?;
 
         Ok(2)
     }
 
     /// Generate market data files only.
-    pub fn generate_market_data_files(&self, yield_curves: &[(&str, Vec<(f64, f64)>)]) -> io::Result<usize> {
+    pub fn generate_market_data_files(
+        &self,
+        yield_curves: &[(&str, Vec<(f64, f64)>)],
+    ) -> io::Result<usize> {
         let md_dir = self.output_dir.join("market_data");
         fs::create_dir_all(&md_dir)?;
 
-        Self::write_file(&md_dir.join("spot_rates.csv"), &CsvGenerator::spot_rates_csv())?;
-        Self::write_file(&md_dir.join("credit_spreads.csv"), &CsvGenerator::credit_spreads_csv())?;
-        Self::write_file(&md_dir.join("currencies.csv"), &CsvGenerator::currencies_csv())?;
+        Self::write_file(
+            &md_dir.join("spot_rates.csv"),
+            &CsvGenerator::spot_rates_csv(),
+        )?;
+        Self::write_file(
+            &md_dir.join("credit_spreads.csv"),
+            &CsvGenerator::credit_spreads_csv(),
+        )?;
+        Self::write_file(
+            &md_dir.join("currencies.csv"),
+            &CsvGenerator::currencies_csv(),
+        )?;
 
         let mut count = 3;
 
         // Write yield curves
         for (currency, rates) in yield_curves {
             let filename = format!("yield_curve_{}.csv", currency.to_lowercase());
-            Self::write_file(&md_dir.join(&filename), &CsvGenerator::yield_curve_csv(currency, rates))?;
+            Self::write_file(
+                &md_dir.join(&filename),
+                &CsvGenerator::yield_curve_csv(currency, rates),
+            )?;
             count += 1;
         }
 
@@ -128,7 +173,10 @@ impl BulkDataGenerator {
         let trade_dir = self.output_dir.join("trades");
         fs::create_dir_all(&trade_dir)?;
 
-        Self::write_file(&trade_dir.join("trades.csv"), &CsvGenerator::trades_to_csv(trades))?;
+        Self::write_file(
+            &trade_dir.join("trades.csv"),
+            &CsvGenerator::trades_to_csv(trades),
+        )?;
 
         Ok(1)
     }
@@ -156,24 +204,59 @@ impl CsvGenerator {
 
         for trade in trades {
             let (p1, p2, p3) = match &trade.params {
-                TradeParams::EquityOption { underlying, strike, is_call } => {
-                    (underlying.clone(), format!("{:.4}", strike), if *is_call { "CALL" } else { "PUT" }.to_string())
-                }
-                TradeParams::Forward { underlying, forward_price } => {
-                    (underlying.clone(), format!("{:.4}", forward_price), String::new())
-                }
-                TradeParams::InterestRateSwap { fixed_rate, float_index, pay_fixed } => {
-                    (format!("{:.6}", fixed_rate), float_index.clone(), if *pay_fixed { "PAY" } else { "RCV" }.to_string())
-                }
-                TradeParams::FxForward { buy_currency, sell_currency, rate } => {
-                    (buy_currency.clone(), sell_currency.clone(), format!("{:.6}", rate))
-                }
-                TradeParams::FxOption { currency_pair, strike, is_call } => {
-                    (currency_pair.clone(), format!("{:.4}", strike), if *is_call { "CALL" } else { "PUT" }.to_string())
-                }
-                TradeParams::CreditDefaultSwap { reference_entity, spread_bps, is_protection_buyer } => {
-                    (reference_entity.clone(), format!("{:.2}", spread_bps), if *is_protection_buyer { "BUY" } else { "SELL" }.to_string())
-                }
+                TradeParams::EquityOption {
+                    underlying,
+                    strike,
+                    is_call,
+                } => (
+                    underlying.clone(),
+                    format!("{:.4}", strike),
+                    if *is_call { "CALL" } else { "PUT" }.to_string(),
+                ),
+                TradeParams::Forward {
+                    underlying,
+                    forward_price,
+                } => (
+                    underlying.clone(),
+                    format!("{:.4}", forward_price),
+                    String::new(),
+                ),
+                TradeParams::InterestRateSwap {
+                    fixed_rate,
+                    float_index,
+                    pay_fixed,
+                } => (
+                    format!("{:.6}", fixed_rate),
+                    float_index.clone(),
+                    if *pay_fixed { "PAY" } else { "RCV" }.to_string(),
+                ),
+                TradeParams::FxForward {
+                    buy_currency,
+                    sell_currency,
+                    rate,
+                } => (
+                    buy_currency.clone(),
+                    sell_currency.clone(),
+                    format!("{:.6}", rate),
+                ),
+                TradeParams::FxOption {
+                    currency_pair,
+                    strike,
+                    is_call,
+                } => (
+                    currency_pair.clone(),
+                    format!("{:.4}", strike),
+                    if *is_call { "CALL" } else { "PUT" }.to_string(),
+                ),
+                TradeParams::CreditDefaultSwap {
+                    reference_entity,
+                    spread_bps,
+                    is_protection_buyer,
+                } => (
+                    reference_entity.clone(),
+                    format!("{:.2}", spread_bps),
+                    if *is_protection_buyer { "BUY" } else { "SELL" }.to_string(),
+                ),
             };
 
             csv.push_str(&format!(
@@ -206,7 +289,8 @@ CP005,BNP Paribas,A+,Financial,FR,60,0.40
 CP006,Toyota Motor,A+,Auto,JP,40,0.35
 CP007,Apple Inc,AA+,Tech,US,25,0.50
 CP008,Berkshire Hathaway,AA,Diversified,US,30,0.45
-"#.to_string()
+"#
+        .to_string()
     }
 
     /// Generate netting sets CSV
@@ -219,7 +303,8 @@ NS004,CP003,CSA,10000000,500000,10
 NS005,CP003,ISDA,0,0,10
 NS006,CP004,CSA,8000000,400000,10
 NS007,CP005,CSA,12000000,600000,10
-"#.to_string()
+"#
+        .to_string()
     }
 
     /// Generate CSA agreements CSV
@@ -231,7 +316,8 @@ CSA003,NS003,USD,CASH;GOVT;CORP,0.05,50000
 CSA004,NS004,USD,CASH;GOVT,0.02,10000
 CSA005,NS006,EUR,CASH;GOVT,0.02,10000
 CSA006,NS007,EUR,CASH,0.00,10000
-"#.to_string()
+"#
+        .to_string()
     }
 
     /// Generate yield curve CSV
@@ -253,14 +339,18 @@ MSFT,380.75,USD,2026-01-09T10:00:00Z
 DBK.DE,15.45,EUR,2026-01-09T10:00:00Z
 VOW3.DE,98.50,EUR,2026-01-09T10:00:00Z
 HSBA.L,625.40,GBP,2026-01-09T10:00:00Z
-"#.to_string()
+"#
+        .to_string()
     }
 
     /// Generate volatility surface CSV
     pub fn volatility_surface_csv(ticker: &str, surface: &[(f64, f64, f64)]) -> String {
         let mut csv = String::from("ticker,strike_pct,expiry_years,implied_vol\n");
         for (strike, expiry, vol) in surface {
-            csv.push_str(&format!("{},{:.2},{:.4},{:.4}\n", ticker, strike, expiry, vol));
+            csv.push_str(&format!(
+                "{},{:.2},{:.4},{:.4}\n",
+                ticker, strike, expiry, vol
+            ));
         }
         csv
     }
@@ -284,7 +374,8 @@ ATT,BBB,1,85
 ATT,BBB,3,100
 ATT,BBB,5,115
 ATT,BBB,10,140
-"#.to_string()
+"#
+        .to_string()
     }
 
     /// Generate holidays CSV for a calendar
@@ -322,7 +413,8 @@ JP,2026-09-22,Autumnal Equinox Day
 JP,2026-10-12,Sports Day
 JP,2026-11-03,Culture Day
 JP,2026-11-23,Labor Thanksgiving Day
-"#.to_string()
+"#
+        .to_string()
     }
 
     /// Generate currencies master CSV
@@ -338,7 +430,8 @@ CAD,Canadian Dollar,C$,2,CATO
 CNY,Chinese Yuan,¥,2,CNSH
 HKD,Hong Kong Dollar,HK$,2,HKHK
 SGD,Singapore Dollar,S$,2,SGSG
-"#.to_string()
+"#
+        .to_string()
     }
 }
 
@@ -412,10 +505,19 @@ mod tests {
         assert_eq!(summary.trades_written, 50);
 
         // Verify directory structure
-        assert!(temp_dir.path().join("counterparties/counterparties.csv").exists());
-        assert!(temp_dir.path().join("counterparties/netting_sets.csv").exists());
+        assert!(temp_dir
+            .path()
+            .join("counterparties/counterparties.csv")
+            .exists());
+        assert!(temp_dir
+            .path()
+            .join("counterparties/netting_sets.csv")
+            .exists());
         assert!(temp_dir.path().join("market_data/spot_rates.csv").exists());
-        assert!(temp_dir.path().join("market_data/credit_spreads.csv").exists());
+        assert!(temp_dir
+            .path()
+            .join("market_data/credit_spreads.csv")
+            .exists());
         assert!(temp_dir.path().join("trades/trades.csv").exists());
         assert!(temp_dir.path().join("config/csa_agreements.csv").exists());
         assert!(temp_dir.path().join("config/holidays.csv").exists());
@@ -429,8 +531,14 @@ mod tests {
         let count = generator.generate_counterparty_files().unwrap();
 
         assert_eq!(count, 2);
-        assert!(temp_dir.path().join("counterparties/counterparties.csv").exists());
-        assert!(temp_dir.path().join("counterparties/netting_sets.csv").exists());
+        assert!(temp_dir
+            .path()
+            .join("counterparties/counterparties.csv")
+            .exists());
+        assert!(temp_dir
+            .path()
+            .join("counterparties/netting_sets.csv")
+            .exists());
     }
 
     #[test]
@@ -446,8 +554,14 @@ mod tests {
 
         assert_eq!(count, 5); // 3 base files + 2 yield curves
         assert!(temp_dir.path().join("market_data/spot_rates.csv").exists());
-        assert!(temp_dir.path().join("market_data/yield_curve_usd.csv").exists());
-        assert!(temp_dir.path().join("market_data/yield_curve_eur.csv").exists());
+        assert!(temp_dir
+            .path()
+            .join("market_data/yield_curve_usd.csv")
+            .exists());
+        assert!(temp_dir
+            .path()
+            .join("market_data/yield_curve_eur.csv")
+            .exists());
     }
 
     #[test]

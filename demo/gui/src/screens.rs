@@ -40,7 +40,10 @@ pub fn draw_dashboard(frame: &mut Frame, area: Rect, metrics: &RiskMetrics) {
         Line::from(vec![Span::raw("XVA Adjustments:")]),
         Line::from(vec![
             Span::raw("  CVA: "),
-            Span::styled(format_number(metrics.cva, 2), Style::default().fg(Color::Red)),
+            Span::styled(
+                format_number(metrics.cva, 2),
+                Style::default().fg(Color::Red),
+            ),
         ]),
         Line::from(vec![
             Span::raw("  DVA: "),
@@ -58,15 +61,21 @@ pub fn draw_dashboard(frame: &mut Frame, area: Rect, metrics: &RiskMetrics) {
         ]),
     ];
 
-    let portfolio = Paragraph::new(portfolio_text)
-        .block(Block::default().title(" Portfolio Summary ").borders(Borders::ALL));
+    let portfolio = Paragraph::new(portfolio_text).block(
+        Block::default()
+            .title(" Portfolio Summary ")
+            .borders(Borders::ALL),
+    );
     frame.render_widget(portfolio, chunks[0]);
 
     // Risk metrics
     let risk_text = vec![
         Line::from(vec![
             Span::raw("Expected Exposure (EE): "),
-            Span::styled(format_number(metrics.ee, 2), Style::default().fg(Color::Cyan)),
+            Span::styled(
+                format_number(metrics.ee, 2),
+                Style::default().fg(Color::Cyan),
+            ),
         ]),
         Line::from(vec![
             Span::raw("Expected Positive Exp: "),
@@ -84,16 +93,27 @@ pub fn draw_dashboard(frame: &mut Frame, area: Rect, metrics: &RiskMetrics) {
         ]),
     ];
 
-    let risk = Paragraph::new(risk_text)
-        .block(Block::default().title(" Exposure Metrics ").borders(Borders::ALL));
+    let risk = Paragraph::new(risk_text).block(
+        Block::default()
+            .title(" Exposure Metrics ")
+            .borders(Borders::ALL),
+    );
     frame.render_widget(risk, chunks[1]);
 }
 
 /// Draw portfolio screen
 pub fn draw_portfolio(frame: &mut Frame, area: Rect, trades: &[TradeRow], selected: usize) {
-    let header_cells = ["ID", "Instrument", "Notional", "PV", "Delta", "Gamma", "Vega"]
-        .iter()
-        .map(|h| Cell::from(*h).style(Style::default().fg(Color::Yellow)));
+    let header_cells = [
+        "ID",
+        "Instrument",
+        "Notional",
+        "PV",
+        "Delta",
+        "Gamma",
+        "Vega",
+    ]
+    .iter()
+    .map(|h| Cell::from(*h).style(Style::default().fg(Color::Yellow)));
     let header = Row::new(header_cells).height(1);
 
     let rows = trades.iter().enumerate().map(|(idx, trade)| {
@@ -107,13 +127,11 @@ pub fn draw_portfolio(frame: &mut Frame, area: Rect, trades: &[TradeRow], select
             Cell::from(trade.id.clone()),
             Cell::from(trade.instrument.clone()),
             Cell::from(format_number(trade.notional, 0)),
-            Cell::from(format_number(trade.pv, 2)).style(Style::default().fg(
-                if trade.pv >= 0.0 {
-                    Color::Green
-                } else {
-                    Color::Red
-                },
-            )),
+            Cell::from(format_number(trade.pv, 2)).style(Style::default().fg(if trade.pv >= 0.0 {
+                Color::Green
+            } else {
+                Color::Red
+            })),
             Cell::from(format!("{:.4}", trade.delta)),
             Cell::from(format!("{:.4}", trade.gamma)),
             Cell::from(format!("{:.4}", trade.vega)),
@@ -194,8 +212,11 @@ pub fn draw_risk(frame: &mut Frame, area: Rect, metrics: &RiskMetrics) {
         ]),
     ];
 
-    let xva = Paragraph::new(xva_text)
-        .block(Block::default().title(" XVA Metrics ").borders(Borders::ALL));
+    let xva = Paragraph::new(xva_text).block(
+        Block::default()
+            .title(" XVA Metrics ")
+            .borders(Borders::ALL),
+    );
     frame.render_widget(xva, chunks[0]);
 
     // Exposure metrics
@@ -233,8 +254,11 @@ pub fn draw_risk(frame: &mut Frame, area: Rect, metrics: &RiskMetrics) {
         ]),
     ];
 
-    let exposure = Paragraph::new(exposure_text)
-        .block(Block::default().title(" Exposure Metrics ").borders(Borders::ALL));
+    let exposure = Paragraph::new(exposure_text).block(
+        Block::default()
+            .title(" Exposure Metrics ")
+            .borders(Borders::ALL),
+    );
     frame.render_widget(exposure, chunks[1]);
 }
 
@@ -299,8 +323,11 @@ pub fn draw_trade_blotter(frame: &mut Frame, area: Rect, trade: Option<&TradeRow
         ]
     };
 
-    let blotter = Paragraph::new(content)
-        .block(Block::default().title(" Trade Details ").borders(Borders::ALL));
+    let blotter = Paragraph::new(content).block(
+        Block::default()
+            .title(" Trade Details ")
+            .borders(Borders::ALL),
+    );
     frame.render_widget(blotter, area);
 }
 
@@ -349,9 +376,7 @@ pub fn draw_exposure_chart(frame: &mut Frame, area: Rect, series: &ExposureTimeS
     ];
 
     // Create X axis labels
-    let x_labels: Vec<Span> = (0..=10)
-        .map(|i| Span::raw(format!("{}Y", i)))
-        .collect();
+    let x_labels: Vec<Span> = (0..=10).map(|i| Span::raw(format!("{}Y", i))).collect();
 
     // Create Y axis labels (format large numbers)
     let y_min = y_bounds[0];

@@ -71,7 +71,7 @@ impl Default for ExposureTimeSeries {
         let data_points: Vec<ExposureDataPoint> = (0..=40)
             .map(|i| {
                 let t = i as f64 * 0.25; // quarterly intervals
-                // Exposure typically rises then falls (tent-shaped profile)
+                                         // Exposure typically rises then falls (tent-shaped profile)
                 let decay = (-0.15 * t).exp();
                 let growth = 1.0 - (-0.8 * t).exp();
                 let profile = growth * decay;
@@ -93,46 +93,46 @@ impl Default for ExposureTimeSeries {
 impl ExposureTimeSeries {
     /// Convert to chart data format for Expected Exposure
     pub fn ee_data(&self) -> Vec<(f64, f64)> {
-        self.data_points
-            .iter()
-            .map(|p| (p.time, p.ee))
-            .collect()
+        self.data_points.iter().map(|p| (p.time, p.ee)).collect()
     }
 
     /// Convert to chart data format for Expected Positive Exposure
     pub fn epe_data(&self) -> Vec<(f64, f64)> {
-        self.data_points
-            .iter()
-            .map(|p| (p.time, p.epe))
-            .collect()
+        self.data_points.iter().map(|p| (p.time, p.epe)).collect()
     }
 
     /// Convert to chart data format for Potential Future Exposure
     pub fn pfe_data(&self) -> Vec<(f64, f64)> {
-        self.data_points
-            .iter()
-            .map(|p| (p.time, p.pfe))
-            .collect()
+        self.data_points.iter().map(|p| (p.time, p.pfe)).collect()
     }
 
     /// Convert to chart data format for Expected Negative Exposure
     pub fn ene_data(&self) -> Vec<(f64, f64)> {
-        self.data_points
-            .iter()
-            .map(|p| (p.time, p.ene))
-            .collect()
+        self.data_points.iter().map(|p| (p.time, p.ene)).collect()
     }
 
     /// Get min/max values for Y axis bounds
     pub fn y_bounds(&self) -> [f64; 2] {
-        let min = self.data_points.iter().map(|p| p.ene).fold(f64::MAX, f64::min);
-        let max = self.data_points.iter().map(|p| p.pfe).fold(f64::MIN, f64::max);
+        let min = self
+            .data_points
+            .iter()
+            .map(|p| p.ene)
+            .fold(f64::MAX, f64::min);
+        let max = self
+            .data_points
+            .iter()
+            .map(|p| p.pfe)
+            .fold(f64::MIN, f64::max);
         [min * 1.1, max * 1.1]
     }
 
     /// Get max time for X axis bounds
     pub fn x_bounds(&self) -> [f64; 2] {
-        let max_time = self.data_points.iter().map(|p| p.time).fold(0.0_f64, f64::max);
+        let max_time = self
+            .data_points
+            .iter()
+            .map(|p| p.time)
+            .fold(0.0_f64, f64::max);
         [0.0, max_time]
     }
 }
@@ -360,7 +360,11 @@ impl TuiApp {
     fn draw_header(frame: &mut Frame, area: Rect, screen: Screen) {
         let title = format!(" FrictionalBank - {} ", screen.title());
         let header = Paragraph::new(title)
-            .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+            .style(
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            )
             .block(Block::default().borders(Borders::ALL));
         frame.render_widget(header, area);
     }

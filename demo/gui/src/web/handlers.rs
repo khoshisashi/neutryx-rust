@@ -1,11 +1,6 @@
 //! HTTP handlers for the web API.
 
-use axum::{
-    extract::State,
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -47,9 +42,7 @@ pub struct PortfolioResponse {
 }
 
 /// Get portfolio data
-pub async fn get_portfolio(
-    State(_state): State<Arc<AppState>>,
-) -> Json<PortfolioResponse> {
+pub async fn get_portfolio(State(_state): State<Arc<AppState>>) -> Json<PortfolioResponse> {
     // Sample portfolio data (in production, fetch from service_gateway)
     let trades = vec![
         TradeData {
@@ -162,9 +155,7 @@ pub struct ExposurePoint {
 }
 
 /// Get exposure metrics
-pub async fn get_exposure(
-    State(_state): State<Arc<AppState>>,
-) -> Json<ExposureResponse> {
+pub async fn get_exposure(State(_state): State<Arc<AppState>>) -> Json<ExposureResponse> {
     // Generate sample exposure profile
     let time_series: Vec<ExposurePoint> = (0..=40)
         .map(|i| {
@@ -184,7 +175,8 @@ pub async fn get_exposure(
         .collect();
 
     // Summary metrics at peak
-    let peak = time_series.iter()
+    let peak = time_series
+        .iter()
         .max_by(|a, b| a.ee.partial_cmp(&b.ee).unwrap())
         .unwrap();
 
@@ -212,9 +204,7 @@ pub struct RiskMetricsResponse {
 }
 
 /// Get risk metrics
-pub async fn get_risk_metrics(
-    State(_state): State<Arc<AppState>>,
-) -> Json<RiskMetricsResponse> {
+pub async fn get_risk_metrics(State(_state): State<Arc<AppState>>) -> Json<RiskMetricsResponse> {
     let cva = -15_000.0;
     let dva = 5_000.0;
     let fva = -8_000.0;

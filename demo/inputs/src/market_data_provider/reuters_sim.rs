@@ -131,7 +131,10 @@ impl ReutersSim {
             Self::run_simulation(instruments, interval_ms, tx, running).await;
         });
 
-        info!("ReutersSim started with {} instruments", self.instruments.len());
+        info!(
+            "ReutersSim started with {} instruments",
+            self.instruments.len()
+        );
         rx
     }
 

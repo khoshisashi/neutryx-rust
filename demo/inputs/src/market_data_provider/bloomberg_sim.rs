@@ -144,23 +144,83 @@ impl BloombergSim {
             "AAPL".to_string(),
             vec![
                 // 1M expiry
-                VolPoint { strike_pct: 80.0, expiry: 1.0 / 12.0, vol: 0.35 },
-                VolPoint { strike_pct: 90.0, expiry: 1.0 / 12.0, vol: 0.28 },
-                VolPoint { strike_pct: 100.0, expiry: 1.0 / 12.0, vol: 0.25 },
-                VolPoint { strike_pct: 110.0, expiry: 1.0 / 12.0, vol: 0.27 },
-                VolPoint { strike_pct: 120.0, expiry: 1.0 / 12.0, vol: 0.32 },
+                VolPoint {
+                    strike_pct: 80.0,
+                    expiry: 1.0 / 12.0,
+                    vol: 0.35,
+                },
+                VolPoint {
+                    strike_pct: 90.0,
+                    expiry: 1.0 / 12.0,
+                    vol: 0.28,
+                },
+                VolPoint {
+                    strike_pct: 100.0,
+                    expiry: 1.0 / 12.0,
+                    vol: 0.25,
+                },
+                VolPoint {
+                    strike_pct: 110.0,
+                    expiry: 1.0 / 12.0,
+                    vol: 0.27,
+                },
+                VolPoint {
+                    strike_pct: 120.0,
+                    expiry: 1.0 / 12.0,
+                    vol: 0.32,
+                },
                 // 3M expiry
-                VolPoint { strike_pct: 80.0, expiry: 0.25, vol: 0.32 },
-                VolPoint { strike_pct: 90.0, expiry: 0.25, vol: 0.26 },
-                VolPoint { strike_pct: 100.0, expiry: 0.25, vol: 0.24 },
-                VolPoint { strike_pct: 110.0, expiry: 0.25, vol: 0.25 },
-                VolPoint { strike_pct: 120.0, expiry: 0.25, vol: 0.29 },
+                VolPoint {
+                    strike_pct: 80.0,
+                    expiry: 0.25,
+                    vol: 0.32,
+                },
+                VolPoint {
+                    strike_pct: 90.0,
+                    expiry: 0.25,
+                    vol: 0.26,
+                },
+                VolPoint {
+                    strike_pct: 100.0,
+                    expiry: 0.25,
+                    vol: 0.24,
+                },
+                VolPoint {
+                    strike_pct: 110.0,
+                    expiry: 0.25,
+                    vol: 0.25,
+                },
+                VolPoint {
+                    strike_pct: 120.0,
+                    expiry: 0.25,
+                    vol: 0.29,
+                },
                 // 1Y expiry
-                VolPoint { strike_pct: 80.0, expiry: 1.0, vol: 0.30 },
-                VolPoint { strike_pct: 90.0, expiry: 1.0, vol: 0.25 },
-                VolPoint { strike_pct: 100.0, expiry: 1.0, vol: 0.23 },
-                VolPoint { strike_pct: 110.0, expiry: 1.0, vol: 0.24 },
-                VolPoint { strike_pct: 120.0, expiry: 1.0, vol: 0.27 },
+                VolPoint {
+                    strike_pct: 80.0,
+                    expiry: 1.0,
+                    vol: 0.30,
+                },
+                VolPoint {
+                    strike_pct: 90.0,
+                    expiry: 1.0,
+                    vol: 0.25,
+                },
+                VolPoint {
+                    strike_pct: 100.0,
+                    expiry: 1.0,
+                    vol: 0.23,
+                },
+                VolPoint {
+                    strike_pct: 110.0,
+                    expiry: 1.0,
+                    vol: 0.24,
+                },
+                VolPoint {
+                    strike_pct: 120.0,
+                    expiry: 1.0,
+                    vol: 0.27,
+                },
             ],
         );
     }

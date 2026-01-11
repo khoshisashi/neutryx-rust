@@ -258,15 +258,19 @@ impl SyntheticGenerator {
                 let spread_bps: f64 = rng.gen_range(2.0..20.0);
                 let half_spread = price * spread_bps / 10000.0 / 2.0;
 
-                MarketQuote::new(format!("SYN{:04}", i), price - half_spread, price + half_spread)
-                    .with_currency(Currency::USD)
-                    .with_timestamp(timestamp)
+                MarketQuote::new(
+                    format!("SYN{:04}", i),
+                    price - half_spread,
+                    price + half_spread,
+                )
+                .with_currency(Currency::USD)
+                .with_timestamp(timestamp)
             })
             .collect()
     }
 
     /// Generate synthetic yield curve
-    pub fn generate_yield_curve(&self, currency: Currency) -> Vec<(f64, f64)> {
+    pub fn generate_yield_curve(&self, _currency: Currency) -> Vec<(f64, f64)> {
         let mut rng = rand::thread_rng();
         let base_rate: f64 = rng.gen_range(0.01..0.06);
 
@@ -286,7 +290,7 @@ impl SyntheticGenerator {
     }
 
     /// Generate synthetic volatility surface
-    pub fn generate_vol_surface(&self, ticker: &str) -> Vec<(f64, f64, f64)> {
+    pub fn generate_vol_surface(&self, _ticker: &str) -> Vec<(f64, f64, f64)> {
         let mut rng = rand::thread_rng();
         let atm_vol: f64 = rng.gen_range(self.vol_range.0..self.vol_range.1);
 
@@ -322,7 +326,7 @@ impl SyntheticGenerator {
 
         let mut paths = vec![vec![vec![0.0; num_steps]; self.num_instruments]; num_paths];
 
-        for path in 0..num_paths {
+        for path_data in paths.iter_mut() {
             // Generate initial prices
             let initial_prices: Vec<f64> = (0..self.num_instruments)
                 .map(|_| rng.gen_range(self.price_range.0..self.price_range.1))
@@ -332,24 +336,24 @@ impl SyntheticGenerator {
                 .map(|_| rng.gen_range(self.vol_range.0..self.vol_range.1))
                 .collect();
 
-            for asset in 0..self.num_instruments {
-                paths[path][asset][0] = initial_prices[asset];
+            for (asset, asset_data) in path_data.iter_mut().enumerate() {
+                asset_data[0] = initial_prices[asset];
             }
 
             // Generate correlated random numbers
             for step in 1..num_steps {
                 let common: f64 = normal.sample(&mut rng);
 
-                for asset in 0..self.num_instruments {
+                for (asset, asset_data) in path_data.iter_mut().enumerate() {
                     let idio: f64 = normal.sample(&mut rng);
                     let z = correlation.sqrt() * common + (1.0 - correlation).sqrt() * idio;
 
                     let dt: f64 = 1.0 / 252.0; // Daily steps
-                    let prev = paths[path][asset][step - 1];
+                    let prev = asset_data[step - 1];
                     let drift = 0.0;
                     let diffusion = vols[asset] * dt.sqrt() * z;
 
-                    paths[path][asset][step] = prev * (1.0 + drift * dt + diffusion).max(0.01);
+                    asset_data[step] = prev * (1.0 + drift * dt + diffusion).max(0.01);
                 }
             }
         }

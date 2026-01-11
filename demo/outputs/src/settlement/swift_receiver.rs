@@ -65,7 +65,15 @@ impl SwiftReceiver {
             message_ref: message_ref.clone(),
             message_type: message_type.to_string(),
             sender_bic: "NEUTRYXXXX".to_string(),
-            receiver_bic: format!("{}XXXX", payment.payee.chars().take(4).collect::<String>().to_uppercase()),
+            receiver_bic: format!(
+                "{}XXXX",
+                payment
+                    .payee
+                    .chars()
+                    .take(4)
+                    .collect::<String>()
+                    .to_uppercase()
+            ),
             payment,
             status: SettlementStatus::Pending,
             received_at: Utc::now().to_rfc3339(),
@@ -87,7 +95,13 @@ impl SwiftReceiver {
     }
 
     /// Format a mock SWIFT message
-    fn format_swift_message(&self, message_ref: &str, message_type: &str, payment: &PaymentInstruction) -> String {
+    #[allow(clippy::literal_string_with_formatting_args)]
+    fn format_swift_message(
+        &self,
+        message_ref: &str,
+        message_type: &str,
+        payment: &PaymentInstruction,
+    ) -> String {
         format!(
             r#"{{1:F01NEUTRYXXXX0000000000}}
 {{2:O{msg_type}0000000000XXXXXXXXXXXX0000000000N}}
@@ -144,9 +158,18 @@ impl SwiftReceiver {
     pub fn get_statistics(&self) -> MessageStatistics {
         let messages = self.messages.read().unwrap();
         let total = messages.len();
-        let pending = messages.values().filter(|m| m.status == SettlementStatus::Pending).count();
-        let settled = messages.values().filter(|m| m.status == SettlementStatus::Settled).count();
-        let failed = messages.values().filter(|m| m.status == SettlementStatus::Failed).count();
+        let pending = messages
+            .values()
+            .filter(|m| m.status == SettlementStatus::Pending)
+            .count();
+        let settled = messages
+            .values()
+            .filter(|m| m.status == SettlementStatus::Settled)
+            .count();
+        let failed = messages
+            .values()
+            .filter(|m| m.status == SettlementStatus::Failed)
+            .count();
 
         let total_amount: f64 = messages.values().map(|m| m.payment.amount).sum();
 

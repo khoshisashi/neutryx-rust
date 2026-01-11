@@ -76,7 +76,7 @@ impl WebSocketSink {
         }
 
         self.message_count.fetch_add(1, Ordering::SeqCst);
-        
+
         // Ignore send errors (no subscribers)
         let _ = self.tx.send(message);
         Ok(())
@@ -140,8 +140,8 @@ pub struct SinkStatistics {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::Utc;
     use crate::risk_dashboard::MetricType;
+    use chrono::Utc;
 
     #[tokio::test]
     async fn test_websocket_sink() {
@@ -156,7 +156,8 @@ mod tests {
             confidence: None,
             horizon_days: None,
             timestamp: Utc::now(),
-        }).unwrap();
+        })
+        .unwrap();
 
         let msg = rx.recv().await.unwrap();
         match msg {

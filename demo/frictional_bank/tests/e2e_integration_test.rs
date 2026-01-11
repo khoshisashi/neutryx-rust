@@ -3,7 +3,9 @@
 //! Tests the complete FrictionalBank demo from start to finish.
 
 use frictional_bank::config::DemoConfig;
-use frictional_bank::workflow::{DemoWorkflow, EodBatchWorkflow, IntradayWorkflow, StressTestWorkflow};
+use frictional_bank::workflow::{
+    DemoWorkflow, EodBatchWorkflow, IntradayWorkflow, StressTestWorkflow,
+};
 use std::path::PathBuf;
 
 fn test_config() -> DemoConfig {
@@ -159,7 +161,10 @@ async fn test_with_sample_data() {
             let path = data_dir.join(file);
             // Files may not exist in test environment, so just log
             if !path.exists() {
-                eprintln!("Sample data file not found (expected in demo env): {}", path.display());
+                eprintln!(
+                    "Sample data file not found (expected in demo env): {}",
+                    path.display()
+                );
             }
         }
     }

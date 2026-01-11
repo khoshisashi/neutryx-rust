@@ -80,7 +80,7 @@ impl NettingEngine {
 
             for payment in &group {
                 gross_amount += payment.amount.abs();
-                
+
                 // Normalize pair (always smaller first)
                 let (party1, party2) = if payment.payer < payment.payee {
                     (payment.payer.clone(), payment.payee.clone())
@@ -144,7 +144,7 @@ impl NettingEngine {
     /// Get netting statistics
     pub fn get_statistics(&self) -> NettingStatistics {
         let all_nets = self.calculate_all_nets();
-        
+
         let total_gross: f64 = all_nets.iter().map(|n| n.gross_amount).sum();
         let total_net: f64 = all_nets.iter().map(|n| n.net_amount).sum();
         let original_count: usize = all_nets.iter().map(|n| n.original_count).sum();
@@ -200,28 +200,34 @@ mod tests {
     #[test]
     fn test_netting_engine() {
         let mut engine = NettingEngine::new();
-        
-        engine.add_payment("NS001", PaymentInstruction {
-            payment_id: "P1".to_string(),
-            payer: "A".to_string(),
-            payee: "B".to_string(),
-            amount: 1000.0,
-            currency: "USD".to_string(),
-            value_date: "2026-01-10".to_string(),
-            payment_type: PaymentType::Interest,
-            reference: "T1".to_string(),
-        });
-        
-        engine.add_payment("NS001", PaymentInstruction {
-            payment_id: "P2".to_string(),
-            payer: "B".to_string(),
-            payee: "A".to_string(),
-            amount: 600.0,
-            currency: "USD".to_string(),
-            value_date: "2026-01-10".to_string(),
-            payment_type: PaymentType::Interest,
-            reference: "T2".to_string(),
-        });
+
+        engine.add_payment(
+            "NS001",
+            PaymentInstruction {
+                payment_id: "P1".to_string(),
+                payer: "A".to_string(),
+                payee: "B".to_string(),
+                amount: 1000.0,
+                currency: "USD".to_string(),
+                value_date: "2026-01-10".to_string(),
+                payment_type: PaymentType::Interest,
+                reference: "T1".to_string(),
+            },
+        );
+
+        engine.add_payment(
+            "NS001",
+            PaymentInstruction {
+                payment_id: "P2".to_string(),
+                payer: "B".to_string(),
+                payee: "A".to_string(),
+                amount: 600.0,
+                currency: "USD".to_string(),
+                value_date: "2026-01-10".to_string(),
+                payment_type: PaymentType::Interest,
+                reference: "T2".to_string(),
+            },
+        );
 
         let nets = engine.calculate_net("NS001").unwrap();
         assert_eq!(nets.len(), 1);

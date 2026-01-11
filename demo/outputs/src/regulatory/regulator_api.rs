@@ -270,9 +270,7 @@ mod tests {
 
     #[test]
     fn test_regulator_api_with_logging() {
-        let api = RegulatorApi::new()
-            .without_validation()
-            .with_logging(true);
+        let api = RegulatorApi::new().without_validation().with_logging(true);
 
         let request = SubmissionRequest {
             report_type: ReportType::SaCcr,
@@ -293,9 +291,7 @@ mod tests {
 
     #[test]
     fn test_regulator_api_export_logs() {
-        let api = RegulatorApi::new()
-            .without_validation()
-            .with_logging(true);
+        let api = RegulatorApi::new().without_validation().with_logging(true);
 
         // Submit multiple reports
         for i in 0..3 {
@@ -318,9 +314,7 @@ mod tests {
 
     #[test]
     fn test_regulator_api_log_entry_details() {
-        let api = RegulatorApi::new()
-            .without_validation()
-            .with_logging(true);
+        let api = RegulatorApi::new().without_validation().with_logging(true);
 
         let request = SubmissionRequest {
             report_type: ReportType::Frtb,

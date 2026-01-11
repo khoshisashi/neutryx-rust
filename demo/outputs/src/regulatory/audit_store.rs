@@ -78,7 +78,14 @@ impl AuditStore {
     }
 
     /// Record an audit event
-    pub fn record(&self, event_type: AuditEventType, actor: &str, entity_type: &str, entity_id: &str, details: serde_json::Value) -> String {
+    pub fn record(
+        &self,
+        event_type: AuditEventType,
+        actor: &str,
+        entity_type: &str,
+        entity_id: &str,
+        details: serde_json::Value,
+    ) -> String {
         let event_id = {
             let mut counter = self.counter.write().unwrap();
             *counter += 1;

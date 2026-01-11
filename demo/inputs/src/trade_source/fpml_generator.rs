@@ -3,7 +3,7 @@
 //! Generates FpML-formatted trade documents for testing
 //! the adapter_fpml parser.
 
-use super::{InstrumentType, TradeParams, TradeRecord};
+use super::{TradeParams, TradeRecord};
 
 /// FpML document generator
 pub struct FpmlGenerator;
@@ -12,24 +12,37 @@ impl FpmlGenerator {
     /// Convert a trade record to FpML XML format
     pub fn to_fpml(trade: &TradeRecord) -> String {
         match &trade.params {
-            TradeParams::InterestRateSwap { fixed_rate, float_index, pay_fixed } => {
-                Self::generate_irs_fpml(trade, *fixed_rate, float_index, *pay_fixed)
-            }
-            TradeParams::CreditDefaultSwap { reference_entity, spread_bps, is_protection_buyer } => {
+            TradeParams::InterestRateSwap {
+                fixed_rate,
+                float_index,
+                pay_fixed,
+            } => Self::generate_irs_fpml(trade, *fixed_rate, float_index, *pay_fixed),
+            TradeParams::CreditDefaultSwap {
+                reference_entity,
+                spread_bps,
+                is_protection_buyer,
+            } => {
                 Self::generate_cds_fpml(trade, reference_entity, *spread_bps, *is_protection_buyer)
             }
-            TradeParams::FxForward { buy_currency, sell_currency, rate } => {
-                Self::generate_fx_forward_fpml(trade, buy_currency, sell_currency, *rate)
-            }
-            TradeParams::EquityOption { underlying, strike, is_call } => {
-                Self::generate_equity_option_fpml(trade, underlying, *strike, *is_call)
-            }
-            TradeParams::FxOption { currency_pair, strike, is_call } => {
-                Self::generate_fx_option_fpml(trade, currency_pair, *strike, *is_call)
-            }
-            TradeParams::Forward { underlying, forward_price } => {
-                Self::generate_equity_forward_fpml(trade, underlying, *forward_price)
-            }
+            TradeParams::FxForward {
+                buy_currency,
+                sell_currency,
+                rate,
+            } => Self::generate_fx_forward_fpml(trade, buy_currency, sell_currency, *rate),
+            TradeParams::EquityOption {
+                underlying,
+                strike,
+                is_call,
+            } => Self::generate_equity_option_fpml(trade, underlying, *strike, *is_call),
+            TradeParams::FxOption {
+                currency_pair,
+                strike,
+                is_call,
+            } => Self::generate_fx_option_fpml(trade, currency_pair, *strike, *is_call),
+            TradeParams::Forward {
+                underlying,
+                forward_price,
+            } => Self::generate_equity_forward_fpml(trade, underlying, *forward_price),
         }
     }
 
@@ -219,13 +232,21 @@ impl FpmlGenerator {
 </FpML>"#,
             trade.trade_id,
             trade.trade_date,
-            if pay_fixed { &trade.counterparty_id } else { "SELF" },
+            if pay_fixed {
+                &trade.counterparty_id
+            } else {
+                "SELF"
+            },
             trade.trade_date,
             trade.maturity_date,
             trade.notional,
             trade.currency,
             fixed_rate,
-            if pay_fixed { "SELF" } else { &trade.counterparty_id },
+            if pay_fixed {
+                "SELF"
+            } else {
+                &trade.counterparty_id
+            },
             trade.trade_date,
             trade.maturity_date,
             trade.notional,
@@ -287,8 +308,16 @@ impl FpmlGenerator {
             trade.trade_date,
             trade.trade_date,
             trade.maturity_date,
-            if is_protection_buyer { &trade.counterparty_id } else { "SELF" },
-            if is_protection_buyer { "SELF" } else { &trade.counterparty_id },
+            if is_protection_buyer {
+                &trade.counterparty_id
+            } else {
+                "SELF"
+            },
+            if is_protection_buyer {
+                "SELF"
+            } else {
+                &trade.counterparty_id
+            },
             reference_entity,
             trade.currency,
             trade.notional,
@@ -422,6 +451,7 @@ impl FpmlGenerator {
     }
 
     /// Generate generic FpML for unsupported types
+    #[allow(dead_code)]
     fn generate_generic_fpml(trade: &TradeRecord) -> String {
         format!(
             r#"<?xml version="1.0" encoding="UTF-8"?>

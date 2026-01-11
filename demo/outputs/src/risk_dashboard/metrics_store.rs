@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
 /// In-memory metrics store for the risk dashboard
+#[allow(clippy::type_complexity)]
 pub struct MetricsStore {
     /// Current metrics by entity and type
     metrics: Arc<RwLock<HashMap<(String, MetricType), MetricUpdate>>>,
@@ -176,7 +177,11 @@ impl MetricsStore {
         StoreStatistics {
             current_metric_count: metrics.len(),
             history_entries: history.values().map(|v| v.len()).sum(),
-            unique_entities: metrics.keys().map(|(e, _)| e.clone()).collect::<std::collections::HashSet<_>>().len(),
+            unique_entities: metrics
+                .keys()
+                .map(|(e, _)| e.clone())
+                .collect::<std::collections::HashSet<_>>()
+                .len(),
         }
     }
 

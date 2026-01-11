@@ -249,7 +249,11 @@ mod tests {
         for level in &["trace", "debug", "info", "warn", "error", "INFO", "DEBUG"] {
             let mut config = DemoConfig::default();
             config.log_level = level.to_string();
-            assert!(config.validate().is_ok(), "Log level '{}' should be valid", level);
+            assert!(
+                config.validate().is_ok(),
+                "Log level '{}' should be valid",
+                level
+            );
         }
     }
 
@@ -363,10 +367,7 @@ mod tests {
 
     #[test]
     fn test_config_error_display() {
-        let error = ConfigError::Validation(vec![
-            "Error 1".to_string(),
-            "Error 2".to_string(),
-        ]);
+        let error = ConfigError::Validation(vec!["Error 1".to_string(), "Error 2".to_string()]);
         let display = format!("{}", error);
         assert!(display.contains("Error 1"));
         assert!(display.contains("Error 2"));

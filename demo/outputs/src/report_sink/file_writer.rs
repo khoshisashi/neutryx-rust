@@ -31,7 +31,7 @@ impl FileWriter {
     /// Create a new file writer
     pub fn new(output_dir: impl AsRef<Path>) -> Self {
         let output_dir = output_dir.as_ref().to_path_buf();
-        
+
         // Create directory if it doesn't exist
         if !output_dir.exists() {
             fs::create_dir_all(&output_dir).ok();
@@ -54,8 +54,7 @@ impl FileWriter {
 
         let path = self.output_dir.join(&filename);
 
-        fs::write(&path, &report.content)
-            .map_err(|e| format!("Failed to write file: {}", e))?;
+        fs::write(&path, &report.content).map_err(|e| format!("Failed to write file: {}", e))?;
 
         let written = WrittenFile {
             path: path.clone(),
@@ -102,10 +101,8 @@ impl FileWriter {
             if let Ok(metadata) = entry.metadata() {
                 if let Ok(modified) = metadata.modified() {
                     let modified: chrono::DateTime<chrono::Utc> = modified.into();
-                    if modified < cutoff {
-                        if fs::remove_file(entry.path()).is_ok() {
-                            removed += 1;
-                        }
+                    if modified < cutoff && fs::remove_file(entry.path()).is_ok() {
+                        removed += 1;
                     }
                 }
             }

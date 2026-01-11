@@ -18,6 +18,7 @@ pub struct FrontOffice {
 
 /// Counterparty information
 #[derive(Clone)]
+#[allow(dead_code)]
 struct CounterpartyInfo {
     id: String,
     name: String,
@@ -124,7 +125,10 @@ impl FrontOffice {
 
             // Maturity 1-24 months
             let months: u64 = rng.gen_range(1..25);
-            let maturity = self.trade_date.checked_add_days(Days::new(months * 30)).unwrap();
+            let maturity = self
+                .trade_date
+                .checked_add_days(Days::new(months * 30))
+                .unwrap();
 
             // Notional
             let notional: f64 = rng.gen_range(1_000_000.0..50_000_000.0);
@@ -154,8 +158,8 @@ impl FrontOffice {
         let mut rng = rand::thread_rng();
         let mut trades = Vec::with_capacity(count);
 
-        let currencies = vec!["USD", "EUR", "JPY", "GBP"];
-        let indices = vec!["SOFR", "EURIBOR", "TONAR", "SONIA"];
+        let currencies = ["USD", "EUR", "JPY", "GBP"];
+        let indices = ["SOFR", "EURIBOR", "TONAR", "SONIA"];
 
         for i in 0..count {
             let cp = &self.counterparties[rng.gen_range(0..self.counterparties.len())];
@@ -164,7 +168,10 @@ impl FrontOffice {
 
             // Maturity 1-30 years
             let years: u64 = rng.gen_range(1..31);
-            let maturity = self.trade_date.checked_add_days(Days::new(years * 365)).unwrap();
+            let maturity = self
+                .trade_date
+                .checked_add_days(Days::new(years * 365))
+                .unwrap();
 
             // Fixed rate around 4%
             let fixed_rate: f64 = rng.gen_range(0.02..0.06);
@@ -197,7 +204,7 @@ impl FrontOffice {
         let mut rng = rand::thread_rng();
         let mut trades = Vec::with_capacity(count);
 
-        let fx_pairs = vec![
+        let fx_pairs = [
             ("USD", "JPY", 150.25),
             ("EUR", "USD", 1.085),
             ("GBP", "USD", 1.265),
@@ -212,7 +219,10 @@ impl FrontOffice {
 
             // Maturity 1-12 months
             let months: u64 = rng.gen_range(1..13);
-            let maturity = self.trade_date.checked_add_days(Days::new(months * 30)).unwrap();
+            let maturity = self
+                .trade_date
+                .checked_add_days(Days::new(months * 30))
+                .unwrap();
 
             // Forward rate with small premium/discount
             let fwd_pts: f64 = rng.gen_range(-0.02..0.02);
@@ -246,7 +256,7 @@ impl FrontOffice {
         let mut rng = rand::thread_rng();
         let mut trades = Vec::with_capacity(count);
 
-        let reference_entities = vec![
+        let reference_entities = [
             ("FORD", 150.0),
             ("GM", 120.0),
             ("BOEING", 80.0),
@@ -257,11 +267,15 @@ impl FrontOffice {
         for i in 0..count {
             let cp = &self.counterparties[rng.gen_range(0..self.counterparties.len())];
             let ns = &cp.netting_sets[rng.gen_range(0..cp.netting_sets.len())];
-            let (entity, base_spread) = &reference_entities[rng.gen_range(0..reference_entities.len())];
+            let (entity, base_spread) =
+                &reference_entities[rng.gen_range(0..reference_entities.len())];
 
             // Standard CDS maturities
             let years: u64 = *[1, 2, 3, 5, 7, 10].iter().collect::<Vec<_>>()[rng.gen_range(0..6)];
-            let maturity = self.trade_date.checked_add_days(Days::new(years * 365)).unwrap();
+            let maturity = self
+                .trade_date
+                .checked_add_days(Days::new(years * 365))
+                .unwrap();
 
             // Spread with noise
             let spread: f64 = base_spread * rng.gen_range(0.8..1.2);
@@ -294,7 +308,7 @@ impl FrontOffice {
         let mut rng = rand::thread_rng();
         let mut trades = Vec::with_capacity(count);
 
-        let fx_pairs = vec![
+        let fx_pairs = [
             ("USDJPY", "USD", 150.25),
             ("EURUSD", "EUR", 1.085),
             ("GBPUSD", "GBP", 1.265),
@@ -309,7 +323,10 @@ impl FrontOffice {
 
             // Maturity 1-12 months
             let months: u64 = rng.gen_range(1..13);
-            let maturity = self.trade_date.checked_add_days(Days::new(months * 30)).unwrap();
+            let maturity = self
+                .trade_date
+                .checked_add_days(Days::new(months * 30))
+                .unwrap();
 
             // Strike around spot
             let strike_pct: f64 = rng.gen_range(0.90..1.10);
@@ -354,7 +371,10 @@ impl FrontOffice {
 
             // Maturity 1-12 months
             let months: u64 = rng.gen_range(1..13);
-            let maturity = self.trade_date.checked_add_days(Days::new(months * 30)).unwrap();
+            let maturity = self
+                .trade_date
+                .checked_add_days(Days::new(months * 30))
+                .unwrap();
 
             // Notional
             let notional: f64 = rng.gen_range(1_000_000.0..20_000_000.0);
@@ -411,7 +431,8 @@ impl TradeSource for FrontOffice {
         let fx_fwd_count = count * 15 / 100;
         let cds_count = count * 15 / 100;
         let fx_opt_count = count * 15 / 100;
-        let eq_fwd_count = count - eq_opt_count - irs_count - fx_fwd_count - cds_count - fx_opt_count;
+        let eq_fwd_count =
+            count - eq_opt_count - irs_count - fx_fwd_count - cds_count - fx_opt_count;
 
         trades.extend(self.generate_equity_options(eq_opt_count));
         trades.extend(self.generate_irs_trades(irs_count));
@@ -445,27 +466,39 @@ mod tests {
 
         let eq_options = fo.generate_equity_options(5);
         assert_eq!(eq_options.len(), 5);
-        assert!(eq_options.iter().all(|t| t.instrument_type == InstrumentType::EquityOption));
+        assert!(eq_options
+            .iter()
+            .all(|t| t.instrument_type == InstrumentType::EquityOption));
 
         let irs = fo.generate_irs_trades(5);
         assert_eq!(irs.len(), 5);
-        assert!(irs.iter().all(|t| t.instrument_type == InstrumentType::InterestRateSwap));
+        assert!(irs
+            .iter()
+            .all(|t| t.instrument_type == InstrumentType::InterestRateSwap));
 
         let fx_fwd = fo.generate_fx_forwards(5);
         assert_eq!(fx_fwd.len(), 5);
-        assert!(fx_fwd.iter().all(|t| t.instrument_type == InstrumentType::FxForward));
+        assert!(fx_fwd
+            .iter()
+            .all(|t| t.instrument_type == InstrumentType::FxForward));
 
         let cds = fo.generate_cds_trades(5);
         assert_eq!(cds.len(), 5);
-        assert!(cds.iter().all(|t| t.instrument_type == InstrumentType::CreditDefaultSwap));
+        assert!(cds
+            .iter()
+            .all(|t| t.instrument_type == InstrumentType::CreditDefaultSwap));
 
         let fx_opt = fo.generate_fx_options(5);
         assert_eq!(fx_opt.len(), 5);
-        assert!(fx_opt.iter().all(|t| t.instrument_type == InstrumentType::FxOption));
+        assert!(fx_opt
+            .iter()
+            .all(|t| t.instrument_type == InstrumentType::FxOption));
 
         let eq_fwd = fo.generate_equity_forwards(5);
         assert_eq!(eq_fwd.len(), 5);
-        assert!(eq_fwd.iter().all(|t| t.instrument_type == InstrumentType::EquityForward));
+        assert!(eq_fwd
+            .iter()
+            .all(|t| t.instrument_type == InstrumentType::EquityForward));
     }
 
     #[test]
@@ -486,12 +519,30 @@ mod tests {
         let fo = FrontOffice::new();
         let trades = fo.generate_trades(100);
 
-        let eq_opt = trades.iter().filter(|t| t.instrument_type == InstrumentType::EquityOption).count();
-        let irs = trades.iter().filter(|t| t.instrument_type == InstrumentType::InterestRateSwap).count();
-        let fx_fwd = trades.iter().filter(|t| t.instrument_type == InstrumentType::FxForward).count();
-        let cds = trades.iter().filter(|t| t.instrument_type == InstrumentType::CreditDefaultSwap).count();
-        let fx_opt = trades.iter().filter(|t| t.instrument_type == InstrumentType::FxOption).count();
-        let eq_fwd = trades.iter().filter(|t| t.instrument_type == InstrumentType::EquityForward).count();
+        let eq_opt = trades
+            .iter()
+            .filter(|t| t.instrument_type == InstrumentType::EquityOption)
+            .count();
+        let irs = trades
+            .iter()
+            .filter(|t| t.instrument_type == InstrumentType::InterestRateSwap)
+            .count();
+        let fx_fwd = trades
+            .iter()
+            .filter(|t| t.instrument_type == InstrumentType::FxForward)
+            .count();
+        let cds = trades
+            .iter()
+            .filter(|t| t.instrument_type == InstrumentType::CreditDefaultSwap)
+            .count();
+        let fx_opt = trades
+            .iter()
+            .filter(|t| t.instrument_type == InstrumentType::FxOption)
+            .count();
+        let eq_fwd = trades
+            .iter()
+            .filter(|t| t.instrument_type == InstrumentType::EquityForward)
+            .count();
 
         // Verify all 6 types are present
         assert!(eq_opt > 0, "Should have equity options");
