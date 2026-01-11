@@ -1,0 +1,39 @@
+[package]
+name = "demo_gui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "TUI dashboard for FrictionalBank demo"
+
+[[bin]]
+name = "demo-tui"
+path = "src/main.rs"
+
+[dependencies]
+# TUI framework
+ratatui = "0.26"
+crossterm = "0.27"
+
+# Demo crates
+frictional_bank = { path = "../frictional_bank" }
+
+# Async runtime
+tokio = { workspace = true }
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json"] }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[dev-dependencies]
+tokio-test = "0.4"

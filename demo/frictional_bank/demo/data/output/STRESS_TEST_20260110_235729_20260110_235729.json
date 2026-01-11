@@ -1,0 +1,22 @@
+{
+  "report_type": "Stress Test Results",
+  "generated_at": "2026-01-10T23:57:29.037333600+00:00",
+  "summary": {
+    "worst_case_pnl": 73387.39,
+    "scenarios_run": 2
+  },
+  "scenario_results": [
+    {
+      "scenario": "IR +100bp",
+      "base_value": -3669369.27,
+      "stressed_value": -3595981.88,
+      "pnl": 73387.39
+    },
+    {
+      "scenario": "Vol +20%",
+      "base_value": -3669369.27,
+      "stressed_value": -3559288.19,
+      "pnl": 110081.08
+    }
+  ]
+}

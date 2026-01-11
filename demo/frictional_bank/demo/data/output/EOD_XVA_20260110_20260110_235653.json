@@ -1,0 +1,12 @@
+{
+  "report_type": "XVA Summary",
+  "generated_at": "2026-01-10T23:56:53.942381900+00:00",
+  "metrics": {
+    "total_pv": 33369023.46,
+    "cva": 83422.56,
+    "dva": 50053.54,
+    "fva": 26695.22,
+    "total_xva": 160171.31
+  },
+  "trade_count": 20
+}

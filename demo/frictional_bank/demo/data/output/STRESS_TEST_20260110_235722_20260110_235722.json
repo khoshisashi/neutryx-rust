@@ -1,0 +1,37 @@
+{
+  "report_type": "Stress Test Results",
+  "generated_at": "2026-01-10T23:57:22.259135700+00:00",
+  "summary": {
+    "worst_case_pnl": -319192.42,
+    "scenarios_run": 2
+  },
+  "scenario_results": [
+    {
+      "scenario": "IR +100bp",
+      "base_value": 10639747.31,
+      "stressed_value": 10426952.36,
+      "pnl": -212794.95
+    },
+    {
+      "scenario": "Vol +20%",
+      "base_value": 10639747.31,
+      "stressed_value": 10320554.89,
+      "pnl": -319192.42
+    }
+  ]
+}796.76
+    },
+    {
+      "scenario": "Vol +20%",
+      "base_value": -2141339838.12,
+      "stressed_value": -2077099642.97,
+      "pnl": 64240195.14
+    },
+    {
+      "scenario": "Credit Default",
+      "base_value": -2141339838.12,
+      "stressed_value": -1820138862.40,
+      "pnl": 321200975.72
+    }
+  ]
+}
