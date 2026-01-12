@@ -13,6 +13,7 @@ use axum::{
     Router,
 };
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::broadcast;
 use tower_http::cors::{Any, CorsLayer};
@@ -40,30 +41,46 @@ impl Default for AppState {
     }
 }
 
-/// Build the web application router
-pub fn build_router(state: Arc<AppState>) -> Router {
-    // CORS configuration for development
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
-
-    // API routes
-    let api_routes = Router::new()
+/// Build API routes (shared between local and Shuttle)
+fn api_routes() -> Router<Arc<AppState>> {
+    Router::new()
         .route("/health", get(handlers::health))
         .route("/portfolio", get(handlers::get_portfolio))
         .route("/portfolio", post(handlers::price_portfolio))
         .route("/exposure", get(handlers::get_exposure))
         .route("/risk", get(handlers::get_risk_metrics))
-        .route("/ws", get(websocket::ws_handler));
+        .route("/ws", get(websocket::ws_handler))
+}
 
-    // Static file serving for the dashboard
+/// Build CORS layer
+fn cors_layer() -> CorsLayer {
+    CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods(Any)
+        .allow_headers(Any)
+}
+
+/// Build the web application router (local development)
+pub fn build_router(state: Arc<AppState>) -> Router {
+    // Static file serving for the dashboard (local path)
     let static_files = ServeDir::new("demo/gui/static");
 
     Router::new()
-        .nest("/api", api_routes)
+        .nest("/api", api_routes())
         .fallback_service(static_files)
-        .layer(cors)
+        .layer(cors_layer())
+        .with_state(state)
+}
+
+/// Build the web application router with custom static folder path (Shuttle deployment)
+pub fn build_router_with_static(state: Arc<AppState>, static_path: PathBuf) -> Router {
+    // Static file serving from Shuttle-provided path
+    let static_files = ServeDir::new(static_path);
+
+    Router::new()
+        .nest("/api", api_routes())
+        .fallback_service(static_files)
+        .layer(cors_layer())
         .with_state(state)
 }
 
