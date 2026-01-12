@@ -14,9 +14,15 @@ name = "demo-web"
 path = "src/web/main.rs"
 required-features = ["web"]
 
+[[bin]]
+name = "frictionalbank-shuttle"
+path = "src/shuttle_main.rs"
+required-features = ["shuttle"]
+
 [features]
 default = []
 web = ["axum", "tower-http", "futures", "chrono"]
+shuttle = ["shuttle-runtime", "shuttle-axum", "tower-http", "futures", "chrono"]
 
 [dependencies]
 # TUI framework
@@ -49,6 +55,10 @@ axum = { workspace = true, features = ["ws"], optional = true }
 tower-http = { version = "0.5", features = ["fs", "cors"], optional = true }
 futures = { version = "0.3", optional = true }
 chrono = { workspace = true, optional = true }
+
+# Shuttle deployment (optional)
+shuttle-runtime = { version = "0.57", optional = true }
+shuttle-axum = { version = "0.57", optional = true }
 
 [dev-dependencies]
 tokio-test = "0.4"

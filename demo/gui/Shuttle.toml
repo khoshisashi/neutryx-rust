@@ -1,0 +1,12 @@
+# Shuttle deployment configuration for FrictionalBank Web Dashboard
+# Deploy: cd demo/gui && shuttle deploy
+# Local:  cd demo/gui && shuttle run
+
+name = "frictionalbank"
+
+[build]
+# Use the shuttle feature flag
+features = ["shuttle"]
+
+[[bin]]
+name = "frictionalbank-shuttle"
